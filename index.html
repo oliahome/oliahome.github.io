@@ -1466,21 +1466,20 @@ function veNutChat() {
   d.innerHTML = '<div class="chat-p" id="chatP" hidden role="dialog" aria-label="Chat với Olia"></div>' +
     '<button class="chat-b olia" data-act="chatMo" aria-label="Chat với Olia" title="Chat với Olia"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4.5 18.5l1.2-3.6A7.5 7.5 0 1 1 9 18.1z"/><path stroke="#fff" stroke-width="2" stroke-linecap="round" d="M8.6 11.5h.01M12 11.5h.01M15.4 11.5h.01"/></svg><i class="chat-dot" id="chatDot" hidden></i></button>';
   document.body.appendChild(d);
-  if (CHAT.ten) taiChat(true);
 }
 function veChat() {
   var c = S.d.cd, p = $("#chatP"); if (!p) return;
+  CHAT.ten = "";   // chỉ chat qua Messenger / Instagram (đã bỏ chat ngay trên trang)
   var lh = function(hr, svg, ten, cls) { return hr ? '<a href="' + esc(hr) + '" target="_blank" rel="noopener" class="lh-ic" title="' + ten + '" aria-label="' + ten + '">' + svg + "</a>" : ""; };
   var lienHe = '<div class="chat-lh"><small>Hoặc nhắn qua</small>' + lh(c.chatFB, LOGO_FB, "Messenger") + lh(c.chatIG, LOGO_IG, "Instagram") +
     (c.sdt ? '<a href="tel:' + esc(String(c.sdt).replace(/\s/g, "")) + '" title="Gọi">📞 ' + esc(c.sdt) + "</a>" : "") + "</div>";
   var dau = '<div class="chat-h"><img src="' + $("#logoImg").src + '" alt=""><div><b>Olia Home</b><small>Thường trả lời trong ít phút · ' + esc(c.gioHoTro || "7h30–21h") + '</small></div><button class="x" data-act="chatDong" aria-label="Đóng">×</button></div>';
   if (!CHAT.ten) {   // bắt buộc: chọn nền tảng (icon) + tên trên nền tảng đó + SĐT
-    var NT = { web: ["Ngay tại đây", "", '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4.5 18.5l1.2-3.6A7.5 7.5 0 1 1 9 18.1z"/></svg>'],
-      fb: ["Messenger", c.chatFB, LOGO_FB], ig: ["Instagram", c.chatIG, LOGO_IG] };
-    var nut = Object.keys(NT).filter(function(k) { return k === "web" || NT[k][1]; }).map(function(k) {
+    var NT = { fb: ["Messenger", c.chatFB, LOGO_FB], ig: ["Instagram", c.chatIG, LOGO_IG] };
+    var nut = Object.keys(NT).filter(function(k) { return NT[k][1]; }).map(function(k) {
       return '<button type="button" class="nt nt-' + k + '" data-k="' + k + '" aria-pressed="false"><i>' + NT[k][2].replace(/width="16" height="16"/, 'width="26" height="26"') + "</i><span>" + NT[k][0] + "</span></button>";
     }).join("");
-    p.innerHTML = dau + '<form class="chat-f0" id="chatF0" novalidate><p class="nt-t">1. Bạn muốn chat qua đâu? <b class="bb">*</b></p><div class="nt-ds" id="chNT">' + nut + "</div>" +
+    p.innerHTML = dau + '<form class="chat-f0" id="chatF0" novalidate><p class="nt-t">1. Chat với Olia bằng tài khoản <b class="bb">*</b></p><div class="nt-ds" id="chNT">' + nut + "</div>" +
       '<p class="nt-t">2. Thông tin liên hệ</p><input id="chTen" maxlength="60" placeholder="Tên của bạn *" autocomplete="name">' +
       '<input id="chSdt" type="tel" inputmode="tel" maxlength="15" placeholder="Số điện thoại *" autocomplete="tel">' +
       '<small class="nt-ghi" id="chLoi"></small><button class="btn dark" id="chBD">Bắt đầu chat</button></form>' +
@@ -1490,23 +1489,20 @@ function veChat() {
       var b = e.target.closest(".nt"); if (!b) return;
       chon = b.dataset.k;
       [].forEach.call(this.children, function(x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-      $("#chTen").placeholder = chon === "web" ? "Tên của bạn *" : "Tên trên " + NT[chon][0] + " *";
-      $("#chBD").textContent = chon === "web" ? "Bắt đầu chat" : "Mở " + NT[chon][0];
+      $("#chTen").placeholder = "Tên trên " + NT[chon][0] + " *";
+      $("#chBD").textContent = "Tiếp tục với " + NT[chon][0];
       $("#chLoi").textContent = ""; $("#chTen").focus();
     });
     $("#chatF0").addEventListener("submit", function(e) { e.preventDefault();
       var t = $("#chTen").value.trim().replace(/\s+/g, " "), sd = $("#chSdt").value.replace(/[^\d+]/g, ""), loi = $("#chLoi");
-      if (!chon) { loi.textContent = "Chọn nơi bạn muốn chat nhé."; return; }
-      if (t.length < 2) { loi.textContent = "Bạn nhập tên" + (chon === "web" ? "" : " trên " + NT[chon][0]) + " nhé."; $("#chTen").focus(); return; }
+      if (!chon) { loi.textContent = "Chọn Messenger hoặc Instagram nhé."; return; }
+      if (t.length < 2) { loi.textContent = "Bạn nhập tên trên " + NT[chon][0] + " nhé."; $("#chTen").focus(); return; }
       if (!/^\+?\d{9,13}$/.test(sd)) { loi.textContent = "Số điện thoại chưa đúng."; $("#chSdt").focus(); return; }
-      if (chon !== "web") {   // ghi lại để Olia biết ai sắp nhắn qua nền tảng nào, rồi mở app đó
-        window.open(NT[chon][1], "_blank", "noopener");
-        google.script.run.guiChat({ ma: CHAT.ma, ten: t, sdt: sd, nd: "👋 Khách chọn chat qua " + NT[chon][0] + " · tên trên " + NT[chon][0] + ": " + t });
-        loi.textContent = "Đã mở " + NT[chon][0] + " — Olia sẽ trả lời bạn ở đó."; return;
-      }
-      CHAT.ten = t; CHAT.sdt = sd;
-      try { localStorage.setItem("olia_chat_ten3", CHAT.ten); localStorage.setItem("olia_chat_sdt", CHAT.sdt); } catch (er) {}
-      veChat(); taiChat(); });
+      // ghi lại để Olia biết ai sắp nhắn qua nền tảng nào, rồi mở app đó (khách dùng tài khoản Facebook/Instagram đã đăng nhập sẵn)
+      window.open(NT[chon][1], "_blank", "noopener");
+      google.script.run.guiChat({ ma: CHAT.ma, ten: t, sdt: sd, nd: "👋 Khách chọn chat qua " + NT[chon][0] + " · tên trên " + NT[chon][0] + ": " + t });
+      loi.textContent = "Đã mở " + NT[chon][0] + ", Olia sẽ trả lời bạn ở đó.";
+    });
     return;
   }
   var gio = function(t) { var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + " " + d.getDate() + "/" + (d.getMonth() + 1); };
