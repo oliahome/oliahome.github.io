@@ -926,6 +926,13 @@ function tienM(x) {
   var t = tr ? tr + "<b>m</b>" + (le ? ("00" + le).slice(-3) : "") : le + "k";
   return m[1] + m[2] + t + m[4];
 }
+function ngayDM(x) {   // ngày đặt hiển thị dạng 09/11
+  var p = ngayTach(x), z = function(n) { return ("0" + n).slice(-2); }, m;
+  if (p) return z(p.d) + "/" + z(p.t);
+  if ((m = String(x).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return z(m[3]) + "/" + z(m[2]);
+  if ((m = String(x).match(/^(\d{1,2})[\/.-](\d{1,2})/))) return z(m[1]) + "/" + z(m[2]);
+  return x;
+}
 function ngayTach(x) { var m = String(x || "").trim().match(/^([A-Za-z]{3})\w*\s+(\d{1,2})$/), t = m && THANG_EN[m[1].toLowerCase()]; return t ? { t: t, d: Number(m[2]) } : null; }
 function oDT(j, x, dt) {   // HTML rút gọn của 1 ô (đầy đủ ở tooltip / khi sửa / ô xổ chi tiết)
   x = String(x == null ? "" : x).trim(); if (!x) return "";
@@ -933,6 +940,7 @@ function oDT(j, x, dt) {   // HTML rút gọn của 1 ô (đầy đủ ở toolt
   if (COT_TIEN[j]) return tienM(x);
   if (j === 9 && dt) return esc(x.slice(0, 3));
   if (j === 4) { var tt = TRANG_THAI_OK(x); return '<span class="tt-i tt-' + tt + '" title="' + esc(x) + '">' + icn("tt" + tt, 14) + "</span>"; }
+  if (j === 3) return esc(ngayDM(x));
   if (j === 13) return esc(tenGon(x, dt ? 14 : 22));
   if (j === 16) return iconCheck(esc(x));
   return esc(x);
