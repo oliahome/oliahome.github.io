@@ -449,7 +449,7 @@ html,body{min-height:100%}body{min-height:100vh}
 /* trang quản lý chạy thẳng trên GitHub: đăng nhập Google -> mã phiên 30 ngày (lưu trên máy) */
 function OLIA_PHIEN() { var k = ""; try { k = localStorage.getItem("olia_phien") || ""; } catch (e) {} return k; }
 function veDangNhapGH(loi) {
-  try { localStorage.removeItem("olia_phien"); localStorage.removeItem("olia_kd_ql"); } catch (e) {}
+  try { localStorage.removeItem("olia_phien"); localStorage.removeItem("olia_kd_ql"); JSON.parse(localStorage.getItem("olia_c_ds") || "[]").forEach(function(k) { localStorage.removeItem(k); }); localStorage.removeItem("olia_c_ds"); } catch (e) {}
   var app = document.getElementById("app");
   app.innerHTML = '<div style="max-width:380px;margin:12vh auto;padding:24px;background:#fff;border:1px solid #e6e1d8;border-radius:16px;text-align:center">' +
     '<h2 style="margin:0 0 6px">🔑 Đăng nhập quản lý</h2><p class="sm muted" style="margin:0 0 16px;white-space:nowrap;font-size:min(13px,3.4vw)">Dùng Google được cấp quyền quản trị Olia.</p>' +
@@ -495,7 +495,26 @@ function du(k) { var d = dk(k); return THU[d.getDay()] + " " + d.getDate() + "/"
 function toast(t) { var e = $("#toast"); e.textContent = t; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function() { e.hidden = true; }, 2800); }
 function laChu() { return Q.d && Q.d.vai === "chu"; }
 
+/* ⚡ tải tức thì: dữ liệu từng tab lưu trên máy, hiện ngay rồi lấy bản mới ngầm; có thao tác ghi thì bỏ bản lưu cũ để không hiện số liệu trước khi sửa */
+var DOC_QL = { khoiDong: 1, lich: 1, bangSheet: 1, thuChi: 1, tongKet: 1, thue: 1, ds: 1, timThue: 1, timKiem: 1, baoMoi: 1, xemDon: 1, xemHoaDon: 1, kiemDoiNgay: 1, phongTrong: 1, fileTT: 1, maDs: 1, giaPhong: 1, chatDs: 1, chatXem: 1, fbTrangThai: 1, baoCaoThue: 1 };
+function ghiLuc() { try { return Number(localStorage.getItem("olia_ghi") || 0); } catch (e) { return 0; } }
+function luuBan(k, d) {
+  try {
+    var ds = JSON.parse(localStorage.getItem("olia_c_ds") || "[]").filter(function(x) { return x !== k; }); ds.push(k);
+    while (ds.length > 12) localStorage.removeItem(ds.shift());
+    localStorage.setItem(k, JSON.stringify({ t: Date.now(), d: d })); localStorage.setItem("olia_c_ds", JSON.stringify(ds));
+  } catch (e) { try { JSON.parse(localStorage.getItem("olia_c_ds") || "[]").forEach(function(x) { localStorage.removeItem(x); }); localStorage.removeItem("olia_c_ds"); } catch (e2) {} }
+}
+function docBan(k) { try { var g = JSON.parse(localStorage.getItem(k) || "null"); return g && g.t > ghiLuc() && Date.now() - g.t < 3 * 864e5 ? g.d : null; } catch (e) { return null; } }
+/** ok(dữ liệu, laBanLuu): gọi ngay bằng bản lưu (nếu có), rồi gọi lại khi bản mới từ máy chủ khác bản lưu */
+function apiNhanh(ten, args, ok, loi) {
+  var k = "olia_c_" + ten + "_" + JSON.stringify(args || []), cu = docBan(k), sCu = cu ? JSON.stringify(cu) : "";
+  if (cu) ok(cu, true);
+  api(ten, args, function(d) { var s = JSON.stringify(d); luuBan(k, d); if (s !== sCu) ok(d, false); }, cu ? function() {} : loi);
+}
+function dangSua() { var a = document.activeElement; return !!(a && a.closest && a.closest("#app, #drawer") && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)); }
 function api(ten, args, ok, loi) {
+  if (!DOC_QL[ten]) try { localStorage.setItem("olia_ghi", String(Date.now())); } catch (e) {}
   google.script.run.withSuccessHandler(function(r) { r && r.ok ? ok(r.data) : (loi || loiChung)((r && r.loi) || "Có lỗi"); })
     .withFailureHandler(function(e) { (loi || loiChung)(e && e.message ? e.message : "Mất kết nối"); })
     .apiQL(KEY, ten, args || []);
@@ -713,7 +732,12 @@ function batDau() {
     daVe = true;
     if (moi && !chay) {
       chay = true;
-      if (d.vai !== "nv") setTimeout(function() { if (!NH.bang) api("bangSheet", [d.homNay.slice(0, 7), NH.theo], function(bs) { if (!NH.bang) NH.bang = bs; }, function() {}); }, 1200);   // tải trước Sổ booking ngầm
+      if (d.vai !== "nv") setTimeout(function() {   // tải trước ngầm Sổ booking, Thu chi, Thuế tháng này -> bấm sang tab là có ngay
+        var th0 = d.homNay.slice(0, 7);
+        apiNhanh("bangSheet", [th0, NH.theo], function(bs) { if (!NH.bang || NH.bang.thang === bs.thang) { NH.bang = bs; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); } }, function() {});
+        setTimeout(function() { apiNhanh("thuChi", [th0], function(x) { if (!TC.dl || TC.dl.thang === x.thang) { TC.dl = x; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) giuOVe(); } }, function() {}); }, 800);
+        setTimeout(function() { apiNhanh("thue", [th0], function(x) { if (!TH.dl || TH.dl.thang === x.thang) { TH.dl = x; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(); } }, function() {}); }, 1600);
+      }, 900);
       if (d.vai !== "nv") { demChat(); var nhip = 0; setInterval(function() { if (Q.tab === "chat" || ++nhip % 5 === 0) demChat(); }, 6000); }   // đang mở tab Chat: 6 giây/lần
     }
   };
@@ -1030,8 +1054,11 @@ function veBangSheet() {
   var th = NH.thang || Q.d.homNay.slice(0, 7);
   if (!NH.bang || NH.bang.thang !== th || NH.bang.theo !== NH.theo) {
     $("#app").innerHTML = '<div class="nh"><div class="nh-bar"><button class="btn pri" data-act="nhThem">＋ Thêm dòng</button></div>' + htmlNhap() + '<div class="loading">Đang tải danh sách…</div></div>'; ganNhap();
-    return api("bangSheet", [th, NH.theo], function(b) { NH.bang = b; if (Q.tab === "nhap" && NH.che === "ds") veBangSheet(); });
+    return apiNhanh("bangSheet", [th, NH.theo], function(b) { NH.bang = b; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); });
   }
+  if (Date.now() - (NH.bangLuc || 0) > 20000 && !NH.lamMoi) { NH.lamMoi = 1; NH.bangLuc = Date.now();   // đang xem lâu: lấy bản mới ngầm
+    apiNhanh("bangSheet", [th, NH.theo], function(b, luu) { if (luu) return; NH.lamMoi = 0; NH.bang = b; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); }, function() { NH.lamMoi = 0; });
+    setTimeout(function() { NH.lamMoi = 0; }, 15000); }
   var b = NH.bang, the = window.innerWidth < 700 && NH.the, w = [130, 56, 100, 66, 58, 74, 90, 80, 50, 66, 64, 64, 50, 130, 50, 50, 170, 80, 80, 96, 90, 90];
   var so = { 6: 1, 7: 1, 8: 1, 12: 1, 14: 1, 15: 1, 17: 1, 18: 1, 19: 1, 20: 1, 21: 1 };   // cột số (H I J N P Q S T U V W) canh phải
   var cot = b.tieuDe.map(function(t, j) { return j; }).filter(function(j) { return (NH.mo || (j !== 0 && j !== 2)) && !(bkDT() && (j === 3 || j === 6)); });   // điện thoại: ẩn thêm Booking Date (E), Published room (H)   // ẩn B (Name VNE id) và D (Phone)
@@ -1146,7 +1173,8 @@ var IC_NHOM = { "CHI PHÍ CỐ ĐỊNH": "🏠", "THUẾ": "🧾", "ĐIỆN": "�
 function veThuChi() {
   if (TC.xem === "nam") return veTongKet();
   var th = TC.thang || Q.d.homNay.slice(0, 7);
-  if (!TC.dl || TC.dl.thang !== th) { $("#app").innerHTML = '<div class="loading">Đang tải thu chi…</div>'; return api("thuChi", [th], function(d) { TC.dl = d;  if (Q.tab === "thuchi") veThuChi(); }); }
+  if (!TC.dl || TC.dl.thang !== th) { $("#app").innerHTML = '<div class="loading">Đang tải thu chi…</div>'; return apiNhanh("thuChi", [th], function(d) { TC.dl = d; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) veThuChi(); }); }
+  if (Date.now() - (TC.luc || 0) > 20000) { TC.luc = Date.now(); tcTaiNgam(); }
   var d = TC.dl, bar = '<div class="bar"><button class="btn" data-act="tcThang" data-v="-1">◀</button><b style="min-width:110px;text-align:center">' + tenThang(th) + '</b><button class="btn" data-act="tcThang" data-v="1">▶</button>' +
     '<button class="btn" data-act="tcTai" aria-label="Tải lại">↻</button><span class="tc-xem"><button class="btn on" data-act="tcXem" data-v="thang">📒 Sổ chi tháng</button><button class="btn" data-act="tcXem" data-v="nam">📊 Tổng kết năm</button></span>' + nutCoThat() + (d.chuaCo ? "" : '<button class="btn pri" data-act="tcThemDong">＋ Thêm dòng</button><button class="btn" data-act="tcThem" title="Nhập bằng form (chọn nhóm bằng icon)">📝 Form</button><a class="btn" href="' + esc(d.url) + '" target="_blank" rel="noopener">📗 ' + esc(d.ten) + "</a>") + "</div>";
   if (d.chuaCo) {
@@ -1169,7 +1197,7 @@ function veThuChi() {
 /* 📊 Tổng kết năm: vẽ lại bảng ⚙ TỔNG KẾT của sheet (cùng chữ, cùng màu); bấm tiêu đề tháng để mở sổ chi tháng đó */
 function veTongKet() {
   var nam = (TC.thang || Q.d.homNay).slice(0, 4);
-  if (!TC.tk || TC.tk.nam !== nam) { $("#app").innerHTML = '<div class="loading">Đang tải tổng kết…</div>'; return api("tongKet", [nam], function(d) { TC.tk = d; if (Q.tab === "thuchi" && TC.xem === "nam") veTongKet(); }); }
+  if (!TC.tk || TC.tk.nam !== nam) { $("#app").innerHTML = '<div class="loading">Đang tải tổng kết…</div>'; return apiNhanh("tongKet", [nam], function(d) { TC.tk = d; if (Q.tab === "thuchi" && TC.xem === "nam") veTongKet(); }); }
   var d = TC.tk, thCur = Number((TC.thang || Q.d.homNay).slice(5, 7));
   var bar = '<div class="bar"><button class="btn" data-act="tcNam" data-v="-1">◀</button><b style="min-width:110px;text-align:center">Năm ' + esc(nam) + '</b><button class="btn" data-act="tcNam" data-v="1">▶</button>' +
     '<button class="btn" data-act="tcTaiTK" aria-label="Tải lại">↻</button><span class="tc-xem"><button class="btn" data-act="tcXem" data-v="thang">📒 Sổ chi tháng</button><button class="btn on" data-act="tcXem" data-v="nam">📊 Tổng kết năm</button></span>' + nutCoThat() +
@@ -1337,7 +1365,7 @@ function chayCho() {
   });
 }
 /* tải lại số liệu tháng mà không làm mất chỗ đang gõ */
-function tcTaiNgam() { var th = TC.thang || Q.d.homNay.slice(0, 7); api("thuChi", [th], function(d) { if (d.thang !== (TC.thang || Q.d.homNay.slice(0, 7))) return; TC.dl = d; giuOVe(); }); }
+function tcTaiNgam() { var th = TC.thang || Q.d.homNay.slice(0, 7); apiNhanh("thuChi", [th], function(d, luu) { if (luu || d.thang !== (TC.thang || Q.d.homNay.slice(0, 7))) return; TC.dl = d; TC.luc = Date.now(); giuOVe(); }); }
 function giuOVe() { if (Q.tab !== "thuchi" || TC.xem === "nam") return; var a = document.activeElement; if (a && a.closest && a.closest(".tc-moi")) { TC.oMoi = a.dataset.k; a.blur(); } veThuChi(); }
 /* biểu đồ cả năm: thu (xanh) và chi (cam) từng tháng, bấm cột để xem tháng đó */
 function bieuDoNam(d, th) {
@@ -1873,7 +1901,7 @@ function iconLuoi(n) {
 function taiDS() {
   DS.thang = DS.thang || Q.d.homNay.slice(0, 7);
   $("#app").innerHTML = '<div class="loading">Đang tải danh sách…</div>';
-  api("ds", [DS.thang, DS.theo], function(d) { DS.dl = d; veDS(); });
+  apiNhanh("ds", [DS.thang, DS.theo], function(d) { DS.dl = d; if (Q.tab === "ds") veDS(); });
 }
 function ttDS(b) { return b.huy ? "Huy" : TRANG_THAI_OK(b.trangThai); }
 function veDS() {
@@ -2252,12 +2280,13 @@ var TH = { thang: "", dl: null };
 function taiThue(th) {
   TH.thang = th || TH.thang || Q.d.homNay.slice(0, 7);
   $("#app").innerHTML = '<div class="loading">Đang đọc sổ thuế…</div>';
-  api("thue", [TH.thang], function(d) { TH.dl = d; TH.thang = d.thang; veThue(); });
+  apiNhanh("thue", [TH.thang], function(d) { TH.dl = d; TH.thang = d.thang; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(); });
 }
 function lechThang(th, n) { var d = dk(th + "-01"); d.setMonth(d.getMonth() + n); return kd(d).slice(0, 7); }
 function tenThang(th) { return "Tháng " + Number(th.slice(5)) + "/" + th.slice(0, 4); }
 function veThue() {
   if (!TH.dl || TH.dl.thang !== (TH.thang || Q.d.homNay.slice(0, 7))) return taiThue();
+  if (Date.now() - (TH.luc || 0) > 20000) { TH.luc = Date.now(); apiNhanh("thue", [TH.dl.thang], function(d, luu) { if (luu) return; TH.dl = d; if (Q.tab === "thue" && !dangSua()) veThue(); }, function() {}); }
   var d = TH.dl, max = Math.max.apply(null, Object.keys(d.theoThang).map(function(k) { return d.theoThang[k]; }).concat([1]));
   var tongNam = Object.keys(d.theoThang).reduce(function(s, k) { return s + d.theoThang[k]; }, 0);
   var h = '<div class="bar"><button class="btn" data-act="thLui">◀</button><b style="min-width:120px;text-align:center">' + tenThang(d.thang) + '</b><button class="btn" data-act="thToi">▶</button>' +
