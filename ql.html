@@ -1190,11 +1190,11 @@ function veTongKet() {
   vuaKhung();
 }
 /* sổ chi dạng bảng như sheet DÒNG TIỀN CHI: bấm ô để sửa, ＋ Thêm dòng nhập ngay trên đầu bảng */
-var TC_COT = [["dd", "DD", 42, "so", 0], ["mm", "MM", 38, "khoa", 1], ["noiDung", "Nội dung chi", 220, "", 2], ["nhom", "Main list", 150, "nhom", 3], ["sl", "SL", 46, "so", 4], ["donGia", "Đơn giá", 110, "tien", 5], ["tien", "Thành tiền", 110, "tinh", 6], ["bill", "Bill code", 84, "bill", 7], ["note", "Note", 160, "", 8]];
+var TC_COT = [["dd", "DD", 42, "so", 0], ["mm", "MM", 38, "so", 1], ["noiDung", "Nội dung chi", 220, "", 2], ["nhom", "Main list", 150, "nhom", 3], ["sl", "SL", 46, "so", 4], ["donGia", "Đơn giá", 110, "tien", 5], ["tien", "Thành tiền", 110, "tinh", 6], ["bill", "Bill code", 84, "bill", 7], ["note", "Note", 160, "", 8]];
 function bangChi(d, th) {
   var moi = TC.moi ? [TC.moi] : [], cho = (TC.cho || []).filter(function(x) { return x.th === th; }).reverse(), vua = TC.vua || [];
   var o = function(x, c, laMoi) {
-    var v = c[0] === "mm" ? Number((TC.thang || Q.d.homNay).slice(5, 7)) : x[c[0]], cls = (c[3] === "so" || c[3] === "tien" || c[3] === "tinh" || c[3] === "khoa" ? "num " : "") + (c[3] === "tinh" || c[3] === "khoa" ? "ct" : "sua");
+    var v = c[0] === "mm" ? Number(x.mm) || Number((TC.thang || Q.d.homNay).slice(5, 7)) : x[c[0]], cls = (c[3] === "so" || c[3] === "tien" || c[3] === "tinh" || c[3] === "khoa" ? "num " : "") + (c[3] === "tinh" || c[3] === "khoa" ? "ct" : "sua");
     if (laMoi && c[3] === "khoa") return '<td class="num ct">' + v + "</td>";
     if (laMoi && c[3] !== "tinh") {
       var ten = 'data-k="' + c[0] + '" class="nh-o' + (cls.indexOf("num") === 0 ? " num" : "") + '"';
@@ -1211,7 +1211,7 @@ function bangChi(d, th) {
     "<thead><tr>" + TC_COT.map(function(c) { return "<th>" + c[1] + "</th>"; }).join("") + "<th></th></tr></thead><tbody>" +
     moi.map(function(x) { return '<tr class="tc-moi">' + TC_COT.map(function(c) { return o(x, c, true); }).join("") + '<td><button class="nh-x" data-act="tcLuuMoi" title="Lưu (Enter)">💾</button></td></tr>'; }).join("") +
     (moi.length ? '<tr class="tc-moi-bar"><td colspan="10"><small class="muted">Enter: lưu &amp; nhập tiếp · ← → / Tab: qua lại giữa các cột · gõ nội dung để chọn từ danh sách · dán được nhiều dòng từ Excel/Sheet</small> <button class="btn" data-act="tcHuyMoi">Đóng hàng nhập</button></td></tr>' : "") +
-    cho.map(function(x) { return '<tr class="tc-cho' + (x.loi ? " loi" : "") + '">' + TC_COT.map(function(c) { var v = c[0] === "mm" ? Number(th.slice(5, 7)) : c[0] === "tien" ? (Number(x.sl) || 1) * (Number(x.donGia) || 0) : x[c[0]];
+    cho.map(function(x) { return '<tr class="tc-cho' + (x.loi ? " loi" : "") + '">' + TC_COT.map(function(c) { var v = c[0] === "mm" ? Number(x.mm) || Number(th.slice(5, 7)) : c[0] === "tien" ? (Number(x.sl) || 1) * (Number(x.donGia) || 0) : x[c[0]];
         return '<td class="' + (c[3] && c[3] !== "nhom" && c[3] !== "bill" ? "num" : "") + '">' + (c[3] === "tien" || c[3] === "tinh" ? Number(v || 0).toLocaleString("vi-VN") : c[3] === "nhom" ? (IC_NHOM[v] || "") + " " + esc(v || "") : esc(v == null ? "" : v)) + "</td>"; }).join("") +
       '<td>' + (x.loi ? '<button class="nh-x" data-act="tcGuiLai" title="' + esc(x.loi) + ' — bấm để lưu lại">⚠</button><button class="nh-x" data-act="tcBoCho" data-v="' + x.id + '" title="Bỏ dòng này">✕</button>' : '<span title="Đang lưu">⏳</span>') + "</td></tr>"; }).join("") +
     d.ds.filter(function(x) { return vua.indexOf(x.hang) >= 0; }).sort(function(a, b) { return vua.indexOf(b.hang) - vua.indexOf(a.hang); }).concat(d.ds.filter(function(x) { return vua.indexOf(x.hang) < 0; })).map(function(x) { return "<tr" + (vua.indexOf(x.hang) >= 0 ? ' class="tc-vua"' : "") + ">" + TC_COT.map(function(c) { return o(x, c); }).join("") + '<td class="nh-tac"><button data-act="tcXoa" data-v="' + x.hang + '" title="Xoá khoản chi" class="xoa">' + IC_XOA + "</button></td></tr>"; }).join("") +
@@ -1270,9 +1270,11 @@ function chonGY(i) {
   dat("noiDung", z.t); dat("nhom", z.n); dat("bill", z.b); if (!String(TC.moi.donGia || "").trim()) dat("donGia", z.g);
   var o = $('.tc-moi [data-k="donGia"]'); if (o) { o.focus(); o.select(); }
 }
+/* yyyy-mm theo tháng gõ ở cột MM (cùng năm của file CashFlow đang xem) */
+function thangCua(th, mm) { mm = Number(mm); return th.slice(0, 4) + "-" + (mm >= 1 && mm <= 12 ? ("0" + mm).slice(-2) : th.slice(5, 7)); }
 function moiTrong() {
   var hn = Q.d.homNay, th = TC.thang || hn.slice(0, 7), tr = TC.moi;
-  return { dd: tr ? tr.dd : hn.slice(0, 7) === th ? Number(hn.slice(8)) : 1, noiDung: "", nhom: tr ? tr.nhom : "KHÁC", sl: 1, donGia: "", bill: tr ? tr.bill : "Bank", note: "" };
+  return { dd: tr ? tr.dd : hn.slice(0, 7) === th ? Number(hn.slice(8)) : 1, mm: tr && tr.mm ? tr.mm : Number(th.slice(5, 7)), noiDung: "", nhom: tr ? tr.nhom : "KHÁC", sl: 1, donGia: "", bill: tr ? tr.bill : "Bank", note: "" };
 }
 /* dán bảng từ Excel/Sheet: đủ 9 cột như sổ chi thì theo đúng cột sheet, ít hơn thì điền từ ô đang đứng sang phải; lưu luôn cả loạt */
 function danChi(txt, k0) {
@@ -1282,9 +1284,9 @@ function danChi(txt, k0) {
   var ds = dong.map(function(r) {
     var x = Object.assign({}, TC.moi), keys = r.length >= 8 ? TC_COT.map(function(c) { return c[0]; }) : sua.slice(Math.max(0, sua.indexOf(k0)));
     r.forEach(function(v, j) {
-      var k = keys[j]; v = String(v).trim(); if (!k || k === "mm" || k === "tien") return;
+      var k = keys[j]; v = String(v).trim(); if (!k || k === "tien") return;
       if (k === "nhom") { var h = nhomDs.filter(function(t) { return t.toLowerCase() === v.toLowerCase(); })[0]; if (h) x.nhom = h; return; }
-      x[k] = k === "donGia" || k === "sl" || k === "dd" ? so(v) : v;
+      x[k] = k === "donGia" || k === "sl" || k === "dd" || k === "mm" ? so(v) : v;
     });
     return x;
   }).filter(function(x) { return String(x.noiDung || "").trim() || String(x.donGia || "").trim(); });
@@ -1301,9 +1303,10 @@ function suaOChi(td) {
   var luu = function() {
     if (xong) return; var v = o.value.trim(); if (v === cu) return huy(); xong = true;
     var th = TC.thang || Q.d.homNay.slice(0, 7), n = Object.assign({}, x); n[k] = v;
-    var dd = Math.max(1, Math.min(31, Number(n.dd) || 1));
+    var dd = Math.max(1, Math.min(31, Number(n.dd) || 1)), mm = Number(n.mm) || Number(th.slice(5, 7));
+    if (!(mm >= 1 && mm <= 12)) { toast("⚠️ Tháng 1–12"); xong = false; o.focus(); return; }
     td.classList.add("luu"); td.textContent = "Đang lưu…";
-    api("luuChi", [{ hang: hang, ngay: th + "-" + ("0" + dd).slice(-2), noiDung: n.noiDung, nhom: n.nhom, sl: n.sl, donGia: n.donGia, bill: n.bill, note: n.note }],
+    api("luuChi", [{ hang: hang, ngay: thangCua(th, mm) + "-" + ("0" + dd).slice(-2), noiDung: n.noiDung, nhom: n.nhom, sl: n.sl, donGia: n.donGia, bill: n.bill, note: n.note }],
       function() { HT.push({ loai: "chi", hang: hang, cu: x, th: th }); toast("✔ Đã sửa"); TC.dl = null; veThuChi(); }, function(e) { loiChung(e); TC.dl = d; veThuChi(); });
   };
   o.addEventListener("keydown", function(e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); luu(); } else if (e.key === "Escape") huy(); });
@@ -1314,6 +1317,7 @@ function luuDongChiMoi() {
   var m = TC.moi; if (!m) return;
   if (!String(m.noiDung || "").trim()) return toast("Nhập nội dung chi");
   if (!Number(String(m.donGia).replace(/[^\d\-]/g, ""))) { var o = $('.tc-moi [data-k="donGia"]'); if (o) o.focus(); return toast("Nhập đơn giá"); }
+  if (m.mm !== undefined && m.mm !== "" && !(Number(m.mm) >= 1 && Number(m.mm) <= 12)) { var om = $('.tc-moi [data-k="mm"]'); if (om) om.focus(); return toast("Tháng 1–12"); }
   var a = document.activeElement; TC.moi = null; if (a && a.blur) a.blur();   // ô cũ bị huỷ không được ghi đè vào hàng nhập mới
   TC.moi = m; guiChi(Object.assign({}, m)); TC.moi = moiTrong(); TC.oMoi = "noiDung"; veThuChi();
 }
@@ -1322,7 +1326,7 @@ function chayCho() {
   if (TC.dangGui) return;
   var di = (TC.cho || []).filter(function(x) { return !x.loi; }); if (!di.length) return;
   TC.dangGui = true;
-  var ds = di.map(function(m) { var dd = Math.max(1, Math.min(31, Number(m.dd) || 1)); return { so: m.noiDung, ngay: m.th + "-" + ("0" + dd).slice(-2), noiDung: m.noiDung, nhom: m.nhom, sl: m.sl || 1, donGia: m.donGia, bill: m.bill || "Bank", note: m.note }; });
+  var ds = di.map(function(m) { var dd = Math.max(1, Math.min(31, Number(m.dd) || 1)); return { so: m.noiDung, ngay: thangCua(m.th, m.mm) + "-" + ("0" + dd).slice(-2), noiDung: m.noiDung, nhom: m.nhom, sl: m.sl || 1, donGia: m.donGia, bill: m.bill || "Bank", note: m.note }; });
   api("luuChiNhieu", [ds], function(r) {
     TC.dangGui = false; TC.vua = (TC.vua || []).concat(r.hang);
     TC.cho = TC.cho.filter(function(x) { return di.indexOf(x) < 0; });
@@ -1382,7 +1386,7 @@ function ghiHoanTac(dong, sua) {
 function hoanTac() {
   var h = HT.pop(); if (!h) return toast("Không còn thao tác nào để hoàn tác");
   var xong = function() { toast("↶ Đã hoàn tác dòng " + h.dong + (h.ten ? " (" + h.ten + ")" : "")); NH.bang = null; taiLich(); if (Q.tab === "nhap") veNhap(); };
-  if (h.loai === "chi") { var c0 = h.cu; return api("luuChi", [{ hang: h.hang, ngay: h.th + "-" + ("0" + (c0.dd || 1)).slice(-2), noiDung: c0.noiDung, nhom: c0.nhom, sl: c0.sl, donGia: c0.donGia, bill: c0.bill, note: c0.note }], function() { toast("↶ Đã hoàn tác khoản chi"); TC.dl = null; veThuChi(); }, function(e) { HT.push(h); loiChung(e); }); }
+  if (h.loai === "chi") { var c0 = h.cu; return api("luuChi", [{ hang: h.hang, ngay: thangCua(h.th, c0.mm) + "-" + ("0" + (c0.dd || 1)).slice(-2), noiDung: c0.noiDung, nhom: c0.nhom, sl: c0.sl, donGia: c0.donGia, bill: c0.bill, note: c0.note }], function() { toast("↶ Đã hoàn tác khoản chi"); TC.dl = null; veThuChi(); }, function(e) { HT.push(h); loiChung(e); }); }
   if (h.loai === "an") api("anDong", [h.dong, h.an], xong, function(e) { HT.push(h); loiChung(e); });
   else api("suaDong", [h.dong, h.cu], xong, function(e) { HT.push(h); loiChung(e); });
 }
