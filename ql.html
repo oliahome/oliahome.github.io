@@ -1715,7 +1715,7 @@ function kenhKhach(ten) { var k = boDauQL(String(ten || "")).replace(/\s+/g, "")
 /* thẻ khách trên Lịch: trạng thái + kênh dạng icon nhỏ trước tên (Book/Keep/Waiting/Done) */
 function bkIcon(b) {
   var tt = TRANG_THAI_OK(b.trangThai), k = kenhKhach(b.agent), m = { ab: "ab", fb: "fb", ig: "ig", web: "web", bk: "bk", ag: "ag" }[k];
-  return '<i class="bk-tt" title="' + tt + '">' + icn("tt" + tt, 11) + "</i>" + (m && IC_AG[m] ? '<i class="bk-kn" title="' + esc(b.agent || "") + '">' + IC_AG[m].replace(/width="\d+" height="\d+"/, 'width="12" height="12"') + "</i>" : "");
+  return (tt === "Book" ? "" : '<i class="bk-tt" title="' + tt + '">' + icn("tt" + tt, 11) + "</i>") + (m && IC_AG[m] ? '<i class="bk-kn" title="' + esc(b.agent || "") + '">' + IC_AG[m].replace(/width="\d+" height="\d+"/, 'width="12" height="12"') + "</i>" : "");
 }
 /* tích Thuế lần 1 / 2 ở Sổ booking: hỏi ngày nhận tiền (mặc định hôm nay) + số tiền rồi ghi sổ thuế */
 function hoiNgayThue(r, lan, neo) {
@@ -1795,7 +1795,7 @@ function veTimeline() {
     h += '<div class="tl-c tl-r" style="grid-row:' + R + ";grid-column:1;background:" + mp[0] + ";box-shadow:inset 4px 0 0 " + mp[1] + '"><span><i class="cham" style="background:' + mp[1] + '"></i>' + esc(p.icon) + " " + esc(p.ten.split(" ")[1] || p.ten) + '</span><small class="muted">' + esc(p.khu) + " · " + tinhTrang(p.id) + "</small></div>";
     ngay.forEach(function(k, j) {
       var tra = cua.filter(function(b) { return b.ra === k && k <= hn; })[0];
-      var nut = tra ? '<button class="don" data-act="don" data-v="' + tra.dong + '" title="' + (tra.daDon ? "Đã dọn · sẵn sàng" : "Cần dọn sau khi " + esc(tra.ten) + " trả phòng") + '">' + (tra.daDon ? "✅" : "🧹") + "</button>" : "";
+      var nut = tra && !tra.daDon ? '<button class="don" data-act="don" data-v="' + tra.dong + '" title="' + (tra.daDon ? "Đã dọn · sẵn sàng" : "Cần dọn sau khi " + esc(tra.ten) + " trả phòng") + '">' + (tra.daDon ? "✅" : "🧹") + "</button>" : "";
       h += '<div class="tl-c' + (k === hn ? " td" : "") + (laT6T7(k) ? " cuoi" : "") + (dk(k).getDate() === 1 ? " m1" : "") + '"' +
         (laChu() ? ' data-act="themO" data-v="' + esc(p.id) + "|" + k + '" title="Bấm để thêm đơn ' + esc(p.id) + " từ " + ngan(k) + '"' : "") +
         ' style="grid-row:' + R + ";grid-column:" + (j + 2) + ";background-color:" + mp[0] + '">' + nut + "</div>";
@@ -1964,8 +1964,8 @@ function tinhTrang(id) {
   if (cua.some(function(b) { return b.vao <= hn && b.ra > hn; })) return "🛏️<em> có khách</em>";
   var tra = cua.filter(function(b) { return b.ra <= hn; }).sort(function(a, b) { return a.ra < b.ra ? 1 : -1; })[0];
   // khách trả quá 3 ngày mà chưa đánh dấu -> coi như đã dọn (đơn cũ hay quên tích)
-  if (!tra || tra.daDon || tra.ra < cong(hn, -3)) return "✅<em> sẵn sàng</em>";
-  return laChu() ? '<button class="bo-don" data-act="boDon" data-v="' + tra.dong + '" title="Bấm khi đã dọn xong / bỏ qua">🧹<em> cần dọn</em> <b>✓</b></button>' : "🧹<em> cần dọn</em>";
+  if (!tra || tra.daDon || tra.ra < cong(hn, -3)) return "<em>sẵn sàng</em>";
+  return laChu() ? '<button class="bo-don" data-act="boDon" data-v="' + tra.dong + '" title="Bấm khi đã dọn xong / bỏ qua">🧹<em> cần dọn</em></button>' : "🧹<em> cần dọn</em>";
 }
 
 /* tooltip khi rê chuột */
