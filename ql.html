@@ -2400,6 +2400,13 @@ function suaOThue(td) {
   o.addEventListener("keydown", function(e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); luu(); } else if (e.key === "Escape") huy(); });
   o.addEventListener("blur", luu);
 }
+/* Esc: đóng thẻ nhập thuế đang mở, trở lại dòng gọn trong danh sách tra cứu */
+document.addEventListener("keydown", function(e) {
+  if (e.key !== "Escape") return;
+  var w = document.activeElement && document.activeElement.closest ? document.activeElement.closest(".th-mo") : null;
+  if (!w) { var ds = document.querySelectorAll(".th-mo"); w = ds[ds.length - 1]; }
+  if (w && w._goc) { e.preventDefault(); w.replaceWith(w._goc); }
+});
 function veThue() {
   if (!TH.dl || TH.dl.thang !== (TH.thang || Q.d.homNay.slice(0, 7))) return taiThue();
   if (Date.now() - (TH.luc || 0) > 20000) { TH.luc = Date.now(); apiNhanh("thue", [TH.dl.thang], function(d, luu) { if (luu) return; TH.dl = d; if (Q.tab === "thue" && !dangSua()) veThue(); }, function() {}); }
@@ -2772,7 +2779,8 @@ document.addEventListener("click", function(e) {
     TL.den = cong(vao, -2); Q.tu = cong(vao, -21); Q.soNgay = DAI;
     taiLich(function() { if (timDon(dong)) moChiTiet(dong); else toast("Đơn này đã huỷ hoặc không còn trên timeline"); });
   }
-  else if (a === "thMo" && TH.kq) { var w = document.createElement("div"); w.className = "cards"; w.innerHTML = theThueDon(TH.kq[Number(v)]); el.replaceWith(w); }
+  else if (a === "thMo" && TH.kq) { var w = document.createElement("div"); w.className = "cards th-mo"; w._goc = el; w.innerHTML = theThueDon(TH.kq[Number(v)]); el.replaceWith(w);
+    var f0 = w.querySelector(".thTien"); if (f0) { f0.focus(); f0.select(); } }
   else if (a === "thChuaDone") { TH.chuaDone = TH.chuaDone === false; el.classList.toggle("on", TH.chuaDone); timThue(); }
   else if (a === "thNguon") { TH.nguon = v || ""; document.querySelectorAll(".tra-thue [data-act=thNguon]").forEach(function(x) { x.classList.toggle("on", x.dataset.v === TH.nguon); }); timThue(); }
   else if (a === "dsCot") { DS.cot = Number(v) || 1; try { localStorage.setItem("olia_ds_cot", DS.cot); } catch (e) {}
