@@ -1595,7 +1595,7 @@ function nutGoogle() {
     var gg = window.google && window.google.accounts && window.google.accounts.id; if (!gg || !$("#ggNut")) return;
     gg.initialize({ client_id: S.d.cd.ggClient, callback: function(r) {
       $("#dnLoi").innerHTML = '<div class="sm muted">Đang kiểm tra tài khoản…</div>';
-      goi("dangNhapGoogle", [r.credential], function(k) { var a = document.createElement("a"); a.href = k.url; a.target = "_top"; document.body.appendChild(a); a.click(); },
+      goi("dangNhapGoogle", [r.credential], function(k) { try { if (k.phien) localStorage.setItem("olia_phien", k.phien); } catch (e) {} var a = document.createElement("a"); a.href = k.url; a.target = "_top"; document.body.appendChild(a); a.click(); },
         function(er) { $("#dnLoi").innerHTML = '<div class="err-box">' + esc(er) + "</div>"; });
     } });
     gg.renderButton($("#ggNut"), { theme: "outline", size: "large", text: "signin_with", shape: "pill", locale: "vi", width: Math.min(320, $("#ggNut").offsetWidth || 300) });
