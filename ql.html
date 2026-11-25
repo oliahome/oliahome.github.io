@@ -391,6 +391,12 @@ html,body{min-height:100%}body{min-height:100vh}
 .the.keep .tt{background:#fdf0d5;color:#8a5a00}.the.done .tt{background:#eee;color:#666}.the.huy{opacity:.55;text-decoration:line-through}.the.an{opacity:.45}
 .nh-dt td,.nh-dt th{padding:4px 3px!important;vertical-align:middle;white-space:nowrap}.nh-dt th div{line-height:1.25}.nh-dt td.o2 div+div{border-top:1px dashed rgba(0,0,0,.12);margin-top:2px;padding-top:2px}.nh-dt div.sua{min-height:15px;cursor:pointer}.nh-dt td>div[data-j="16"]{white-space:normal;min-width:60px;max-width:110px;line-height:1.25}.nh-pc td>div[data-j="16"]{max-width:200px}.nh-dt .nh-tac{line-height:1.1}.nh-dt .nh-tac button{padding:1px 2px}.nh-dt .nh-tac svg{width:13px;height:13px}
 .tim-nut{display:none}
+.ab-huy{border-left-color:#c0392b!important}.ab-huy b{color:#c0392b!important}.ab-huy span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ab-tien-ds{display:flex;flex-direction:column;gap:6px}.ab-tien{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:3px solid #2f7d4f;border-radius:10px;padding:8px 12px}.ab-tien b{font-size:15px;color:#2f7d4f}.ab-tien span{font-size:13px;color:#555}.ab-tien .btn{padding:4px 10px}
+.ab-the .ab-xo{border:0;background:none;padding:2px;cursor:pointer;color:#9a8a6a;line-height:0;vertical-align:-3px}.ab-the.ab-mo .ab-xo svg{transform:rotate(180deg)}
+.ab-the:not(.ab-mo) .ab-sub{display:none}.ab-the:not(.ab-mo) .ab-tin,.ab-the:not(.ab-mo) .ab-tom{line-height:1.45;padding-bottom:0!important;max-height:calc(2.9em + 8px);overflow-y:auto;overscroll-behavior:contain;cursor:pointer}.ab-the .ab-tin{scrollbar-width:thin}
+.ab-the.ab-moi h3,.ab-the.ab-moi .ab-tin{font-weight:800}.ab-the.ab-moi{box-shadow:0 0 0 2px #e9b46a}
+.tbMoRong{border:0;background:none;cursor:pointer;color:#8a8f98;line-height:0;padding:4px;align-self:center}.tbThe.tbRong .tbMoRong svg{transform:rotate(180deg)}.tbCT2{display:none;font-size:12px;color:#6b7280;margin-top:3px}.tbThe.tbRong .tbCT2{display:block}.tbThe.tbRong .tbCT{-webkit-line-clamp:unset!important;display:block!important;max-height:none!important;white-space:normal!important}
 .nh-dt .oi.co-giam{opacity:1!important;color:#a35a10}.nh-dt .oi.co-giam path{stroke-width:2.6}
 .nh-dt td.o-mota,.nh-dt th.o-mota{width:auto!important;min-width:90px}.nh-dt td.o-mota>div{max-width:none!important;white-space:normal!important;line-height:1.3}
 .nh-dt{width:auto!important;min-width:100%!important;table-layout:auto!important}.nh-dt td,.nh-dt th{width:1%}
@@ -602,7 +608,7 @@ function batTatChuong() {
 }
 /* 🔔 Thông báo kiểu macOS (như web quản trị HMK): thẻ trượt vào góc phải, tự ẩn 9 giây (rê chuột thì giữ), vuốt phải để tắt,
    bấm thẻ = mở đúng chỗ; chuông 🔔 = bảng tất cả thông báo (✕ Xoá hết). Lưu 50 thông báo gần nhất trên máy. */
-var AB_LOAI = { yeucau: "Yêu cầu đặt phòng", xacnhan: "Đã xác nhận", huy: "Huỷ đặt phòng", tin: "Tin nhắn", khac: "Email" };
+var AB_LOAI = { yeucau: "Yêu cầu đặt phòng", xacnhan: "Đã xác nhận", huy: "Huỷ đặt phòng", tin: "Tin nhắn", tien: "Thanh toán", khac: "Email" };
 var TB_IC = { don: "🛎️", chat: "💬", airbnb: "🅰️", thu: "🔔" };
 var TB = { ds: [], daCo: {} };
 try { TB.ds = JSON.parse(localStorage.getItem("olia_tb") || "[]"); TB.daCo = JSON.parse(localStorage.getItem("olia_tb_co") || "{}"); } catch (e) {}
@@ -617,9 +623,11 @@ function tbHop() { var h = $("#tbMac"); if (!h) { h = document.createElement("di
 function tbLuc(ms) { var p = Math.round((Date.now() - ms) / 6e4); return p < 1 ? "bây giờ" : p < 60 ? p + " phút" : p < 1440 ? Math.round(p / 60) + " giờ" : Math.round(p / 1440) + " ngày"; }
 function tbThe(t, giu) {
   var hop = tbHop(), el = document.createElement("div"); el.className = "tbThe tb-" + t.loai;
-  el.innerHTML = '<div class="tbIc">' + (TB_IC[t.loai] || "🔔") + '</div><div class="tbND"><div class="tbDau"><b>OLIA</b><span>' + tbLuc(t.luc) + '</span></div><div class="tbTieu">' + esc(t.tieu) + '</div><div class="tbCT">' + esc(t.ct || "") + '</div></div><button class="tbXem">Xem</button><button class="tbDong" title="Đóng">✕</button>';
+  el.innerHTML = '<div class="tbIc">' + (TB_IC[t.loai] || "🔔") + '</div><div class="tbND"><div class="tbDau"><b>OLIA</b><span>' + tbLuc(t.luc) + '</span></div><div class="tbTieu">' + esc(t.tieu) + '</div><div class="tbCT">' + esc(t.ct || "") + '</div>' + (t.chiTiet ? '<div class="tbCT2">' + esc(t.chiTiet) + "</div>" : "") + '</div><button class="tbMoRong" title="Hiện / ẩn chi tiết" aria-label="Chi tiết">' + icn("xo", 14) + '</button><button class="tbXem">Xem</button><button class="tbDong" title="Đóng">✕</button>';
+  if (TB.moHet) el.classList.add("tbRong");
   var bo = function() { el.classList.add("di"); setTimeout(function() { el.remove(); }, 280); }, hen = giu ? 0 : setTimeout(bo, 9000);
   el.onmouseenter = function() { clearTimeout(hen); }; el.onmouseleave = function() { if (!hop.classList.contains("tbMo")) hen = setTimeout(bo, 4000); };
+  el.querySelector(".tbMoRong").onclick = function(e) { e.stopPropagation(); el.classList.toggle("tbRong"); clearTimeout(hen); };
   el.querySelector(".tbDong").onclick = function(e) { e.stopPropagation(); TB.ds = TB.ds.filter(function(x) { return x.id !== t.id; }); luuTB(); bo(); };
   var x0 = null, dx = 0;   // vuốt sang phải để tắt (như macOS)
   el.addEventListener("pointerdown", function(e) { if (e.target.closest("button")) return; x0 = e.clientX; dx = 0; el.style.transition = "none"; });
@@ -632,7 +640,8 @@ function tbThe(t, giu) {
 function tbMoCho(t) { var m = t.mo || []; if (m[0] === "tab") { Q.tab = m[1] === "cho" ? "cho" : m[1]; if (Q.tab === "cho") Q.tab = "cho"; ve(); } }
 function tbHienTatCa() {
   var hop = tbHop(); hop.innerHTML = ""; hop.classList.add("tbMo");
-  var dau = document.createElement("div"); dau.className = "tbDauMac"; dau.innerHTML = "<b>Thông báo · " + TB.ds.length + '</b><span><button data-tb="doc">✓ Đã đọc hết</button><button data-tb="xoa">✕ Xoá hết</button></span>'; hop.appendChild(dau);
+  var dau = document.createElement("div"); dau.className = "tbDauMac"; dau.innerHTML = "<b>Thông báo · " + TB.ds.length + '</b><span><button data-tb="mo">' + (TB.moHet ? "▴ Ẩn bớt" : "▾ Hiện chi tiết") + '</button><button data-tb="doc">✓ Đã đọc hết</button><button data-tb="xoa">✕ Xoá hết</button></span>'; hop.appendChild(dau);
+  dau.querySelector('[data-tb="mo"]').onclick = function() { TB.moHet = !TB.moHet; tbHienTatCa(); };
   dau.querySelector('[data-tb="xoa"]').onclick = function() { TB.ds = []; luuTB(); tbDongHet(); };
   dau.querySelector('[data-tb="doc"]').onclick = function() { TB.ds.forEach(function(x) { x.doc = 1; }); luuTB(); tbHienTatCa(); };
   if (!TB.ds.length) { var r = document.createElement("div"); r.className = "tbThe xam"; r.innerHTML = '<div class="tbND"><div class="tbTieu">✅ Không có thông báo</div></div>'; hop.appendChild(r); }
@@ -650,7 +659,7 @@ function demChat() {
     var d = r.don || {};
     if (d.t && CHUONG.donT && d.t > CHUONG.donT) { keuChuong("don"); tbMoi({ id: "don" + d.t, loai: "don", tieu: "Đơn mới · " + (d.ten || ""), ct: (d.phong || "") + " · " + (d.vao ? ngan(d.vao) : ""), mo: ["tab", "cho"] }); }
     Q.ab = r.ab || [];
-    (r.ab || []).forEach(function(x) { if (!TB.daCo[x.id]) { var cu = TB.lanDauAb === undefined; TB.daCo[x.id] = 1; if (!cu || Date.now() - x.luc < 36e5) { if (x.loai === "yeucau") keuChuong("don"); tbMoi({ id: "ab" + x.id, loai: "airbnb", tieu: "Airbnb · " + (AB_LOAI[x.loai] || "Email") + (x.khach ? " · " + x.khach : ""), ct: (x.phong ? x.phong + " · " : "") + (x.ngay ? x.ngay + " · " : "") + x.tieu, mo: ["tab", "cho"], im: cu }); } } });
+    (r.ab || []).forEach(function(x) { if (!TB.daCo[x.id]) { var cu = TB.lanDauAb === undefined; TB.daCo[x.id] = 1; if (!cu || Date.now() - x.luc < 36e5) { if (x.loai === "yeucau") keuChuong("don"); tbMoi({ id: "ab" + x.id, loai: "airbnb", tieu: "Airbnb · " + (AB_LOAI[x.loai] || "Email") + (x.khach ? " · " + x.khach : ""), ct: (x.tin ? "💬 " + x.tin : x.tieu), chiTiet: (x.phong ? "🛏 " + x.phong + " · " : "") + (x.ngay ? "📅 " + x.ngay + " · " : "") + x.tieu, mo: ["tab", "cho"], im: cu }); } } });
     TB.lanDauAb = 1; luuTB();
     if (d.t) CHUONG.donT = Math.max(CHUONG.donT, d.t); else if (!CHUONG.donT) CHUONG.donT = 1;
     if (Q.tab === "chat" && !document.hidden) taiDsChat(true);
@@ -2377,13 +2386,20 @@ function luuThemDon() {
 
 /* ---------- Chờ cọc ---------- */
 function veCho() {
-  var ds = Q.d.cho, ab = Q.ab || [];
-  var abH = '<div class="bar" style="margin-top:4px"><b>🅰️ Email Airbnb cần xem</b><small class="muted">từ hộp thư oliagohome · chấp nhận yêu cầu trên Airbnb</small></div>' +
-    (ab.length ? '<div class="cards">' + ab.map(function(x) {
-      return '<div class="card ab-' + x.loai + '"><h3><span>' + esc(AB_LOAI[x.loai] || "Email") + '</span><span class="muted sm">' + tbLuc(x.luc) + '</span></h3><div>' + (x.khach ? "👤 <b>" + esc(x.khach) + "</b> " : "") + (x.phong ? "· 🛏 " + esc(x.phong) + " " : "") + (x.ngay ? "· 📅 " + esc(x.ngay) : "") + '</div><div class="sm">' + esc(x.tieu) + '</div>' + (x.tin ? '<div class="ab-tin">' + esc(x.tin) + "</div>" : '<div class="muted sm ab-tom">' + esc(x.tom) + "</div>") +
+  var ds = Q.d.cho, ab = Q.ab || [], abT = ab.filter(function(x) { return x.loai === "tien"; }), abH = ab.filter(function(x) { return x.loai === "huy"; }), abK = ab.filter(function(x) { return x.loai !== "tien" && x.loai !== "huy"; });   // tiền Airbnb chuyển về tách riêng
+  var abH = '<div class="bar" style="margin-top:4px"><b>🅰️ Email Airbnb cần xem</b><small class="muted">từ hộp thư oliagohome · chấp nhận yêu cầu trên Airbnb</small><button class="btn" data-act="abMoHet" style="margin-left:auto">' + (TB.abMo ? "▴ Ẩn bớt" : "▾ Hiện chi tiết") + '</button></div>' +
+    (abK.length ? '<div class="cards">' + abK.map(function(x) {
+      var tuoi = (Date.now() - x.luc) / 864e5, mo = tuoi < 1 ? "" : "filter:grayscale(" + Math.min(1, tuoi / 4).toFixed(2) + ");opacity:" + Math.max(.55, 1 - tuoi * .12).toFixed(2);   // càng cũ càng xám
+      return '<div class="card ab-the ab-' + x.loai + (TB.abMo ? " ab-mo" : "") + (tuoi < 1 ? " ab-moi" : "") + '"' + (mo ? ' style="' + mo + '"' : "") + '><h3><span>' + esc(AB_LOAI[x.loai] || "Email") + '</span><span class="muted sm">' + tbLuc(x.luc) + ' <button class="ab-xo" data-act="abXo" title="Hiện / ẩn chi tiết" aria-label="Chi tiết">' + icn("xo", 14) + '</button></span></h3><div>' + (x.khach ? "👤 <b>" + esc(x.khach) + "</b> " : "") + (x.phong ? "· 🛏 " + esc(x.phong) + " " : "") + (x.ngay ? "· 📅 " + esc(x.ngay) : "") + '</div><div class="sm ab-sub">' + esc(x.tieu) + '</div>' + (x.tin ? '<div class="ab-tin" data-act="abXo" title="Bấm để xem / thu gọn · cuộn để đọc tiếp">' + esc(x.tin) + "</div>" : '<div class="muted sm ab-tom" data-act="abXo">' + esc(x.tom) + "</div>") +
         '<div class="acts">' + (x.link ? '<a class="btn pri" href="' + esc(x.link) + '" target="_blank" rel="noopener">' + (x.loai === "yeucau" ? "✅ Mở Airbnb để chấp nhận" : "🅰️ Mở trên Airbnb") + "</a>" : '<a class="btn" href="https://www.airbnb.com/hosting/reservations" target="_blank" rel="noopener">🅰️ Mở Airbnb</a>') +
         '<button class="btn" data-act="abXong" data-v="' + esc(x.id) + '">✓ Đã xử lý</button></div></div>';
-    }).join("") + "</div>" : '<div class="empty sm">Chưa có email Airbnb mới.</div>');
+    }).join("") + "</div>" : '<div class="empty sm">Chưa có email Airbnb mới.</div>') +
+    (abH.length ? '<div class="bar" style="margin-top:10px"><b>❌ Huỷ đặt phòng</b><small class="muted">' + abH.length + " đơn Airbnb bị huỷ · ngày đã mở lại cho khách khác</small></div><div class=\"ab-tien-ds\">" + abH.map(function(x) {
+      var ma = String(x.tieu + " " + (x.tin || "")).match(/\b(HM[A-Z0-9]{6,})\b/);
+      return '<div class="ab-tien ab-huy"><b>' + esc(x.khach || (ma ? ma[1] : "Huỷ")) + '</b><span>' + (x.phong ? "🛏 " + esc(x.phong) + " · " : "") + (x.ngay ? "📅 " + esc(x.ngay) + " · " : "") + esc(x.tin || x.tieu) + '</span><small class="muted">' + tbLuc(x.luc) + '</small>' + (x.link ? '<a class="btn" href="' + esc(x.link) + '" target="_blank" rel="noopener">Xem</a>' : '<span></span>') + '<button class="btn" data-act="abXong" data-v="' + esc(x.id) + '" title="Đã xem">✓</button></div>'; }).join("") + "</div>" : "") +
+    (abT.length ? '<div class="bar" style="margin-top:10px"><b>💰 Thanh toán từ Airbnb</b><small class="muted">' + abT.length + " khoản chuyển về</small></div><div class=\"ab-tien-ds\">" + abT.map(function(x) {
+      var st = String(x.tieu + " " + (x.tin || "")).match(/₫\s?[\d.,]+/), nhan = String(x.tin || "").match(/muộn nhất vào ([^.]+)/);
+      return '<div class="ab-tien"><b>' + esc(st ? st[0] : "") + '</b><span>' + (nhan ? "nhận muộn nhất " + esc(nhan[1]) : esc(x.tieu)) + '</span><small class="muted">' + tbLuc(x.luc) + '</small><a class="btn" href="https://www.airbnb.com.vn/users/transaction_history" target="_blank" rel="noopener">Xem</a><button class="btn" data-act="abXong" data-v="' + esc(x.id) + '" title="Đã xem">✓</button></div>'; }).join("") + "</div>" : "");
   $("#app").innerHTML = abH + '<div class="bar"><b>⏳ Đơn web đang chờ cọc</b><button class="btn" data-act="taiCho">↻ Tải lại</button></div>' +
     (ds.length ? '<div class="cards">' + ds.map(function(d) {
       return '<div class="card"><h3><span>' + esc(d.ten) + '</span><span class="pill Keep">Keep</span></h3><div class="muted">' + esc(d.code) + " · " + esc(d.phong) + " · " +
@@ -2768,6 +2784,8 @@ document.addEventListener("click", function(e) {
   else if (a === "abXong") { el.disabled = true; api("abXong", [v], function(ds) { Q.ab = ds; veCho(); }); }
   else if (a === "coThat") { VK.that = !VK.that; try { localStorage.setItem("olia_co_that", VK.that ? "1" : "0"); } catch (er) {} ve(); }
   else if (a === "nhThe") { NH.the = !NH.the; veNhap(); }
+  else if (a === "abXo") { var c = el.closest(".ab-the"); if (c) c.classList.toggle("ab-mo"); }
+  else if (a === "abMoHet") { TB.abMo = !TB.abMo; veCho(); }
   else if (a === "nhAnDone") {
     var dsDone = NH.bang.ds.filter(function(r) { return !r.an && TRANG_THAI_OK(r.tt) === "Done"; });
     if (!dsDone.length) return toast("Không có dòng Done nào đang hiện");
