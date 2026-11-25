@@ -502,6 +502,8 @@ html,body{min-height:100%}body{min-height:100vh}
 function OLIA_PHIEN() {   // ưu tiên link 1 thiết bị (?lk=...), không thì mã phiên đăng nhập Google
   var k = "";
   try {
+    var nv = /[?&]v=nv(&|$)/.test(location.search) && location.search.match(/[?&]key=([^&#]+)/);   // trang dọn phòng nhân viên: mã nhân viên trên link
+    if (nv) return decodeURIComponent(nv[1]);
     var m = location.search.match(/[?&]lk=([\w-]{8,})/);
     if (m) { localStorage.setItem("olia_lk", m[1]); history.replaceState(null, "", location.pathname); }
     var lk = localStorage.getItem("olia_lk"), may = localStorage.getItem("olia_may");
@@ -538,7 +540,7 @@ function veDangNhapGH(loi) {
 }
 </script>
 <script>
-var KEY = OLIA_PHIEN(), VAI_URL = "ql";
+var KEY = OLIA_PHIEN(), VAI_URL = /[?&]v=nv\b/.test(location.search) ? "nv" : "ql";
 var Q = { an: {}, d: null, tab: "", tu: "", soNgay: 63, zoom: window.innerWidth < 700 ? 7 : 14, lich: null, chon: null, dang: false };
 /* timeline cuộn vô tận: TL.den = ngày cần cuộn tới sau khi vẽ, TL.dang = đang tải thêm */
 var TL = { den: "", dang: false, colW: 76, keo: null, daKeo: false };
