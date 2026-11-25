@@ -391,6 +391,7 @@ html,body{min-height:100%}body{min-height:100vh}
 .the.keep .tt{background:#fdf0d5;color:#8a5a00}.the.done .tt{background:#eee;color:#666}.the.huy{opacity:.55;text-decoration:line-through}.the.an{opacity:.45}
 .nh-dt td,.nh-dt th{padding:4px 3px!important;vertical-align:middle;white-space:nowrap}.nh-dt th div{line-height:1.25}.nh-dt td.o2 div+div{border-top:1px dashed rgba(0,0,0,.12);margin-top:2px;padding-top:2px}.nh-dt div.sua{min-height:15px;cursor:pointer}.nh-dt td>div[data-j="16"]{white-space:normal;min-width:60px;max-width:110px;line-height:1.25}.nh-pc td>div[data-j="16"]{max-width:200px}.nh-dt .nh-tac{line-height:1.1}.nh-dt .nh-tac button{padding:1px 2px}.nh-dt .nh-tac svg{width:13px;height:13px}
 .tim-nut{display:none}
+.nh-dt .oi.co-giam{opacity:1!important;color:#a35a10}.nh-dt .oi.co-giam path{stroke-width:2.6}
 .nh-dt td.o-mota,.nh-dt th.o-mota{width:auto!important;min-width:90px}.nh-dt td.o-mota>div{max-width:none!important;white-space:normal!important;line-height:1.3}
 .nh-dt{width:auto!important;min-width:100%!important;table-layout:auto!important}.nh-dt td,.nh-dt th{width:1%}
 .nh-dt div[data-j="12"]:has(>.oi){min-height:40px;box-sizing:border-box;border:1.5px solid rgba(0,0,0,.45)!important;border-radius:6px!important;align-items:center}.nh-dt div[data-j="12"] .oi svg{width:1.35em!important;height:1.35em!important}
@@ -1056,7 +1057,7 @@ function bangDT(b, ds, mo, dt) {
   var oj = function(r, j) {
     var x = r.o[j], st = (r.chu[j] && r.chu[j] !== "#000000" ? "color:" + r.chu[j] + ";" : "") + (r.dam[j] ? "font-weight:700;" : "");
     var daCoc = j === 20 && Number(String(x || "").replace(/[^\d]/g, "")) > 0;   // đã cọc: số tiền cọc in đậm
-    return '<div class="' + (so[j] ? "num " : giua[j] ? "giua " : "") + (daCoc ? "da-coc " : "") + (r.ct[j] ? "ct" : "sua") + '" data-dong="' + r.dong + '" data-j="' + j + '"' + (st ? ' style="' + st + '"' : "") + ' title="' + esc(b.tieuDe[j] + ": " + x) + '">' + (ICON_O[j] ? '<i class="oi' + (String(x == null ? "" : x).trim() ? "" : " rong") + '">' + icn(ICON_O[j], 12) + "</i><span>" + oDT(j, x, dt) + "</span>" : oDT(j, x, dt)) + "</div>";
+    return '<div class="' + (so[j] ? "num " : giua[j] ? "giua " : "") + (daCoc ? "da-coc " : "") + (r.ct[j] ? "ct" : "sua") + '" data-dong="' + r.dong + '" data-j="' + j + '"' + (st ? ' style="' + st + '"' : "") + ' title="' + esc(b.tieuDe[j] + ": " + x) + '">' + (ICON_O[j] ? '<i class="oi' + (String(x == null ? "" : x).trim() || (j === 7 && String(r.o[8] || "").trim()) ? (j === 7 ? " co-giam" : "") : " rong") + '">' + icn(ICON_O[j], 12) + "</i><span>" + oDT(j, x, dt) + "</span>" : oDT(j, x, dt)) + "</div>";
   };
   return '<div class="nh-cuon vk"><table class="nh-b nh-s nh-dt' + (dt ? "" : " nh-pc") + '"><thead><tr><th></th>' + (DT_BAT.sua ? "<th></th>" : "") +
     NHOM.map(function(g) { if (g[0] === "thue") return '<th><span class="th-i" title="Đã nhập thuế lần 1 / lần 2 — tích để ghi sổ thuế">' + icn("thue2", 15) + "</span></th>"; if (g[0] === 19) return '<th><div class="hdg"><div class="hd-v">' + thBK(b.tieuDe[19]) + "</div><div><div>" + thBK(b.tieuDe[20]) + "</div><div>" + thBK(b.tieuDe[21]) + "</div></div></div></th>"; return "<th" + (g[0] === 16 ? ' class="o-mota"' : "") + ">" + g.map(function(j) { return "<div>" + thBK(b.tieuDe[j]) + "</div>"; }).join("") + "</th>"; }).join("") + "</tr></thead><tbody>" +
