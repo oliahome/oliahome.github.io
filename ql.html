@@ -391,6 +391,7 @@ html,body{min-height:100%}body{min-height:100vh}
 .the.keep .tt{background:#fdf0d5;color:#8a5a00}.the.done .tt{background:#eee;color:#666}.the.huy{opacity:.55;text-decoration:line-through}.the.an{opacity:.45}
 .nh-dt td,.nh-dt th{padding:4px 3px!important;vertical-align:middle;white-space:nowrap}.nh-dt th div{line-height:1.25}.nh-dt td.o2 div+div{border-top:1px dashed rgba(0,0,0,.12);margin-top:2px;padding-top:2px}.nh-dt div.sua{min-height:15px;cursor:pointer}.nh-dt td>div[data-j="16"]{white-space:normal;min-width:60px;max-width:110px;line-height:1.25}.nh-pc td>div[data-j="16"]{max-width:200px}.nh-dt .nh-tac{line-height:1.1}.nh-dt .nh-tac button{padding:1px 2px}.nh-dt .nh-tac svg{width:13px;height:13px}
 .tim-nut{display:none}
+.lk-tb{background:#f6f3ec;border:1px solid #e8e0d0;border-radius:8px;padding:6px 9px;margin:6px 0;line-height:1.55;word-break:break-word}
 .bk.dang-o{animation:dangO 2.4s ease-in-out infinite}@keyframes dangO{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0),0 1px 3px rgba(0,0,0,.15)}50%{box-shadow:0 0 0 3px rgba(255,214,120,.55),0 0 10px rgba(255,190,80,.45)}}@media (prefers-reduced-motion:reduce){.bk.dang-o{animation:none}}
 .lk-ds-ck{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.lk-ck{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:12.5px;cursor:pointer;background:#fff}.lk-ck input{accent-color:#2f7d4f}.lk-ck:has(input:checked){background:#e7f3ec;border-color:#9fd0b0}.lk-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}.lk-dau{display:flex;justify-content:space-between;align-items:center;gap:8px}.lk-nut{display:flex;flex-wrap:wrap;gap:6px}.lk-nut .xoa{color:#c0392b}
 .dem-tag{font-size:11px!important;font-weight:800!important;padding:2px 5px!important;top:-9px!important;background:#fff!important;color:#3f3a32!important;border:1px solid rgba(0,0,0,.15);box-shadow:0 1px 2px rgba(0,0,0,.12);gap:2px!important}.dem-tag svg{width:11px!important;height:11px!important}.dem-tag path{stroke-width:2.4}
@@ -801,6 +802,7 @@ function batDau() {
     daVe = true;
     if (moi && !chay) {
       chay = true;
+      if (d.lk) guiTbLk();   // link 1 thiết bị: gửi thông tin máy cho chủ xem
       if (d.vai !== "nv") setTimeout(function() {   // tải trước ngầm Sổ booking, Thu chi, Thuế tháng này -> bấm sang tab là có ngay
         var th0 = d.homNay.slice(0, 7);
         apiNhanh("bangSheet", [th0, NH.theo], function(bs) { if (!NH.bang || NH.bang.thang === bs.thang) { NH.bang = bs; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); } }, function() {});
@@ -2307,6 +2309,27 @@ var LKQ = { ds: null };
 function tabDauLk(q) { var m = ["tl", "don", "so", "cho", "thue", "thuchi", "chat"].filter(function(x) { return q.indexOf(x) >= 0; })[0] || "tl"; if (m === "so") { NH.che = "ds"; return "nhap"; } return m; }
 function linkLk(ma) { return "https://oliahome.github.io/ql?lk=" + ma; }
 function copyLink(ma) { var u = linkLk(ma); (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function() { toast("📋 Đã copy link — gửi cho người dùng, mở lần đầu trên thiết bị nào thì chỉ thiết bị đó dùng được"); }, function() { prompt("Copy link:", u); }); }
+/** Link 1 thiết bị: thu dòng máy, hệ điều hành, trình duyệt, màn hình, IP rồi gửi máy chủ (trình duyệt không cho đọc MAC / tên máy đặt riêng) */
+function guiTbLk() {
+  var ua = navigator.userAgent || "", x = { ua: ua, ngonNgu: navigator.language || "", manHinh: screen.width + "×" + screen.height + "@" + (window.devicePixelRatio || 1) + "x" };
+  try { x.muiGio = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  var m;
+  if ((m = ua.match(/iPhone OS ([\d_]+)/))) { x.may = "iPhone"; x.heDH = "iOS " + m[1].replace(/_/g, "."); }
+  else if ((m = ua.match(/iPad.*OS ([\d_]+)/))) { x.may = "iPad"; x.heDH = "iPadOS " + m[1].replace(/_/g, "."); }
+  else if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) { x.may = "iPad"; x.heDH = "iPadOS"; }
+  else if ((m = ua.match(/Android ([\d.]+)(?:;[^;)]*)*?;\s*([^;)]+?)(?:\sBuild[^;)]*)?\)/))) { x.heDH = "Android " + m[1]; x.may = m[2] === "K" ? "Android" : m[2]; }
+  else if ((m = ua.match(/Mac OS X ([\d_]+)/))) { x.may = "Mac"; x.heDH = "macOS " + m[1].replace(/_/g, "."); }
+  else if (/Windows/.test(ua)) { x.may = "PC"; x.heDH = "Windows"; }
+  else x.heDH = navigator.platform || "";
+  x.trinhDuyet = (m = ua.match(/(Edg|OPR|SamsungBrowser|CriOS|FxiOS|Zalo|FBAN|Firefox|Chrome)\/?([\d.]*)/)) ? ({ Edg: "Edge", OPR: "Opera", SamsungBrowser: "Samsung", CriOS: "Chrome", FxiOS: "Firefox", FBAN: "Facebook" }[m[1]] || m[1]) + " " + m[2].split(".")[0]
+    : (m = ua.match(/Version\/([\d.]+).*Safari/)) ? "Safari " + m[1].split(".")[0] : "";
+  var hc = navigator.userAgentData && navigator.userAgentData.getHighEntropyValues ? navigator.userAgentData.getHighEntropyValues(["model", "platform", "platformVersion"]).then(function(h) {
+    if (h.model) x.may = h.model; if (h.platform === "Android" && h.platformVersion) x.heDH = "Android " + h.platformVersion.split(".")[0];
+    if (h.platform === "Windows" && h.platformVersion) x.heDH = parseInt(h.platformVersion, 10) >= 13 ? "Windows 11" : "Windows 10";
+  }).catch(function() {}) : Promise.resolve();
+  var ip = fetch("https://api.ipify.org?format=json").then(function(r) { return r.json(); }).then(function(j) { x.ip = j.ip || ""; }).catch(function() {});
+  Promise.all([hc, ip]).then(function() { api("lkTb", [x], function() {}, function() {}); });
+}
 function moLink() {
   var dr = $("#drawer");
   if (!LKQ.ds) { dr.innerHTML = '<div class="dr"><div class="loading">Đang tải link…</div></div>'; dr.hidden = false; return api("lkDs", [], function(d) { LKQ.ds = d; moLink(); }); }
@@ -2318,6 +2341,9 @@ function moLink() {
     '<div class="lk-list">' + (LKQ.ds.length ? LKQ.ds.map(function(l) {
       return '<div class="lk-the sec"><div class="lk-dau"><b>' + esc(l.ten) + '</b><span class="pill ' + (l.may ? "Book" : "Keep") + '">' + (l.may ? "📱 Đã gắn thiết bị" : "Chưa dùng") + "</span></div>" +
         '<div class="sm muted">Tạo ' + tbLuc(l.tao) + " trước" + (l.dung ? " · dùng gần nhất " + tbLuc(l.dung) + " trước" : "") + "</div>" +
+        (l.tb ? '<div class="lk-tb sm">📱 <b>' + esc(l.tb.may || "Thiết bị") + "</b>" + [l.tb.heDH, l.tb.trinhDuyet, l.tb.manHinh].filter(Boolean).map(function(v) { return " · " + esc(v); }).join("") +
+          (l.tb.ip ? '<br>🌐 IP <b>' + esc(l.tb.ip) + "</b>" + (l.ips && l.ips.length > 1 ? ' <span class="muted">(trước: ' + l.ips.slice(1).map(esc).join(", ") + ")</span>" : "") : "") +
+          '<br><span class="muted">🕘 ' + esc(l.tb.muiGio || "") + (l.tb.ngonNgu ? " · " + esc(l.tb.ngonNgu) : "") + " · cập nhật " + tbLuc(l.tb.luc) + " trước</span></div>" : "") +
         '<div class="lk-ds-ck">' + LK_MUC_TEN.map(function(m) { return ck(m[0], m[1], l.quyen.indexOf(m[0]) >= 0, 'data-q="' + m[0] + '"'); }).join("") + "</div>" +
         '<div class="lk-nut"><button class="btn" data-act="lkCopy" data-v="' + l.ma + '">📋 Copy link</button><button class="btn" data-act="lkLuu" data-v="' + l.ma + '">💾 Lưu quyền</button>' +
         (l.may ? '<button class="btn" data-act="lkGo" data-v="' + l.ma + '">📵 Gỡ thiết bị</button>' : "") + '<button class="btn xoa" data-act="lkXoa" data-v="' + l.ma + '">🗑 Xoá</button></div></div>';
