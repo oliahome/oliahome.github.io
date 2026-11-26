@@ -362,6 +362,12 @@ footer.ft .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-
 .bay{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 @media (max-width:560px){.chat-p{position:fixed;inset:auto 8px calc(84px + env(safe-area-inset-bottom,0px)) 8px;width:auto;height:min(70vh,560px)}}
 .ag-p{margin:-6px 0 10px}
+.bd-khung{position:relative}
+.bd-loc{position:relative;z-index:4;display:flex;gap:6px;flex-wrap:wrap;padding:9px 10px;background:linear-gradient(#f7f1e2,#f1e9d6);border-bottom:1px solid #e3d6bb}.bd-chip{pointer-events:auto;border:1px solid rgba(120,95,60,.3);background:rgba(251,246,236,.92);backdrop-filter:blur(3px);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;color:#4a3b2c;cursor:pointer;box-shadow:0 2px 6px rgba(70,50,25,.12)}.bd-chip[aria-pressed="true"]{background:#3b2a1c;color:#fff;border-color:#3b2a1c}.bd-chip:hover{border-color:#a9854f}
+.bd-noi{position:absolute;z-index:5;background:#fbf6ec;border:1px solid #d9c6a3;border-radius:14px;box-shadow:0 10px 30px rgba(70,50,25,.22);padding:10px 12px;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;font-size:13px}
+.bd-noi.hien{opacity:1;pointer-events:auto;transform:none}
+.bd-noi-d{display:flex;gap:9px;align-items:center;margin-bottom:4px}.bd-noi-d img{width:42px;height:42px;border-radius:50%;object-fit:cover;flex:none;border:1px solid #e6d8bd}.bd-noi-ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#efe3cc;font-size:22px;flex:none}
+.bd-noi-d>div{display:flex;flex-direction:column;min-width:0}.bd-noi-t{font-size:15px;line-height:1.25}.bd-noi p{margin:3px 0 0}.bd-noi-n{display:flex;gap:6px;margin-top:8px}.bd-noi .ag-b{flex:1;font-size:12.5px;padding:5px 8px;text-decoration:none;background:#fff!important;color:#3b2a0c!important;border:1px solid #e0d4bd!important;box-shadow:none!important;border-radius:9px;text-align:center;font-weight:600}
 .bd-svg text.bd-chu,.bd-svg text.bd-olia-t,.bd-svg text.bd-ten,.bd-svg text.bd-tt,.bd-svg text.bd-ghi{font-family:"Ms Madi","Sacramento",cursive!important;font-weight:400!important}.bd-svg .bd-chu{font-size:25px!important;fill:#4a3b2c!important}.bd-svg .bd-chu.bd-ho{font-size:30px!important;fill:#3d6574!important}.bd-svg .bd-olia-t{font-size:32px!important;fill:#2b2118!important}.bd-svg .bd-ten{font-size:24px!important;fill:#2b2118!important}.bd-svg .bd-tt{font-size:32px!important;fill:#2b2118!important}.bd-svg .bd-ghi{font-size:19px!important}
 /* 🍜 bố cục bao quát: bản đồ trái · danh sách gọn phải */
 .ag-bo{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:14px;align-items:start}
@@ -1281,7 +1287,7 @@ function banDoQuan(ds) {
       (ngoai ? '<text x="' + x.toFixed(0) + '" y="' + (y > H / 2 ? y - 46 : y + 16) + '" text-anchor="middle" class="bd-km">' + km.toFixed(0) + " km</text>" : "") + nhan + "</g>";
   }).join("");
   return '<div class="bd-khung"><svg viewBox="0 0 ' + W + " " + H + '" class="bd-svg" role="img" aria-label="Bản đồ vẽ tay quanh Olia">' +
-    '<defs><clipPath id="bdTron"><circle cx="0" cy="-25" r="10.5"/></clipPath><filter id="bdNet"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>' +
+    '<defs><clipPath id="bdOlia"><circle cx="' + olia[0].toFixed(0) + '" cy="' + olia[1].toFixed(0) + '" r="15"/></clipPath><clipPath id="bdTron"><circle cx="0" cy="-25" r="10.5"/></clipPath><filter id="bdNet"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>' +
     '<filter id="bdMau" x="-25%" y="-25%" width="150%" height="150%"><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="4" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="26" result="d"/><feGaussianBlur in="d" stdDeviation="2.2" result="b"/><feComposite in="b" in2="d" operator="arithmetic" k2=".6" k3=".55"/></filter>' +
     '<filter id="bdMau2" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="3"/></filter>' +
     '<filter id="bdGiay"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="2"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .42  0 0 0 0 .3  0 0 0 .11 0"/></filter>' +
@@ -1302,7 +1308,7 @@ function banDoQuan(ds) {
     duong([[11.9434, 108.4372], [11.9425, 108.4420], [11.9410, 108.4470], [11.9405, 108.4520], [11.9416, 108.4544]], 1) + duong([[11.9410, 108.4462], [11.9360, 108.4445], [11.9300, 108.4470]]) +
     duong([[11.9434, 108.4372], [11.9415, 108.4310], [11.9370, 108.4250]]) + duong([[11.9440, 108.4532], [11.9432, 108.4552], [11.9416, 108.4544]]) + duong([[11.9478, 108.4416], [11.9494, 108.4470], [11.9482, 108.4565]]) +
     chu([11.9446, 108.4466], "Hồ Xuân Hương", -46, 34, "bd-ho") + chu([11.9434, 108.4372], "chợ Đà Lạt", -30, 30) + chu([11.9416, 108.4544], "ga Đà Lạt", -70, 26) +
-    '<g class="bd-olia"><circle cx="' + olia[0].toFixed(0) + '" cy="' + olia[1].toFixed(0) + '" r="26" fill="#56705a" opacity=".75" filter="url(#bdMau)"/><circle cx="' + olia[0].toFixed(0) + '" cy="' + olia[1].toFixed(0) + '" r="15" fill="#fbf6ec"/><text x="' + olia[0].toFixed(0) + '" y="' + (olia[1] + 6).toFixed(0) + '" text-anchor="middle" class="bd-ic">🏡</text><text x="' + (olia[0] + 32).toFixed(0) + '" y="' + (olia[1] + 8).toFixed(0) + '" class="bd-olia-t">Olia Home</text></g>' +
+    '<g class="bd-olia"><circle cx="' + olia[0].toFixed(0) + '" cy="' + olia[1].toFixed(0) + '" r="26" fill="#56705a" opacity=".75" filter="url(#bdMau)"/><circle cx="' + olia[0].toFixed(0) + '" cy="' + olia[1].toFixed(0) + '" r="15" fill="#fbf6ec"/>' + ((document.getElementById("logoImg") || {}).src ? '<image href="' + document.getElementById("logoImg").src + '" x="' + (olia[0] - 15).toFixed(0) + '" y="' + (olia[1] - 15).toFixed(0) + '" width="30" height="30" clip-path="url(#bdOlia)"/>' : '<text x="' + olia[0].toFixed(0) + '" y="' + (olia[1] + 6).toFixed(0) + '" text-anchor="middle" class="bd-ic">🏡</text>') + '<text x="' + (olia[0] + 32).toFixed(0) + '" y="' + (olia[1] + 8).toFixed(0) + '" class="bd-olia-t">Olia Home</text></g>' +
     '<g transform="translate(' + (W - 58) + ' 66)" class="bd-la" opacity=".7"><circle r="26" fill="none" stroke="#8b7558" stroke-width="1.2" stroke-dasharray="3 4"/><path d="M0 -30 L6 0 L0 30 L-6 0Z" fill="#a9654a" opacity=".6"/><path d="M0 -30 L6 0 L-6 0Z" fill="#7a4a35" opacity=".7"/><text y="-36" text-anchor="middle" class="bd-chu">B</text></g>' +
     '<g class="bd-tieude"><rect x="300" y="' + (H - 62) + '" width="208" height="42" rx="10" fill="#fbf6ec" opacity=".85" stroke="#b9a382" stroke-width="1.2" filter="url(#bdNet)"/><text x="314" y="' + (H - 34) + '" class="bd-tt">Đà Lạt quanh Olia</text></g>' +
     '<rect width="' + W + '" height="' + H + '" fill="url(#bdNang)" pointer-events="none"/>' + ghim + '<rect width="' + W + '" height="' + H + '" fill="url(#bdVien)" pointer-events="none"/><text x="16" y="' + (H - 12) + '" class="bd-ghi">vẽ tay · vị trí gần đúng · bấm icon để xem tên</text></svg></div>';
@@ -1312,15 +1318,49 @@ function thanhDG(q) {
   return '<a class="ag-dg" href="' + esc(quanMap(q)) + '" target="_blank" rel="noopener" title="Đánh giá Google"><span class="ag-dg-so">' + q.diem.toFixed(1) + '</span><span class="ag-dg-thanh"><i style="width:' + (q.diem / 5 * 100).toFixed(0) + '%"></i></span><span class="ag-dg-n">' + (q.soDG ? (q.soDG >= 1000 ? (q.soDG / 1000).toFixed(1).replace(".0", "") + "k" : q.soDG) + " đánh giá" : "Google") + "</span></a>";
 }
 /** Cột danh sách quán cao đúng bằng bản đồ (máy tính) */
-function canCaoQuan() { requestAnimationFrame(function() { var k = document.querySelector(".ag-bo .bd-khung"), l = document.querySelector(".ag-bo .ag-ds"); if (k && l) l.style.maxHeight = innerWidth > 860 ? k.offsetHeight + "px" : ""; }); }
+/** Rê chuột / bấm icon trên bản đồ: hiện thẻ thông tin quán nổi ngay cạnh icon */
+function theQuanNoi(i, g, ghim) {
+  var k = document.querySelector(".ag-bo .bd-khung"), q = (S.d.quan || [])[i]; if (!k || !q) return;
+  var o = k.querySelector(".bd-noi"); if (!o) { o = document.createElement("div"); o.className = "bd-noi"; k.appendChild(o); }
+  var km = q.td && q.td.length > 1 ? kmTu(OLIA_TD, q.td) : 0, ic = QUAN_IC[q.loai] || "📍";
+  o.innerHTML = '<div class="bd-noi-d">' + (q.logo ? '<img src="' + esc(q.logo) + '" alt="" referrerpolicy="no-referrer">' : '<span class="bd-noi-ic">' + ic + "</span>") + '<div><span class="ag-loai">' + esc(q.loai) + (q.tt <= 5 ? ' <b class="ag-hot">⭐ Olia gợi ý</b>' : "") + "</span><b class=\"bd-noi-t\">" + esc(q.ten) + "</b>" +
+    (km ? '<span class="sm muted">' + (km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1).replace(".0", "") + " km") + " từ Olia</span>" : "") + "</div></div>" + thanhDG(q) + (q.moTa ? '<p class="sm">' + esc(q.moTa) + "</p>" : "") + (q.diaChi ? '<p class="sm muted">📍 ' + esc(q.diaChi) + "</p>" : "") +
+    '<div class="bd-noi-n"><button class="btn ag-b" data-act="quanBD" data-v="' + i + '">🗺️ Bản đồ</button><a class="btn ag-b" href="' + esc(quanMap(q)) + '" target="_blank" rel="noopener">⭐ Google</a></div>';
+  var r = g.getBoundingClientRect(), kr = k.getBoundingClientRect(), w = Math.min(280, kr.width - 16);
+  o.style.width = w + "px"; o.classList.add("hien"); o.classList.toggle("ghim", !!ghim);
+  var x = r.left - kr.left + r.width / 2 + 14, y = r.top - kr.top - 6;
+  if (x + w > kr.width - 8) x = r.left - kr.left - w - 10 + r.width / 2; x = Math.max(8, x);
+  var h = o.offsetHeight; y = Math.min(Math.max(8, y - h / 2), kr.height - h - 8);
+  o.style.left = x + "px"; o.style.top = y + "px"; o.dataset.i = i;
+}
+function ganBanDo() {
+  var k = document.querySelector(".ag-bo .bd-khung"); if (!k || k._gan) return; k._gan = 1;
+  var an = function() { var o = k.querySelector(".bd-noi"); if (o && !o.classList.contains("ghim")) o.classList.remove("hien"); };
+  k.addEventListener("mouseover", function(e) { var g = e.target.closest(".bd-g"); if (g) theQuanNoi(Number(g.dataset.v), g, false); });
+  k.addEventListener("mouseout", function(e) { var g = e.target.closest(".bd-g"); if (g && !(e.relatedTarget && (g.contains(e.relatedTarget) || e.relatedTarget.closest(".bd-noi")))) an(); });
+  k.addEventListener("mouseleave", an);
+  k.addEventListener("click", function(e) { if (!e.target.closest(".bd-g") && !e.target.closest(".bd-noi")) { var o = k.querySelector(".bd-noi"); if (o) o.classList.remove("hien", "ghim"); } });
+  if (S.quanMo != null) { var g0 = k.querySelector('.bd-g[data-v="' + S.quanMo + '"]'); if (g0) theQuanNoi(S.quanMo, g0, true); }
+}
+function canCaoQuan() { ganBanDo(); requestAnimationFrame(function() { var k = document.querySelector(".ag-bo .bd-khung"), l = document.querySelector(".ag-bo .ag-ds"); if (k && l) l.style.maxHeight = innerWidth > 860 ? k.offsetHeight + "px" : ""; }); }
 if (!window.__canCaoQuan) { window.__canCaoQuan = 1; addEventListener("resize", canCaoQuan); }
+/** Nhóm lọc trên bản đồ: Cafe / Nướng / Lẩu / Check-in / Món khác */
+var NHOM_IC = { "Cafe": "☕", "Nướng": "🔥", "Lẩu": "🍲", "Check-in": "📸", "Món khác": "🍢" };
+function nhomQuan(q) {
+  var t = String(q.ten || "").toLowerCase(), k = [];
+  if (q.loai === "Cafe" || /cafe|cà phê|coffee/.test(t)) k.push("Cafe");
+  if (/nướng/.test(t)) k.push("Nướng");
+  if (/lẩu/.test(t)) k.push("Lẩu");
+  if (q.loai === "Săn mây · Cảnh" || /check ?-?in/.test(t)) k.push("Check-in");
+  if (!k.length) k.push("Món khác");
+  return k;
+}
 function anGi() {
   var ds = (S.d.quan || []); if (!ds.length) return "";
-  var loai = ["Tất cả"].concat(ds.map(function(q) { return q.loai; }).filter(function(x, i, a) { return a.indexOf(x) === i; }));
-  var chon = S.quanLoc || "Tất cả", xem = ds.filter(function(q) { return chon === "Tất cả" || q.loai === chon; });
+  var loai = ["Tất cả", "Cafe", "Nướng", "Lẩu", "Check-in", "Món khác"].filter(function(x) { return x === "Tất cả" || ds.some(function(q) { return nhomQuan(q).indexOf(x) >= 0; }); });
+  var chon = loai.indexOf(S.quanLoc) >= 0 ? S.quanLoc : "Tất cả", xem = ds.filter(function(q) { return chon === "Tất cả" || nhomQuan(q).indexOf(chon) >= 0; });
   return '<section class="wrap ag" id="anGi"><h2 class="sec-t">🍜 ' + (laEN() ? "Eat, coffee & cloud hunting near Olia" : "Ăn gì · Cafe · Săn mây quanh Olia") + '</h2><p class="sm muted ag-p">' + (laEN() ? "Tap an icon on the map or a card for details, map and Google reviews." : "Bấm icon trên bản đồ hoặc thẻ quán để xem tên, bản đồ và đánh giá Google.") + "</p>" +
-    '<div class="chips ag-chips" role="toolbar">' + loai.map(function(x) { return '<button class="chip" data-act="quanLoc" data-v="' + esc(x) + '" aria-pressed="' + (x === chon) + '">' + (QUAN_IC[x] ? QUAN_IC[x] + " " : "") + esc(x) + "</button>"; }).join("") + "</div>" +
-    '<div class="ag-bo">' + banDoQuan(ds.map(function(q) { return xem.indexOf(q) >= 0 ? q : {}; })) +
+    '<div class="ag-bo">' + banDoQuan(ds.map(function(q) { return xem.indexOf(q) >= 0 ? q : {}; })).replace('<div class="bd-khung">', '<div class="bd-khung"><div class="bd-loc" role="toolbar" aria-label="Lọc quán trên bản đồ">' + loai.map(function(x) { return '<button class="bd-chip" data-act="quanLoc" data-v="' + esc(x) + '" aria-pressed="' + (x === chon) + '">' + (NHOM_IC[x] ? NHOM_IC[x] + " " : "") + esc(x === "Tất cả" ? "Tất cả · " + ds.length : x + " · " + ds.filter(function(q) { return nhomQuan(q).indexOf(x) >= 0; }).length) + "</button>"; }).join("") + "</div>") +
     '<div class="ag-ds">' + xem.map(function(q) {
       var i = ds.indexOf(q), mo = S.quanMo === i, ic = QUAN_IC[q.loai] || "📍", km = q.td && q.td.length > 1 ? kmTu(OLIA_TD, q.td) : 0;
       var dau = q.logo ? '<img class="ag-logo" src="' + esc(q.logo) + '" alt="Logo ' + esc(q.ten) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : q.anh ? '<img src="' + esc(q.anh) + '" alt="' + esc(q.ten) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'ag-ko\');this.remove()">' : "";
