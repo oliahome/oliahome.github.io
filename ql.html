@@ -826,7 +826,7 @@ function batDau() {
       if (d.lk) guiTbLk();   // link 1 thiết bị: gửi thông tin máy cho chủ xem
       if (d.vai !== "nv") setTimeout(function() {   // tải trước ngầm Sổ booking, Thu chi, Thuế tháng này -> bấm sang tab là có ngay
         var th0 = d.homNay.slice(0, 7);
-        apiNhanh("bangSheet", [th0, NH.theo], function(bs) { if (!NH.bang || NH.bang.thang === bs.thang) { NH.bang = bs; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); } }, function() {});
+        apiNhanh("bangSheet", [NH.thang || th0, NH.theo], function(bs) { if (!NH.bang || NH.bang.thang === bs.thang) { NH.bang = bs; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); } }, function() {});
         setTimeout(function() { apiNhanh("thuChi", [th0], function(x) { if (!TC.dl || TC.dl.thang === x.thang) { TC.dl = x; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) giuOVe(); } }, function() {}); }, 800);
         setTimeout(function() { apiNhanh("thue", [th0], function(x) { if (!TH.dl || TH.dl.thang === x.thang) { TH.dl = x; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(); } }, function() {}); }, 1600);
       }, 900);
@@ -925,7 +925,7 @@ var DT_BAT = (function() { try { return JSON.parse(localStorage.getItem("olia_dt
 if (DT_BAT.giam == null) DT_BAT.giam = true;
 var NH_SHEET = (function() { try { return localStorage.getItem("olia_nh_sheet") === "1"; } catch (e) { return false; } })();
 var NH_GOP = (function() { try { var v = localStorage.getItem("olia_gop"); return v == null ? 60 : Number(v); } catch (e) { return 60; } })();
-var NH = { anNgay: (function() { try { return localStorage.getItem("olia_an_ngay") || "1"; } catch (e) { return "1"; } })(), dong: [], hen: {}, gop: NH_GOP, bangCu: NH_SHEET, mo: false, che: "nhap", thang: "", theo: "vao", bang: null };   // che: "nhap" | "ds"   // mo: đang xổ cột Tên FB + Phone (mặc định ẩn)
+var NH = { anNgay: (function() { try { return localStorage.getItem("olia_an_ngay") || "1"; } catch (e) { return "1"; } })(), dong: [], hen: {}, gop: NH_GOP, bangCu: NH_SHEET, mo: false, che: "nhap", thang: (function() { try { return localStorage.getItem("olia_nh_xem") === "thang" ? "" : "all"; } catch (e) { return "all"; } })(), theo: "vao", bang: null };   // mặc định xem "Tất cả" như sheet   // che: "nhap" | "ds"   // mo: đang xổ cột Tên FB + Phone (mặc định ẩn)
 try { NH.mo = localStorage.getItem("olia_nh_mo") === "1"; } catch (e) {}
 var NH_COT = [   // [khoá, tiêu đề như sheet, rộng, kiểu]
   ["ten", "Name", 150], ["tenFb", "Tên FB / hiển thị", 140, "", 1], ["agent", "Agent", 100, "ds"], ["sdt", "Phone", 105, "", 1], ["ngayDat", "Booking Date", 78, "ngay"],
@@ -2851,8 +2851,8 @@ document.addEventListener("click", function(e) {
   else if (a === "nhThem") { NH.dong.push(dongNhapMoi(NH.dong[NH.dong.length - 1])); veNhap(); var q = document.querySelectorAll('.nh-n .nh-o[data-k="ten"]'); if (q.length) { q[q.length - 1].focus(); q[q.length - 1].scrollIntoView({ block: "center" }); } }
   else if (a === "nhHuyMoi") { NH.dong = []; veNhap(); }
   else if (a === "nhChe") { NH.che = v; veNhap(); }
-  else if (a === "nhTatCa") { NH.thang = NH.thang === "all" ? NH.thangCu || Q.d.homNay.slice(0, 7) : (NH.thangCu = NH.thang || Q.d.homNay.slice(0, 7), "all"); veNhap(); }
-  else if (a === "nhThang") { var t0 = dk((NH.thang && NH.thang !== "all" ? NH.thang : NH.thangCu || Q.d.homNay.slice(0, 7)) + "-01"); t0.setMonth(t0.getMonth() + Number(v)); NH.thang = kd(t0).slice(0, 7); veNhap(); }
+  else if (a === "nhTatCa") { NH.thang = NH.thang === "all" ? NH.thangCu || Q.d.homNay.slice(0, 7) : (NH.thangCu = NH.thang || Q.d.homNay.slice(0, 7), "all"); try { localStorage.setItem("olia_nh_xem", NH.thang === "all" ? "all" : "thang"); } catch (e) {} veNhap(); }
+  else if (a === "nhThang") { var t0 = dk((NH.thang && NH.thang !== "all" ? NH.thang : NH.thangCu || Q.d.homNay.slice(0, 7)) + "-01"); t0.setMonth(t0.getMonth() + Number(v)); NH.thang = kd(t0).slice(0, 7); try { localStorage.setItem("olia_nh_xem", "thang"); } catch (e) {} veNhap(); }
   else if (a === "nhTheo") { NH.theo = v; veNhap(); }
   else if (a === "nhTai") { NH.bang = null; veNhap(); }
   else if (a === "sdMo") moSuaDong(Number(v));
