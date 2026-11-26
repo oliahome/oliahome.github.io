@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Olia Home · Đặt phòng Đà Lạt</title><link rel="icon" href="https://fonts.gstatic.com/s/e/notoemoji/latest/1f33f/72.png">
   <base target="_top">
   <meta charset="utf-8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -362,6 +361,47 @@ footer.ft .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-
 .chat-lh{align-items:center}.chat-lh small{color:var(--muted,#888)}.chat-lh a svg{width:18px;height:18px;display:block}.chat-lh a{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.chat-lh a .oi{width:1.1em;height:1.1em}.chat-lh a.lh-ic{padding:6px;line-height:0}
 .bay{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 @media (max-width:560px){.chat-p{position:fixed;inset:auto 8px calc(84px + env(safe-area-inset-bottom,0px)) 8px;width:auto;height:min(70vh,560px)}}
+.ag-p{margin:-6px 0 10px}
+.bd-svg text.bd-chu,.bd-svg text.bd-olia-t,.bd-svg text.bd-ten,.bd-svg text.bd-tt,.bd-svg text.bd-ghi{font-family:"Ms Madi","Sacramento",cursive!important;font-weight:400!important}.bd-svg .bd-chu{font-size:25px!important;fill:#4a3b2c!important}.bd-svg .bd-chu.bd-ho{font-size:30px!important;fill:#3d6574!important}.bd-svg .bd-olia-t{font-size:32px!important;fill:#2b2118!important}.bd-svg .bd-ten{font-size:24px!important;fill:#2b2118!important}.bd-svg .bd-tt{font-size:32px!important;fill:#2b2118!important}.bd-svg .bd-ghi{font-size:19px!important}
+/* 🍜 bố cục bao quát: bản đồ trái · danh sách gọn phải */
+.ag-bo{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:14px;align-items:start}
+.ag-bo .bd-khung{margin:0;position:sticky;top:76px}
+.ag-bo .ag-ds{position:relative;display:flex;flex-direction:column;gap:8px;max-height:min(78vh,640px);overflow:auto;padding-right:4px;scrollbar-width:thin}
+.ag-bo .ag-the{flex-direction:row;flex-wrap:wrap;align-items:stretch;border-radius:14px;flex:none}
+.ag-bo .ag-anh,.ag-bo .ag-anh.ag-ko{width:64px;height:auto;min-height:64px;aspect-ratio:auto;flex:none;border-radius:0}
+.ag-bo .ag-anh .ag-ic,.ag-bo .ag-anh.ag-ko .ag-ic{left:50%;top:50%;bottom:auto;transform:translate(-50%,-50%);font-size:24px;background:none}
+.ag-bo .ag-anh img+.ag-ic{display:none}
+.ag-anh.co-logo{background:#fbf6ec}.ag-anh .ag-logo{object-fit:contain;padding:10px;box-sizing:border-box}.ag-bo .ag-anh .ag-logo{padding:6px;border-radius:50%;width:56px;height:56px;margin:4px;object-fit:cover}
+.ag-bo .ag-nd{flex:1;min-width:0;padding:7px 10px 8px;gap:2px}
+.ag-bo .ag-nd h3{font-size:15px;line-height:1.25}
+.ag-bo .ag-nd p.sm{font-size:12.5px}
+.ag-bo .ag-the:not(.mo) .ag-nd p,.ag-bo .ag-the:not(.mo) .ag-nut{display:none}
+.ag-bo .ag-the.mo{box-shadow:0 0 0 2px #c8a36a}
+.ag-bo .ag-map{flex-basis:100%;height:220px}
+@media (max-width:860px){.ag-bo{grid-template-columns:1fr}.ag-bo .bd-khung{position:static}.ag-bo .ag-ds{max-height:none;overflow:visible}}
+
+.bd-khung{border-radius:18px;overflow:hidden;border:1px solid var(--line,#e0d4bd);margin:0 0 14px;background:#f3ecdf;box-shadow:inset 0 0 40px rgba(120,95,60,.12)}
+.bd-svg{display:block;width:100%;height:auto}
+.bd-chu{font-family:var(--hand,"Caveat",cursive);font-size:21px;fill:#6d6150;opacity:.85}.bd-chu.bd-ho{fill:#4f6e6f;font-size:24px}.bd-tt{font-family:var(--hand,"Caveat",cursive);font-size:27px;font-weight:700;fill:#5b4630}.bd-g:focus{outline:none}
+.bd-olia-t{font-family:var(--hand,"Caveat",cursive);font-size:24px;font-weight:700;fill:#3f5641}
+.bd-ic{font-size:15px}.bd-g{cursor:pointer}.bd-g.hot .bd-ic{font-size:17px}.bd-g:hover circle:first-of-type,.bd-g.on circle:first-of-type{opacity:1}
+.bd-ten{font-family:var(--hand,"Caveat",cursive);font-size:20px;font-weight:700;fill:#4b3d2c}.bd-km{font-size:12px;font-weight:700;fill:#6d6150}
+.bd-ghi{font-family:var(--hand,"Caveat",cursive);font-size:16px;fill:#8b7a62;opacity:.7}
+.ag-ten{cursor:pointer;display:inline-flex;align-items:center;gap:5px}.ag-ten:hover{text-decoration:underline dotted;text-underline-offset:3px}.ag-ten-bd{font-size:.8em;opacity:.6}.ag-km{text-transform:none;letter-spacing:0;font-weight:600}
+.ag-dg{display:flex;align-items:center;gap:7px;text-decoration:none;color:inherit;font-size:12.5px;margin:2px 0}
+.ag-dg-so{font-weight:800;color:#8a5a1c;min-width:24px}.ag-dg-thanh{flex:1;max-width:140px;height:7px;border-radius:5px;background:#ece3d2;overflow:hidden}.ag-dg-thanh i{display:block;height:100%;background:linear-gradient(90deg,#d99a3a,#b8722a);border-radius:5px}.ag-dg-n{color:var(--muted,#8a7350)}.ag-chips{margin-bottom:12px}
+.ag-ds{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.ag-the{background:var(--paper,#fff);border:1px solid var(--line,#e8e0d0);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.ag-anh{position:relative;display:block;width:100%;aspect-ratio:16/9;border:0;padding:0;cursor:pointer;background:linear-gradient(135deg,#f4ead6,color-mix(in srgb,var(--m,#b39a6c) 30%,#efe3cc));overflow:hidden}
+.ag-anh img{width:100%;height:100%;object-fit:cover;display:block}
+.ag-ic{position:absolute;left:10px;bottom:8px;font-size:22px;background:rgba(255,255,255,.88);border-radius:12px;padding:2px 7px;line-height:1.3}
+.ag-anh.ag-ko{aspect-ratio:auto;height:64px}.ag-anh.ag-ko .ag-ic{left:50%;top:50%;bottom:auto;transform:translate(-50%,-50%);font-size:30px;background:none}
+.ag-nd{padding:10px 14px 12px;display:flex;flex-direction:column;gap:4px}
+.ag-nd h3{margin:0;font-size:17px}.ag-nd p{margin:0}
+.ag-loai{font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted,#8a7350)}
+.ag-nut{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.ag-the .ag-b{flex:1;font-size:13px;padding:6px 10px;text-decoration:none;background:#fff!important;color:var(--fg,#3b2a0c)!important;border:1px solid var(--line,#e0d4bd)!important;box-shadow:none!important;border-radius:10px;text-align:center;font-weight:600;width:auto}.ag-the .ag-b:hover{border-color:#c8a36a!important}.ag-mxh{display:inline-grid;place-items:center;width:34px;height:32px;border:1px solid var(--line,#e0d4bd);border-radius:10px;background:#fff}.ag-mxh svg{width:18px;height:18px}.ag-hot{margin-left:6px;color:#b06d10;text-transform:none;letter-spacing:0}
+.ag-map{width:100%;height:260px;border:0;display:block;border-top:1px solid var(--line,#e8e0d0)}
+@media (max-width:600px){.ag-ds{grid-template-columns:1fr}.ag-map{height:300px}}
 .kg-dau{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;border:0;background:none;padding:0;text-align:left;cursor:pointer}
 .kg-dau>span:first-child{display:flex;flex-direction:column;gap:4px}
 .kg-nut{flex:none;border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-weight:600;font-size:14px;background:#fff}
@@ -912,15 +952,17 @@ function veDanhSach() {
     '<div class="facts"><a class="fact" href="' + esc(d.cd.banDo) + '" target="_blank" rel="noopener">📍 1,9 km tới chợ</a><span class="fact">🔐 Tự nhận phòng</span><span class="fact">🍳 Bếp chung</span><span class="fact">🚭 Không hút thuốc</span><span class="fact">🐾 Không thú cưng</span></div><div class="mxh" style="margin-top:14px;align-items:center"><button class="btn line" data-act="traCuu" style="width:auto;padding:9px 16px;font-size:14px">🔎 Tra cứu đơn đã đặt</button></div></div>' +
     '<div class="hero-ph' + (yt ? " co-yt" : "") + '">' + ph + "</div></section>";
   h += bangGia();
+  if (d.cd.quanViTri === "dau") h += anGi();
   h += '<div class="wrap"><div class="chips" role="toolbar">' + NHOM_LOC.map(function(x) {
     return '<button class="chip" data-act="loc" data-v="' + x.id + '" aria-pressed="' + (x.id === S.loc) + '">' + x.t + "</button>";
   }).join("") + "</div>";
   h += '<p class="result">' + (coNgay ? soTrong + " phòng còn trống · " + khoangNgay() + " · " + chuKhach() : d.phong.length + " phòng ở Olia · chọn ngày để xem phòng trống") + "</p>";
   h += '<div class="grid">' + ds.map(theThe).join("") + "</div></div>";
+  if (d.cd.quanViTri !== "dau" && d.cd.quanViTri !== "an") h += anGi();
   h += khongGian();
   h += chanTrang();
   $("#app").innerHTML = h;
-  ganCarousel();
+  ganCarousel(); canCaoQuan();
 }
 /* Bảng giá như tin nhắn Olia gửi khách: giá thường = giá xuất hiện nhiều nhất trong Daily Price */
 function giaThuong(id) {
@@ -1210,6 +1252,85 @@ function anhTron() {
   return S.kgTron;
 }
 function anhKG() { var ds = anhTron(); return S.kgKhu ? ds.filter(function(a) { return (a.k || KG_KHU[3][0]) === S.kgKhu; }) : ds; }
+/* 🍜 Ăn gì · Cafe · Săn mây quanh Olia — danh sách chủ sửa ở trang "🍜 Quán gợi ý" trên sheet */
+var QUAN_IC = { "Ăn uống": "🍲", "Ăn vặt": "🍢", "Ăn sáng": "🥖", "Ăn đêm": "🌙", "Cafe": "☕", "Săn mây · Cảnh": "⛰️" };
+var QUAN_MAU = { "Ăn uống": "#a9654a", "Ăn vặt": "#b98f45", "Ăn sáng": "#9c7a52", "Ăn đêm": "#5d6a86", "Cafe": "#7a5b45", "Săn mây · Cảnh": "#5f8579" };
+var OLIA_TD = [11.9533, 108.4238];
+function quanMap(q) { return q.map || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q.ten + (q.diaChi ? ", " + q.diaChi : ", Đà Lạt")); }
+function kmTu(a, b) { var r = Math.PI / 180, x = (b[1] - a[1]) * r * Math.cos((a[0] + b[0]) / 2 * r), y = (b[0] - a[0]) * r; return Math.sqrt(x * x + y * y) * 6371; }
+/* Bản đồ vẽ tay màu nước tông trầm: chỉ hiện icon (ghim giọt nước), bấm vào mới hiện tên */
+function banDoQuan(ds) {
+  var W = 800, H = 560, la0 = 11.957, la1 = 11.930, lo0 = 108.418, lo1 = 108.460;
+  var P = function(td) { return [(td[1] - lo0) / (lo1 - lo0) * W, (la0 - td[0]) / (la0 - la1) * H]; };
+  var dPath = function(pts) { var q = pts.map(P), d = "M" + q[0][0].toFixed(1) + " " + q[0][1].toFixed(1); for (var k = 1; k < q.length; k++) { var a = q[k - 1], b = q[k], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2; d += " Q" + a[0].toFixed(1) + " " + a[1].toFixed(1) + " " + mx.toFixed(1) + " " + my.toFixed(1); } var z = q[q.length - 1]; return d + " L" + z[0].toFixed(1) + " " + z[1].toFixed(1); };
+  var duong = function(pts, lon) { var d = dPath(pts); return '<path d="' + d + '" stroke="#e9dcc4" stroke-width="' + (lon ? 11 : 7) + '" fill="none" stroke-linecap="round" opacity=".9" filter="url(#bdNet)"/><path d="' + d + '" stroke="#8b7558" stroke-width="' + (lon ? 2.2 : 1.4) + '" fill="none" stroke-linecap="round" opacity=".55" filter="url(#bdNet)"' + (lon ? "" : ' stroke-dasharray="6 5"') + "/>"; };
+  var ho = [[11.9478, 108.4416], [11.9474, 108.4452], [11.9456, 108.4489], [11.9436, 108.4530], [11.9417, 108.4529], [11.9433, 108.4486], [11.9451, 108.4445], [11.9462, 108.4415]].map(P).map(function(p) { return p[0].toFixed(0) + "," + p[1].toFixed(0); }).join(" ");
+  var chu = function(td, t, dx, dy, c) { var p = P(td); return '<text x="' + (p[0] + (dx || 0)).toFixed(0) + '" y="' + (p[1] + (dy || 0)).toFixed(0) + '" class="bd-chu' + (c ? " " + c : "") + '">' + t + "</text>"; };
+  var seed = 7, rnd = function() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  var thong = function(cx, cy, n, rx, ry) { var h = ""; for (var k = 0; k < n; k++) { var x = cx + (rnd() - .5) * rx * 2, y = cy + (rnd() - .5) * ry * 2, s = .7 + rnd() * .6; h += '<g transform="translate(' + x.toFixed(0) + " " + y.toFixed(0) + ") scale(" + s.toFixed(2) + ')"><path d="M0 -14 L-6 -3 L-3 -3 L-8 5 L8 5 L3 -3 L6 -3Z" fill="#4f7a45" opacity=".55"/><path d="M0 5 V9" stroke="#6b5a43" stroke-width="1.4" opacity=".5"/></g>'; } return h; };
+  var olia = P(OLIA_TD), sel = S.quanMo;
+  var giot = "M0 0 C-4 -6 -14 -15 -14 -25 A14 14 0 1 1 14 -25 C14 -15 4 -6 0 0Z";
+  var ghim = ds.map(function(q, i) {
+    if (!q.td || q.td.length < 2) return "";
+    var p = P(q.td), ngoai = p[0] < 18 || p[0] > W - 18 || p[1] < 40 || p[1] > H - 10, km = kmTu(OLIA_TD, q.td);
+    var x = Math.min(W - 24, Math.max(24, p[0])), y = Math.min(H - 12, Math.max(44, p[1])), mau = QUAN_MAU[q.loai] || "#7a6a55", on = sel === i, to = q.tt <= 5 ? 1.15 : 1;
+    var rong = Math.min(270, 22 + q.ten.length * 8.2), lx = x + rong + 24 > W ? x - rong - 18 : x + 18;
+    var nhan = on ? '<g class="bd-nhan"><rect x="' + lx.toFixed(0) + '" y="' + (y - 52) + '" rx="10" width="' + rong.toFixed(0) + '" height="34" fill="#fbf6ec" stroke="' + mau + '" stroke-width="1.5" filter="url(#bdNet)"/><text x="' + (lx + 12).toFixed(0) + '" y="' + (y - 29) + '" class="bd-ten">' + esc(q.ten) + "</text></g>" : "";
+    return '<g class="bd-g' + (on ? " on" : "") + '" data-act="quanMo" data-v="' + i + '" role="button" tabindex="0" aria-label="' + esc(q.ten) + '"><title>' + esc(q.ten) + (ngoai ? " · ~" + km.toFixed(0) + " km" : "") + "</title>" +
+      '<g transform="translate(' + x.toFixed(0) + " " + y.toFixed(0) + ") scale(" + (on ? to * 1.15 : to) + ')"><ellipse cx="0" cy="1" rx="7" ry="2.5" fill="#5a4a36" opacity=".18"/><path d="' + giot + '" fill="' + mau + '" opacity=".88" filter="url(#bdMau2)"/><path d="' + giot + '" fill="none" stroke="' + mau + '" stroke-width="1.6" opacity=".55"/><circle cx="0" cy="-25" r="11" fill="#fbf6ec" opacity=".95"/>' + (q.logo ? '<image href="' + esc(q.logo) + '" x="-10.5" y="-35.5" width="21" height="21" preserveAspectRatio="xMidYMid slice" clip-path="url(#bdTron)"/>' : '<text x="0" y="-20.5" text-anchor="middle" class="bd-ic">' + (QUAN_IC[q.loai] || "📍") + "</text>") + "</g>" +
+      (ngoai ? '<text x="' + x.toFixed(0) + '" y="' + (y > H / 2 ? y - 46 : y + 16) + '" text-anchor="middle" class="bd-km">' + km.toFixed(0) + " km</text>" : "") + nhan + "</g>";
+  }).join("");
+  return '<div class="bd-khung"><svg viewBox="0 0 ' + W + " " + H + '" class="bd-svg" role="img" aria-label="Bản đồ vẽ tay quanh Olia">' +
+    '<defs><clipPath id="bdTron"><circle cx="0" cy="-25" r="10.5"/></clipPath><filter id="bdNet"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>' +
+    '<filter id="bdMau" x="-25%" y="-25%" width="150%" height="150%"><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="4" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="26" result="d"/><feGaussianBlur in="d" stdDeviation="2.2" result="b"/><feComposite in="b" in2="d" operator="arithmetic" k2=".6" k3=".55"/></filter>' +
+    '<filter id="bdMau2" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="3"/></filter>' +
+    '<filter id="bdGiay"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="2"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .42  0 0 0 0 .3  0 0 0 .11 0"/></filter>' +
+    '<radialGradient id="bdVien" cx="50%" cy="48%" r="70%"><stop offset="62%" stop-color="#7a6243" stop-opacity="0"/><stop offset="100%" stop-color="#7a6243" stop-opacity=".22"/></radialGradient>' +
+    '<linearGradient id="bdHo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8cc3d6"/><stop offset="1" stop-color="#5f9fb8"/></linearGradient>' +
+    '<linearGradient id="bdTroi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3e2"/><stop offset=".55" stop-color="#f3eedb"/><stop offset="1" stop-color="#eae6cc"/></linearGradient>' +
+    '<radialGradient id="bdNang" cx="78%" cy="8%" r="60%"><stop offset="0" stop-color="#fff3c4" stop-opacity=".75"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient>' +
+    '<filter id="bdMay" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="1.4"/></filter></defs>' +
+    '<rect width="' + W + '" height="' + H + '" fill="url(#bdTroi)"/><rect width="' + W + '" height="' + H + '" filter="url(#bdGiay)"/>' +
+    '<g filter="url(#bdMau)"><ellipse cx="80" cy="480" rx="210" ry="130" fill="#9cc27f" opacity=".55"/><ellipse cx="120" cy="500" rx="120" ry="70" fill="#7aa862" opacity=".35"/><ellipse cx="710" cy="80" rx="220" ry="115" fill="#a9cf8c" opacity=".55"/><ellipse cx="760" cy="60" rx="110" ry="60" fill="#86b56d" opacity=".35"/>' +
+    '<ellipse cx="430" cy="560" rx="290" ry="80" fill="#93bd78" opacity=".5"/><ellipse cx="770" cy="420" rx="120" ry="160" fill="#b0d394" opacity=".5"/><ellipse cx="250" cy="30" rx="190" ry="60" fill="#c4dca4" opacity=".45"/><ellipse cx="40" cy="160" rx="90" ry="120" fill="#b8d79b" opacity=".4"/><ellipse cx="560" cy="300" rx="70" ry="40" fill="#e3d39a" opacity=".35"/></g>' +
+    thong(90, 470, 14, 130, 70) + thong(700, 80, 12, 150, 55) + thong(430, 530, 12, 220, 25) + thong(760, 420, 8, 50, 110) + thong(240, 34, 7, 130, 22) +
+    '<g filter="url(#bdMau)"><polygon points="' + ho + '" fill="url(#bdHo)" opacity=".85"/><polygon points="' + ho + '" fill="none" stroke="#3f7f9a" stroke-width="5" opacity=".3"/></g>' +
+    (function() { var c = P([11.9450, 108.4475]); return '<g stroke="#f4efe4" stroke-width="1.3" fill="none" opacity=".7" stroke-linecap="round"><path d="M' + (c[0] - 40) + " " + (c[1] + 2) + " q10 -5 20 0 t20 0" + '"/><path d="M' + (c[0] + 10) + " " + (c[1] + 16) + " q10 -5 20 0 t20 0" + '"/></g>'; })() +
+    (function() { var nha = [[150, 300], [205, 255], [470, 250], [520, 470], [620, 520], [330, 390], [650, 300], [395, 175], [585, 410], [255, 455]], h = ""; nha.forEach(function(n, k) { var c = ["#c0623f", "#b5533a", "#cf7a4a", "#a95a3c"][k % 4]; h += '<g transform="translate(' + n[0] + " " + n[1] + ')" opacity=".9"><rect x="-7" y="-6" width="14" height="10" fill="#f6efe0" stroke="#8b7558" stroke-width=".8"/><path d="M-9 -5 L0 -13 L9 -5Z" fill="' + c + '"/><rect x="-2" y="-1" width="4" height="5" fill="#7a5a40" opacity=".7"/></g>'; }); return h; })() +
+    '<g filter="url(#bdMay)" opacity=".92">' + [[120, 24, 1.1], [560, 18, 1.3], [760, 230, .9], [30, 330, .8], [690, 535, 1.0]].map(function(m) { return '<g transform="translate(' + m[0] + " " + m[1] + ") scale(" + m[2] + ')"><ellipse cx="0" cy="6" rx="46" ry="10" fill="#c9d8e0" opacity=".55"/><circle cx="-22" cy="0" r="14" fill="#fff"/><circle cx="0" cy="-8" r="19" fill="#fff"/><circle cx="22" cy="-1" r="15" fill="#fff"/><ellipse cx="0" cy="5" rx="40" ry="9" fill="#fff"/></g>'; }).join("") + "</g>" +
+    duong([OLIA_TD, [11.9500, 108.4290], [11.9483, 108.4336], [11.9455, 108.4362], [11.9434, 108.4372]], 1) + duong([[11.9525, 108.4318], [11.9480, 108.4355], [11.9445, 108.4370]]) +
+    duong([[11.9434, 108.4372], [11.9425, 108.4420], [11.9410, 108.4470], [11.9405, 108.4520], [11.9416, 108.4544]], 1) + duong([[11.9410, 108.4462], [11.9360, 108.4445], [11.9300, 108.4470]]) +
+    duong([[11.9434, 108.4372], [11.9415, 108.4310], [11.9370, 108.4250]]) + duong([[11.9440, 108.4532], [11.9432, 108.4552], [11.9416, 108.4544]]) + duong([[11.9478, 108.4416], [11.9494, 108.4470], [11.9482, 108.4565]]) +
+    chu([11.9446, 108.4466], "Hồ Xuân Hương", -46, 34, "bd-ho") + chu([11.9434, 108.4372], "chợ Đà Lạt", -30, 30) + chu([11.9416, 108.4544], "ga Đà Lạt", -70, 26) +
+    '<g class="bd-olia"><circle cx="' + olia[0].toFixed(0) + '" cy="' + olia[1].toFixed(0) + '" r="26" fill="#56705a" opacity=".75" filter="url(#bdMau)"/><circle cx="' + olia[0].toFixed(0) + '" cy="' + olia[1].toFixed(0) + '" r="15" fill="#fbf6ec"/><text x="' + olia[0].toFixed(0) + '" y="' + (olia[1] + 6).toFixed(0) + '" text-anchor="middle" class="bd-ic">🏡</text><text x="' + (olia[0] + 32).toFixed(0) + '" y="' + (olia[1] + 8).toFixed(0) + '" class="bd-olia-t">Olia Home</text></g>' +
+    '<g transform="translate(' + (W - 58) + ' 66)" class="bd-la" opacity=".7"><circle r="26" fill="none" stroke="#8b7558" stroke-width="1.2" stroke-dasharray="3 4"/><path d="M0 -30 L6 0 L0 30 L-6 0Z" fill="#a9654a" opacity=".6"/><path d="M0 -30 L6 0 L-6 0Z" fill="#7a4a35" opacity=".7"/><text y="-36" text-anchor="middle" class="bd-chu">B</text></g>' +
+    '<g class="bd-tieude"><rect x="300" y="' + (H - 62) + '" width="208" height="42" rx="10" fill="#fbf6ec" opacity=".85" stroke="#b9a382" stroke-width="1.2" filter="url(#bdNet)"/><text x="314" y="' + (H - 34) + '" class="bd-tt">Đà Lạt quanh Olia</text></g>' +
+    '<rect width="' + W + '" height="' + H + '" fill="url(#bdNang)" pointer-events="none"/>' + ghim + '<rect width="' + W + '" height="' + H + '" fill="url(#bdVien)" pointer-events="none"/><text x="16" y="' + (H - 12) + '" class="bd-ghi">vẽ tay · vị trí gần đúng · bấm icon để xem tên</text></svg></div>';
+}
+function thanhDG(q) {
+  if (!q.diem) return "";
+  return '<a class="ag-dg" href="' + esc(quanMap(q)) + '" target="_blank" rel="noopener" title="Đánh giá Google"><span class="ag-dg-so">' + q.diem.toFixed(1) + '</span><span class="ag-dg-thanh"><i style="width:' + (q.diem / 5 * 100).toFixed(0) + '%"></i></span><span class="ag-dg-n">' + (q.soDG ? (q.soDG >= 1000 ? (q.soDG / 1000).toFixed(1).replace(".0", "") + "k" : q.soDG) + " đánh giá" : "Google") + "</span></a>";
+}
+/** Cột danh sách quán cao đúng bằng bản đồ (máy tính) */
+function canCaoQuan() { requestAnimationFrame(function() { var k = document.querySelector(".ag-bo .bd-khung"), l = document.querySelector(".ag-bo .ag-ds"); if (k && l) l.style.maxHeight = innerWidth > 860 ? k.offsetHeight + "px" : ""; }); }
+if (!window.__canCaoQuan) { window.__canCaoQuan = 1; addEventListener("resize", canCaoQuan); }
+function anGi() {
+  var ds = (S.d.quan || []); if (!ds.length) return "";
+  var loai = ["Tất cả"].concat(ds.map(function(q) { return q.loai; }).filter(function(x, i, a) { return a.indexOf(x) === i; }));
+  var chon = S.quanLoc || "Tất cả", xem = ds.filter(function(q) { return chon === "Tất cả" || q.loai === chon; });
+  return '<section class="wrap ag" id="anGi"><h2 class="sec-t">🍜 ' + (laEN() ? "Eat, coffee & cloud hunting near Olia" : "Ăn gì · Cafe · Săn mây quanh Olia") + '</h2><p class="sm muted ag-p">' + (laEN() ? "Tap an icon on the map or a card for details, map and Google reviews." : "Bấm icon trên bản đồ hoặc thẻ quán để xem tên, bản đồ và đánh giá Google.") + "</p>" +
+    '<div class="chips ag-chips" role="toolbar">' + loai.map(function(x) { return '<button class="chip" data-act="quanLoc" data-v="' + esc(x) + '" aria-pressed="' + (x === chon) + '">' + (QUAN_IC[x] ? QUAN_IC[x] + " " : "") + esc(x) + "</button>"; }).join("") + "</div>" +
+    '<div class="ag-bo">' + banDoQuan(ds.map(function(q) { return xem.indexOf(q) >= 0 ? q : {}; })) +
+    '<div class="ag-ds">' + xem.map(function(q) {
+      var i = ds.indexOf(q), mo = S.quanMo === i, ic = QUAN_IC[q.loai] || "📍", km = q.td && q.td.length > 1 ? kmTu(OLIA_TD, q.td) : 0;
+      var dau = q.logo ? '<img class="ag-logo" src="' + esc(q.logo) + '" alt="Logo ' + esc(q.ten) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : q.anh ? '<img src="' + esc(q.anh) + '" alt="' + esc(q.ten) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'ag-ko\');this.remove()">' : "";
+      return '<article class="ag-the' + (mo ? " mo" : "") + '" id="quan' + i + '"><button class="ag-anh' + (q.anh || q.logo ? "" : " ag-ko") + (q.logo ? " co-logo" : "") + '" data-act="quanMo" data-v="' + i + '" aria-label="Xem bản đồ ' + esc(q.ten) + '" style="--m:' + (QUAN_MAU[q.loai] || "#7a6a55") + '">' + dau + '<span class="ag-ic">' + ic + "</span></button>" +
+        '<div class="ag-nd"><span class="ag-loai">' + esc(q.loai) + (q.tt <= 5 ? ' <b class="ag-hot">⭐ Olia gợi ý</b>' : "") + (km ? ' <span class="ag-km">· ' + (km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1).replace(".0", "") + " km") + " từ Olia</span>" : "") + '</span><h3 class="ag-ten" data-act="quanBD" data-v="' + i + '" title="Bấm để xem bản đồ">' + esc(q.ten) + ' <span class="ag-ten-bd">🗺️</span></h3>' + thanhDG(q) + (q.moTa ? '<p class="sm">' + esc(q.moTa) + "</p>" : "") + (q.diaChi ? '<p class="sm muted">📍 ' + esc(q.diaChi) + "</p>" : "") +
+        '<div class="ag-nut"><button class="btn ag-b" data-act="quanBD" data-v="' + i + '">' + (S.quanBD === i ? "▴ Ẩn bản đồ" : "🗺️ Bản đồ") + '</button><a class="btn ag-b" href="' + esc(quanMap(q)) + '" target="_blank" rel="noopener" title="Ảnh, đánh giá trên Google Maps">⭐ Google</a>' +
+        [[q.fb, LOGO_FB, "Facebook"], [q.tt2, LOGO_TT, "TikTok"], [q.ig, LOGO_IG, "Instagram"]].filter(function(x) { return x[0]; }).map(function(x) { return '<a class="ag-mxh" href="' + esc(x[0]) + '" target="_blank" rel="noopener" title="' + esc(q.ten) + " trên " + x[2] + '" aria-label="' + x[2] + '">' + x[1] + "</a>"; }).join("") + "</div></div>" +
+        (mo && S.quanBD === i ? '<iframe class="ag-map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Bản đồ ' + esc(q.ten) + '" src="https://maps.google.com/maps?q=' + encodeURIComponent(q.td && q.td.length > 1 && !q.diaChi ? q.td.join(",") : q.ten + ", " + (q.diaChi || "Đà Lạt")) + '&z=16&hl=vi&output=embed"></iframe>' : "") + "</article>";
+    }).join("") + "</div></div></section>";
+}
 function khongGian() {
   var tat = S.d.anhChung || [];
   if (!tat.length) return "";
@@ -1690,6 +1811,7 @@ document.addEventListener("click", function(e) {
   else if (a === "ytPhat") { var f = document.createElement("iframe"); f.src = "https://www.youtube-nocookie.com/embed/" + v + "?autoplay=1&rel=0&modestbranding=1&playsinline=1";
     f.title = "Olia Home"; f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true; f.className = "yt-f"; el.replaceWith(f); }
   else if (a === "kgXem") moAnh(Number(v) || 0, anhTron(), "Không gian Olia");
+  else if (a === "quanLoc" || a === "quanMo" || a === "quanBD") { if (a === "quanLoc") { S.quanLoc = v; S.quanMo = null; S.quanBD = null; } else if (a === "quanBD") { var nB = Number(v); S.quanBD = S.quanBD === nB ? null : nB; S.quanMo = nB; } else { S.quanMo = S.quanMo === Number(v) ? null : Number(v); if (S.quanMo !== S.quanBD) S.quanBD = null; } var tuBD = !!(el && el.closest && el.closest(".bd-svg")); var o3 = $("#anGi"); if (o3) { var t3 = document.createElement("div"); t3.innerHTML = anGi(); o3.replaceWith(t3.firstChild); } canCaoQuan(); if (S.quanMo != null) { var c3 = document.getElementById("quan" + S.quanMo), l3 = c3 && c3.parentNode; if (c3) setTimeout(function() { if (l3 && innerWidth > 860 && l3.scrollHeight > l3.clientHeight) l3.scrollTop = c3.offsetTop - l3.offsetTop - 4; else if (tuBD) c3.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, 30); } return; }
   else if (a === "kgMo") { S.kgMo = !S.kgMo; var o2 = $("#kg"); if (o2) { var t2 = document.createElement("div"); t2.innerHTML = khongGian(); o2.replaceWith(t2.firstChild); } }
   else if (a === "chatMo") { if ($("#chatP").hidden) moChat(); else dongChat(); }
   else if (a === "chatDong") dongChat();

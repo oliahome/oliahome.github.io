@@ -391,6 +391,9 @@ html,body{min-height:100%}body{min-height:100vh}
 .the.keep .tt{background:#fdf0d5;color:#8a5a00}.the.done .tt{background:#eee;color:#666}.the.huy{opacity:.55;text-decoration:line-through}.the.an{opacity:.45}
 .nh-dt td,.nh-dt th{padding:4px 3px!important;vertical-align:middle;white-space:nowrap}.nh-dt th div{line-height:1.25}.nh-dt td.o2 div+div{border-top:1px dashed rgba(0,0,0,.12);margin-top:2px;padding-top:2px}.nh-dt div.sua{min-height:15px;cursor:pointer}.nh-dt td>div[data-j="16"]{white-space:normal;min-width:60px;max-width:110px;line-height:1.25}.nh-pc td>div[data-j="16"]{max-width:200px}.nh-dt .nh-tac{line-height:1.1}.nh-dt .nh-tac button{padding:1px 2px}.nh-dt .nh-tac svg{width:13px;height:13px}
 .tim-nut{display:none}
+.nk-loc{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ddd;border-radius:8px;margin-bottom:8px;font-size:14px}.nk-ngay{display:flex;align-items:center;gap:4px;font-weight:700;font-size:13px;color:#6b5a3e;margin:12px 0 4px;padding-bottom:3px;border-bottom:1px solid #eee5d6}.nk-dong{display:flex;gap:10px;padding:6px 2px;border-bottom:1px dashed #f0e8da}.nk-gio{font-variant-numeric:tabular-nums;font-weight:700;color:#8a7350;min-width:42px;font-size:13px}.nk-nd{flex:1;min-width:0;font-size:14px}.nk-kh{color:#5b4a2e}.nk-ai{display:flex;align-items:center;gap:3px;font-size:12px;color:#8a8f98;margin-top:2px}.nk-ct summary{font-size:11.5px;color:#a08a63;cursor:pointer}.nk-ct code{display:block;font-size:11px;white-space:pre-wrap;word-break:break-all;background:#f8f4ec;padding:4px 6px;border-radius:6px;margin-top:3px}
+.nh-xep{display:inline-flex;align-items:center;gap:4px}.nh-xep svg:last-child{opacity:.55}
+.md-sec h3{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:15px}.md-bat{margin-left:auto;font-size:13px;font-weight:500;display:inline-flex;gap:4px;align-items:center}.md-hang{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0}.md-hang>span{min-width:120px;font-size:14px}.md-o{display:inline-flex;align-items:center;gap:5px;font-size:13px;cursor:pointer}.md-o input{width:34px;height:28px;border:1px solid #ddd;border-radius:6px;padding:0;background:none;cursor:pointer}.md-n{width:52px;padding:4px 6px;border:1px solid #ddd;border-radius:6px;text-align:center}.md-r{display:flex;gap:6px;align-items:center;margin:4px 0;font-size:14px}.md-mau{padding:7px 10px;border-radius:6px;margin:4px 0;font-weight:600;font-size:14px;border:1px solid rgba(0,0,0,.06)}.md-nut{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .tac-trong{display:block;width:16px;height:14px}
 .th-vat{display:inline-flex;flex-direction:column;align-items:center;gap:1px;line-height:1}.th-i .th-vat svg{width:30px!important;height:30px!important}.th-vat b{font-size:11px;font-weight:800;letter-spacing:.6px}
 th .hdg .hd-v .th-i svg{width:40px!important;height:40px!important}
@@ -585,7 +588,7 @@ function toast(t, undo) {
 function laChu() { return Q.d && Q.d.vai === "chu"; }
 
 /* ⚡ tải tức thì: dữ liệu từng tab lưu trên máy, hiện ngay rồi lấy bản mới ngầm; có thao tác ghi thì bỏ bản lưu cũ để không hiện số liệu trước khi sửa */
-var DOC_QL = { khoiDong: 1, lich: 1, bangSheet: 1, thuChi: 1, tongKet: 1, thue: 1, ds: 1, timThue: 1, timKiem: 1, baoMoi: 1, xemDon: 1, xemHoaDon: 1, kiemDoiNgay: 1, phongTrong: 1, fileTT: 1, maDs: 1, giaPhong: 1, chatDs: 1, chatXem: 1, fbTrangThai: 1, baoCaoThue: 1 };
+var DOC_QL = { nhatKy: 1, khoiDong: 1, lich: 1, bangSheet: 1, thuChi: 1, tongKet: 1, thue: 1, ds: 1, timThue: 1, timKiem: 1, baoMoi: 1, xemDon: 1, xemHoaDon: 1, kiemDoiNgay: 1, phongTrong: 1, fileTT: 1, maDs: 1, giaPhong: 1, chatDs: 1, chatXem: 1, fbTrangThai: 1, baoCaoThue: 1 };
 function ghiLuc() { try { return Number(localStorage.getItem("olia_ghi") || 0); } catch (e) { return 0; } }
 function luuBan(k, d) {
   try {
@@ -923,10 +926,10 @@ function ve() {
 }
 /* ---------- 📝 Nhập nhanh: bảng giống sheet booking (mỗi dòng 1 đơn, Tab sang ô kế, Enter xuống dòng mới) ---------- */
 var DT_BAT = (function() { try { return JSON.parse(localStorage.getItem("olia_dt_bat") || "{}"); } catch (e) { return {}; } })();   // điện thoại: bật/tắt cột giảm giá, cột sửa
-if (DT_BAT.giam == null) DT_BAT.giam = true;
+if (DT_BAT.giam == null) DT_BAT.giam = true; if (DT_BAT.sua == null) DT_BAT.sua = true;   // cột sửa · highlight · ẩn · xoá mặc định hiện
 var NH_SHEET = (function() { try { return localStorage.getItem("olia_nh_sheet") === "1"; } catch (e) { return false; } })();
 var NH_GOP = (function() { try { var v = localStorage.getItem("olia_gop"); return v == null ? 60 : Number(v); } catch (e) { return 60; } })();
-var NH = { anNgay: (function() { try { return localStorage.getItem("olia_an_ngay") || "1"; } catch (e) { return "1"; } })(), dong: [], hen: {}, gop: NH_GOP, bangCu: NH_SHEET, mo: false, che: "nhap", thang: (function() { try { return localStorage.getItem("olia_nh_xem") === "thang" ? "" : "all"; } catch (e) { return "all"; } })(), theo: "vao", bang: null };   // mặc định xem "Tất cả" như sheet   // che: "nhap" | "ds"   // mo: đang xổ cột Tên FB + Phone (mặc định ẩn)
+var NH = { anNgay: (function() { try { return localStorage.getItem("olia_an_ngay") || "1"; } catch (e) { return "1"; } })(), dong: [], hen: {}, gop: NH_GOP, bangCu: NH_SHEET, mo: false, che: "nhap", xep: (function() { try { return localStorage.getItem("olia_nh_xep") === "in" ? "in" : "dat"; } catch (e) { return "dat"; } })(), thang: (function() { try { return localStorage.getItem("olia_nh_xem") === "thang" ? "" : "all"; } catch (e) { return "all"; } })(), theo: "vao", bang: null };   // mặc định xem "Tất cả" như sheet   // che: "nhap" | "ds"   // mo: đang xổ cột Tên FB + Phone (mặc định ẩn)
 try { NH.mo = localStorage.getItem("olia_nh_mo") === "1"; } catch (e) {}
 var NH_COT = [   // [khoá, tiêu đề như sheet, rộng, kiểu]
   ["ten", "Name", 150], ["tenFb", "Tên FB / hiển thị", 140, "", 1], ["agent", "Agent", 100, "ds"], ["sdt", "Phone", 105, "", 1], ["ngayDat", "Booking Date", 78, "ngay"],
@@ -1016,7 +1019,7 @@ var IC_AN = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
   IC_XOA = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg>';
 /* Danh sách dạng Google Sheet: cột B → W, đúng chữ + màu ô như sheet booking. Bấm vào ô để sửa thẳng (ô công thức khoá) */
 /* 📱 Bảng Booking trên điện thoại: ẩn Dòng / Booking Date / Published room, tiêu đề thành icon nét đồng bộ, tiền gọn theo k */
-var ICN_P = { agent: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
+var ICN_P = { mau: "M12 3a9 9 0 1 0 0 18c1 0 1.6-.8 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1 0-.9.7-1.5 1.6-1.5H16a5 5 0 0 0 5-5c0-4.3-4-7.8-9-7.8zM7.5 12.5h.01M9.5 8h.01M14.5 8h.01M17 12h.01", agent: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
   status: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 12.5l2.7 2.7L16 9.8", code: "M9 4L7 20M17 4l-2 16M4 9h16M3.5 15h16",
   giam: "M3.5 12.5V4.5a1 1 0 0 1 1-1h8l8 8-9 9zM8 8h.01", room: "M3 18V7M3 13h18v5M21 18v-5a3 3 0 0 0-3-3h-7v3M7 11.5h.01",
   vao: "M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M3 12h11M10 8l4 4-4 4", ra: "M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M9 12h12M17 8l4 4-4 4",
@@ -1079,6 +1082,13 @@ function chiTietDT(r, b, ncot) {
   }).join("") + '</div><div class="dt-nut"><button class="btn" data-act="sdMo" data-v="' + r.dong + '">' + icn("mota", 15) + ' Sửa cả dòng</button><button class="btn" data-act="nhAn" data-v="' + r.dong + '">' + (an ? IC_HIEN + " Bỏ ẩn" : IC_AN + " Ẩn dòng") + '</button><button class="btn xoa" data-act="nhXoaDong" data-v="' + r.dong + '">' + IC_XOA + " Xoá</button></div></td></tr>";
 }
 /* gộp khách cùng tên: xếp sát nhau nếu ngày IN cách nhau ≤ NH.gop ngày, ô Invoice gộp 1 (tổng) */
+/** Xếp dòng Sổ booking: "dat" = theo thời gian đặt (thứ tự nhập trên sheet, mặc định) · "in" = theo ngày nhận phòng */
+function xepDs(ds, th) {
+  var a = ds.slice();
+  if (NH.xep === "in") a.sort(function(x, y) { var p = ngayIN(x, th) || "9999", q = ngayIN(y, th) || "9999"; return p < q ? -1 : p > q ? 1 : x.dong - y.dong; });
+  else a.sort(function(x, y) { return x.dong - y.dong; });
+  return a;
+}
 function gopCungTen(ds, th) {
   var ngay = NH.gop | 0; if (!ngay) return ds;
   var k = function(r) { return boDauQL(String(r.o[13] || "")).trim().toLowerCase().replace(/\s+/g, " "); }, dung = {}, kq = [];
@@ -1151,17 +1161,44 @@ function xemGhiChu(r) {
   n.addEventListener("click", function(e) { if (e.target === n || e.target.closest(".x")) dong(); });
   document.addEventListener("keydown", esc1); document.body.appendChild(n);
 }
+/* 🎨 Màu dòng Sổ booking: chủ tự chỉnh trong khung "Màu dòng" (lưu trên máy chủ, mọi máy dùng chung) */
+var MAU_MAC = { hl: "#fbe3b4", hlChu: "#3b2a0c", done: "#d3d8df", doneChu: "#374151", g1: "#b6dfc0", g2: "#cde9d4", g3: "#e4f3e8", gChu: "#14432a", n1: 3, n2: 5, n3: 7, uuTien: "hl", bat: true };
+function md() { return Object.assign({}, MAU_MAC, (Q.d && Q.d.mauDong) || {}); }
 function mauDong(r, th) {
-  var d = ngayIN(r, th), hn = Q.d.homNay, gan = d && d >= hn && d <= cong(hn, bkDT() ? 3 : 7), nen = r.nen.slice(), chu = r.chu.slice();
+  var M = md(), d = ngayIN(r, th), hn = Q.d.homNay, han = Math.max(M.n1, M.n2, M.n3), gan = M.bat && d && d >= hn && d <= cong(hn, han), conNgay = gan ? Math.round((dk(d) - dk(hn)) / 864e5) : 99;
+  var xanh = conNgay <= M.n1 ? M.g1 : conNgay <= M.n2 ? M.g2 : M.g3, nen = r.nen.slice(), chu = r.chu.slice();
   var toi = function(c) { var m = String(c || "").match(/^#([0-9a-f]{6})$/i); if (!m) return false; var n = parseInt(m[1], 16); return (0.299 * (n >> 16) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) < 40; };
-  if (TRANG_THAI_OK(r.tt) === "Done" || nen.some(toi)) return Object.assign({}, r, { nen: nen.map(function() { return "#d3d8df"; }), chu: chu.map(function() { return "#374151"; }), gan: false, xong: true });   // khách Done / nền đen: xám mờ dễ đọc
+  if (TRANG_THAI_OK(r.tt) === "Done" || nen.some(toi)) return Object.assign({}, r, { nen: nen.map(function() { return M.done; }), chu: chu.map(function() { return M.doneChu; }), gan: false, xong: true });   // khách Done / nền đen: xám mờ dễ đọc
   var hl = false;
   nen.forEach(function(c, j) {
-    var low = String(c || "").toLowerCase();
-    if (MAU_SAP[low]) { nen[j] = "#fbe3b4"; chu[j] = "#3b2a0c"; hl = true; return; }   // khách highlight trên sheet (olive) -> vàng đậm dễ đọc
-    if (gan && (!low || low === "#ffffff")) { nen[j] = "#dcefe0"; chu[j] = "#17462a"; }
+    var low = String(c || "").toLowerCase(), laHL = !!MAU_SAP[low];
+    if (laHL) hl = true;
+    if (gan && (!low || low === "#ffffff" || (laHL && M.uuTien === "sap"))) { nen[j] = xanh; chu[j] = M.gChu; return; }   // sắp nhận phòng: gần nhất đậm nhất
+    if (laHL) { nen[j] = M.hl; chu[j] = M.hlChu; }   // khách highlight trên sheet (olive)
   });
   return Object.assign({}, r, { nen: nen, chu: chu, gan: gan, hl: hl });
+}
+/** Khung 🎨 Màu dòng: chọn màu + số ngày, xem trước, lưu cho mọi máy */
+function moMauDong() {
+  var M = md(), dr = $("#drawer");
+  var o = function(k, nhan) { return '<label class="md-o"><input type="color" data-k="' + k + '" value="' + M[k] + '"><span>' + nhan + "</span></label>"; };
+  var so = function(k) { return '<input type="number" class="md-n" data-k="' + k + '" min="0" max="60" value="' + M[k] + '">'; };
+  dr.innerHTML = '<div class="dr md-dr" role="dialog" aria-modal="true"><div style="display:flex;justify-content:space-between;align-items:center"><h2>' + icn("mau", 20) + ' Màu dòng Sổ booking</h2><button class="x" data-act="dong">×</button></div>' +
+    '<p class="sm muted" style="margin:0 0 10px">Màu chỉ hiện trên web, không đổi màu trên Google Sheet (trừ nút ⭐ highlight). Lưu xong mọi máy dùng chung.</p>' +
+    '<div class="sec md-sec"><h3>' + icn("vao", 16) + ' Sắp nhận phòng <label class="md-bat"><input type="checkbox" data-k="bat"' + (M.bat ? " checked" : "") + "> bật</label></h3>" +
+    '<div class="md-hang"><span>Còn ≤ ' + so("n1") + " ngày</span>" + o("g1", "đậm") + '</div><div class="md-hang"><span>Còn ≤ ' + so("n2") + " ngày</span>" + o("g2", "vừa") + '</div><div class="md-hang"><span>Còn ≤ ' + so("n3") + " ngày</span>" + o("g3", "nhạt") + "</div>" +
+    '<div class="md-hang"><span>Màu chữ</span>' + o("gChu", "chữ") + "</div></div>" +
+    '<div class="sec md-sec"><h3>' + icn("sao", 16) + ' Khách highlight (⭐ / tô olive trên sheet)</h3><div class="md-hang"><span>Nền · chữ</span>' + o("hl", "nền") + o("hlChu", "chữ") + "</div></div>" +
+    '<div class="sec md-sec"><h3>' + icn("ttDone", 16) + ' Khách Done</h3><div class="md-hang"><span>Nền · chữ</span>' + o("done", "nền") + o("doneChu", "chữ") + "</div></div>" +
+    '<div class="sec md-sec"><h3>' + icn("canh", 16) + ' Khi khách vừa highlight vừa sắp tới</h3><label class="md-r"><input type="radio" name="mdUu" value="hl"' + (M.uuTien !== "sap" ? " checked" : "") + '> Giữ màu highlight</label><label class="md-r"><input type="radio" name="mdUu" value="sap"' + (M.uuTien === "sap" ? " checked" : "") + "> Ưu tiên màu sắp nhận phòng</label></div>" +
+    '<div class="sec md-sec md-xem"><h3>Xem trước</h3><div id="mdXem"></div><p class="sm muted" style="margin:6px 0 0">Màu khác (đỏ, xám, xanh…) lấy đúng như trên sheet.</p></div>' +
+    '<div class="md-nut"><button class="btn" data-act="mdMacDinh">↺ Mặc định</button><button class="btn pri" data-act="mdLuu">' + icn("luu", 16) + " Lưu cho mọi máy</button></div></div>";
+  dr.hidden = false;
+  var doc = function() { var x = {}; [].forEach.call(dr.querySelectorAll("[data-k]"), function(e) { x[e.dataset.k] = e.type === "checkbox" ? e.checked : e.type === "number" ? Number(e.value) : e.value; }); var u = dr.querySelector('[name="mdUu"]:checked'); x.uuTien = u ? u.value : "hl"; return x; };
+  var xem = function() { var x = Object.assign({}, MAU_MAC, doc()), h = function(n, c, t) { return '<div class="md-mau" style="background:' + n + ";color:" + c + '">' + t + "</div>"; };
+    $("#mdXem").innerHTML = h(x.g1, x.gChu, "Nhận phòng trong " + x.n1 + " ngày") + h(x.g2, x.gChu, "Trong " + x.n2 + " ngày") + h(x.g3, x.gChu, "Trong " + x.n3 + " ngày") + h(x.hl, x.hlChu, "⭐ Khách highlight") + h(x.done, x.doneChu, "Khách Done") + h("#ffffff", "#111", "Khách thường"); };
+  dr.querySelector(".md-dr").addEventListener("input", xem); dr.querySelector(".md-dr").addEventListener("change", xem); xem();
+  moMauDong.doc = doc;
 }
 /** Tải ngầm sẵn tháng trước / tháng sau của Sổ booking (lưu trên máy) -> bấm ◀ ▶ là hiện ngay */
 function taiTruocThang(th) {
@@ -1195,9 +1232,12 @@ function veBangSheet() {
   $("#app").innerHTML = '<div class="nh"><div class="nh-bar"><button class="btn pri" data-act="nhThem">＋ Thêm dòng</button>' +
     '<div class="nh-thang"><button class="btn" data-act="nhThang" data-v="-1" aria-label="Tháng trước">◀</button><b>' + (th === "all" ? "Tất cả" : bkDT() || innerWidth < 500 ? th.slice(5, 7) + "/" + th.slice(0, 4) : tenThang(th)) + '</b><button class="btn" data-act="nhThang" data-v="1" aria-label="Tháng sau">▶</button></div>' +
     '<button class="btn nh-tatca' + (th === "all" ? " on" : "") + '" data-act="nhTatCa" title="Xem tất cả dòng như trên sheet / về xem theo tháng">' + icn("bang", 16) + "<span>" + (th === "all" ? "Theo tháng" : "Tất cả") + "</span></button>" +
+    '<button class="btn nh-xep" data-act="nhXep" title="Đang xếp ' + (NH.xep === "in" ? "theo ngày nhận phòng" : "theo thời gian đặt (thứ tự trên sheet)") + ' · bấm để đổi">' + icn(NH.xep === "in" ? "vao" : "lich", 16) + "<span>" + (NH.xep === "in" ? "Ngày ở" : "Thời gian đặt") + "</span>" + icn("doi", 13) + "</button>" +
+    '<button class="btn bt-i" data-act="moMauDong" title="Màu dòng: chỉnh màu sắp nhận phòng, highlight, Done">' + icn("mau", 17) + "</button>" +
     (bkDT() && !the ? "" : '<button class="btn nh-ht" data-act="hoanTac" title="Hoàn tác (Ctrl+Z)" aria-label="Hoàn tác">↶</button>') + (the || bkDT() ? "" : nutCoThat()) +
     (window.innerWidth < 700 && the ? '<button class="btn" data-act="nhThe">📋 Bảng</button>' : "") +
-    (bkDT() && !the ? '<button class="btn bt-i' + (DT_BAT.giam ? " on" : "") + '" data-act="dtBat" data-v="giam" aria-pressed="' + !!DT_BAT.giam + '" title="Bật / tắt cột giảm giá">' + icn("giam", 17) + '</button><button class="btn bt-i' + (DT_BAT.sua ? " on" : "") + '" data-act="dtBat" data-v="sua" aria-pressed="' + !!DT_BAT.sua + '" title="Bật / tắt cột sửa · ẩn · xoá">' + icn("mota", 17) + "</button>" : "") +
+    (bkDT() && !the ? '<button class="btn bt-i' + (DT_BAT.giam ? " on" : "") + '" data-act="dtBat" data-v="giam" aria-pressed="' + !!DT_BAT.giam + '" title="Bật / tắt cột giảm giá">' + icn("giam", 17) + "</button>" : "") +
+    (the ? "" : '<button class="btn bt-i' + (DT_BAT.sua ? " on" : "") + '" data-act="dtBat" data-v="sua" aria-pressed="' + !!DT_BAT.sua + '" title="Bật / tắt cột sửa · highlight · ẩn · xoá">' + icn("mota", 17) + "</button>") +
     (the ? "" : '<button class="btn bt-i on" data-act="dtKieu" title="' + (bkDT() ? "Đang xem kiểu điện thoại · bấm để xem kiểu iPad / máy tính" : "Đang xem kiểu iPad / máy tính · bấm để xem kiểu điện thoại") + '">' + icn(bkDT() ? "dt" : "tab", 17) + "</button>") +
     (the || bkDT() ? "" : (function() { var n = ds.filter(function(r) { return !r.an && TRANG_THAI_OK(r.tt) === "Done"; }).length; return n ? '<button class="btn bt-i bt-done" data-act="nhAnDone" title="Ẩn trong sheet ' + n + ' dòng đã Done (chỉ dòng Done)">' + icn("an", 17) + "<b>" + n + "</b></button>" : ""; })()) +
     '<button class="btn nh-them" data-act="nhPhu" aria-expanded="' + !!NH.moPhu + '" aria-label="Tuỳ chọn khác">⋯</button>' +
@@ -1208,7 +1248,7 @@ function veBangSheet() {
     (soAn ? '<button class="btn" data-act="nhHienAn">' + (NH.hienAn ? "🙈 Giấu " : "👁 Hiện ") + soAn + " dòng ẩn</button>" : "") +
     '<span class="muted sm nh-goiy">' + ds.length + " dòng · bấm vào ô để sửa (Enter lưu, Esc huỷ)</span></div></div>" + htmlNhap() +
     (the ? '<div class="the-ds">' + (ds.length ? ds.map(theBooking).join("") : '<p class="muted" style="text-align:center">Chưa có đơn nào trong tháng này.</p>') + "</div></div>" :
-    !NH.bangCu ? bangDT(b, gopCungTen(ds, thx), NH.mo, bkDT()) + "</div>" :
+    !NH.bangCu ? bangDT(b, gopCungTen(xepDs(ds, thx), thx), NH.mo, bkDT()) + "</div>" :
     '<div class="nh-cuon vk"><table class="nh-b nh-s" style="width:' + cot.reduce(function(s, j) { return s + w[j]; }, 46 + 88) + 'px"><colgroup><col style="width:46px"><col style="width:88px">' + cot.map(function(j) { return '<col style="width:' + w[j] + 'px">'; }).join("") + "</colgroup>" +
     "<thead><tr>" + (bkDT() && !NH.bangCu ? "" : "<th>Dòng</th>") + "<th></th>" + cot.map(function(j) { return "<th>" + (NH.bangCu ? esc(b.tieuDe[j]) : thBK(b.tieuDe[j])) + "</th>"; }).join("") + "</tr></thead><tbody>" +
     (ds.length ? ds.map(function(r) {
@@ -2388,6 +2428,25 @@ function guiTbLk() {
   var ip = fetch("https://api.ipify.org?format=json").then(function(r) { return r.json(); }).then(function(j) { x.ip = j.ip || ""; }).catch(function() {});
   Promise.all([hc, ip]).then(function() { api("lkTb", [x], function() {}, function() {}); });
 }
+/** 📝 Nhật ký thao tác: xem lại mọi thao tác ghi từ web (lúc, ai, làm gì, khách) — dữ liệu ở trang "📝 Nhật ký" trên sheet */
+var NKQ = { ds: null, loc: "" };
+function moNhatKy() {
+  var dr = $("#drawer");
+  if (!NKQ.ds) { dr.innerHTML = '<div class="dr"><div class="loading">Đang tải nhật ký…</div></div>'; dr.hidden = false; return api("nhatKy", [400], function(d) { NKQ.ds = d; moNhatKy(); }, function(e) { dr.innerHTML = '<div class="dr"><div class="empty">' + esc(e) + "</div></div>"; }); }
+  var q = boDauQL(NKQ.loc || "").toLowerCase().trim(), ds = NKQ.ds.filter(function(x) { return !q || boDauQL([x.ai, x.tt, x.khach, x.dong, x.ct].join(" ")).toLowerCase().indexOf(q) >= 0; });
+  var ngayCu = "", h = ds.map(function(x) {
+    var d = new Date(x.luc), ngay = ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear(), gio = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+    var dau = ngay !== ngayCu ? '<div class="nk-ngay">' + icn("lich", 13) + " " + ngay + "</div>" : ""; ngayCu = ngay;
+    return dau + '<div class="nk-dong"><span class="nk-gio">' + gio + '</span><div class="nk-nd"><b>' + esc(x.tt) + "</b>" + (x.khach ? ' <span class="nk-kh">' + esc(x.khach) + "</span>" : x.dong ? ' <span class="nk-kh">dòng ' + esc(x.dong) + "</span>" : "") +
+      '<div class="nk-ai">' + icn("ten", 11) + " " + esc(x.ai || "—") + '</div><details class="nk-ct"><summary>chi tiết</summary><code>' + esc(x.ct) + "</code></details></div></div>";
+  }).join("");
+  dr.innerHTML = '<div class="dr nk-dr" role="dialog" aria-modal="true"><div style="display:flex;justify-content:space-between;align-items:center"><h2>📝 Nhật ký thao tác</h2><span><button class="btn" data-act="nkTai" title="Tải lại">↻</button> <button class="x" data-act="dong">×</button></span></div>' +
+    '<p class="sm muted" style="margin:0 0 8px">Mọi thao tác ghi từ web (sửa, ẩn, highlight, nhập thuế, dọn phòng…) · lưu ở trang "📝 Nhật ký" trên Google Sheet.</p>' +
+    '<input id="nkLoc" class="nk-loc" placeholder="Tìm: tên khách, thao tác, người làm…" value="' + esc(NKQ.loc) + '">' +
+    '<div class="nk-ds">' + (h || '<div class="empty sm">Chưa có thao tác nào' + (q ? " khớp" : "") + ".</div>") + "</div></div>";
+  dr.hidden = false;
+  var o = $("#nkLoc"); o.addEventListener("input", function() { NKQ.loc = o.value; clearTimeout(moNhatKy.t); moNhatKy.t = setTimeout(function() { var p = o.selectionStart; moNhatKy(); var o2 = $("#nkLoc"); o2.focus(); o2.setSelectionRange(p, p); }, 250); });
+}
 function moLink() {
   var dr = $("#drawer");
   if (!LKQ.ds) { dr.innerHTML = '<div class="dr"><div class="loading">Đang tải link…</div></div>'; dr.hidden = false; return api("lkDs", [], function(d) { LKQ.ds = d; moLink(); }); }
@@ -2417,7 +2476,7 @@ function veMenu() {
   m.innerHTML = (laChu() ? '<div class="menu-h">Việc nhanh</div>' + nut("themDon", "➕", "Thêm đơn") + nut("moKhoa", "🔒", "Khoá phòng tạm") +
       '<div class="menu-h">Cài đặt</div>' + nut("moGia", "💰", "Giá phòng & ngày lễ") + nut("moMaGiam", "🏷️", "Mã giảm giá") + nut("moICal", "📅", "Đồng bộ Airbnb") +
       nut("moFB", "💬", "Kết nối Messenger") + nut("moDay", "📲", "Thông báo điện thoại") + '<button data-act="chuong"><span>' + (CHUONG.bat ? "🔔" : "🔕") + "</span>Âm báo: " + (CHUONG.bat ? "bật" : "tắt") + "</button>" +
-      nut("moQuyen", "👤", "Phân quyền") + nut("moLink", "🔗", "Link truy cập 1 thiết bị") + nut("moFile", "🗂️", "File dữ liệu") : "") +
+      nut("moQuyen", "👤", "Phân quyền") + nut("moLink", "🔗", "Link truy cập 1 thiết bị") + nut("moNhatKy", "📝", "Nhật ký thao tác") + nut("moFile", "🗂️", "File dữ liệu") : "") +
     '<div class="menu-h">Mở nhanh</div>' +
     dong("🏡", "Trang đặt phòng", L.web) + dong("🔎", "Trang tra cứu đơn", L.traCuu) + dong("🧹", "Trang dọn phòng (nhân viên)", L.nhanVien) +
     dong("📗", "Google Sheet", L.sheet) + dong("💬", "Meta Business Suite", L.meta) + (laChu() ? dong("⚙️", "Apps Script", L.script) : "");
@@ -2893,6 +2952,10 @@ document.addEventListener("click", function(e) {
   else if (a === "sdLuu") luuSuaDong(Number(v));
   else if (a === "nhPhu") { NH.moPhu = !NH.moPhu; var ph = $(".nh-phu"); if (ph) ph.classList.toggle("mo", NH.moPhu); el.setAttribute("aria-expanded", NH.moPhu); }
   else if (a === "nhHienAn") { NH.hienAn = !NH.hienAn; veNhap(); }
+  else if (a === "moMauDong") moMauDong();
+  else if (a === "nhXep") { NH.xep = NH.xep === "in" ? "dat" : "in"; try { localStorage.setItem("olia_nh_xep", NH.xep); } catch (e) {} veBangSheet(); toast(NH.xep === "in" ? "Xếp theo ngày nhận phòng" : "Xếp theo thời gian đặt"); }
+  else if (a === "mdMacDinh") { Q.d.mauDong = {}; api("luuMau", [{ xoa: 1 }], function() { toast("↺ Đã về màu mặc định"); }); moMauDong(); if (NH.bang) veBangSheet(); }
+  else if (a === "mdLuu") { var x = moMauDong.doc(); Q.d.mauDong = x; dongChiTiet(); if (Q.tab === "nhap" && NH.bang) veBangSheet(); api("luuMau", [x], function(k) { Q.d.mauDong = k; toast("🎨 Đã lưu màu dòng cho mọi máy"); }, loiChung); }
   else if (a === "nhHL") {   // tô / bỏ tô nền dòng trên sheet: đổi ngay trên web rồi ghi ngầm
     var r1 = NH.bang.ds.filter(function(x) { return x.dong === Number(v); })[0], bat = !(r1.nen || []).some(function(c) { return MAU_SAP[String(c || "").toLowerCase()]; }), cu1 = { nen: r1.nen, chu: r1.chu };
     r1.nen = r1.nen.map(function() { return bat ? "#494429" : "#ffffff"; }); r1.chu = r1.chu.map(function() { return bat ? "#ffffff" : "#000000"; }); veBangSheet();
@@ -2912,6 +2975,8 @@ document.addEventListener("click", function(e) {
   else if (a === "dayChep") { try { navigator.clipboard.writeText(v); toast("Đã chép tên kênh"); } catch (e) {} }
   else if (a === "moQuyen") { $("#menu").hidden = true; moQuyen(); }
   else if (a === "moLink") { $("#menu").hidden = true; moLink(); }
+  else if (a === "moNhatKy") { $("#menu").hidden = true; NKQ.loc = ""; moNhatKy(); }
+  else if (a === "nkTai") { NKQ.ds = null; moNhatKy(); }
   else if (a === "lkTao") { var f = $("#fLk"), q = [].map.call(f.querySelectorAll("input[name=q]:checked"), function(x) { return x.value; }); if (!q.length) return toast("Chọn ít nhất 1 mục"); api("lkTao", [f.ten.value, q], function(r) { LKQ.ds = r.ds; moLink(); copyLink(r.ma); }); }
   else if (a === "lkCopy") copyLink(v);
   else if (a === "lkGo") { if (confirm("Gỡ thiết bị đang dùng link này? Lần mở tới, thiết bị nào mở trước sẽ được gắn.")) api("lkGo", [v], function(d) { LKQ.ds = d; moLink(); toast("Đã gỡ thiết bị"); }); }
