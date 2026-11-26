@@ -391,6 +391,7 @@ html,body{min-height:100%}body{min-height:100vh}
 .the.keep .tt{background:#fdf0d5;color:#8a5a00}.the.done .tt{background:#eee;color:#666}.the.huy{opacity:.55;text-decoration:line-through}.the.an{opacity:.45}
 .nh-dt td,.nh-dt th{padding:4px 3px!important;vertical-align:middle;white-space:nowrap}.nh-dt th div{line-height:1.25}.nh-dt td.o2 div+div{border-top:1px dashed rgba(0,0,0,.12);margin-top:2px;padding-top:2px}.nh-dt div.sua{min-height:15px;cursor:pointer}.nh-dt td>div[data-j="16"]{white-space:normal;min-width:60px;max-width:110px;line-height:1.25}.nh-pc td>div[data-j="16"]{max-width:200px}.nh-dt .nh-tac{line-height:1.1}.nh-dt .nh-tac button{padding:1px 2px}.nh-dt .nh-tac svg{width:13px;height:13px}
 .tim-nut{display:none}
+a.btn{text-decoration:none!important;color:inherit}a.btn.pri{color:#fff}.bo-don{display:inline-flex!important;align-items:center;gap:2px;white-space:nowrap}.ab-i{font-style:normal;display:inline-flex;align-items:center;gap:3px;margin-right:8px;vertical-align:middle}.ab-i svg{flex:none;opacity:.75}.tt-i.tt-Book{display:inline-block;width:14px}
 .lk-tb{background:#f6f3ec;border:1px solid #e8e0d0;border-radius:8px;padding:6px 9px;margin:6px 0;line-height:1.55;word-break:break-word}
 .bk.dang-o{animation:dangO 2.4s ease-in-out infinite}@keyframes dangO{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0),0 1px 3px rgba(0,0,0,.15)}50%{box-shadow:0 0 0 3px rgba(255,214,120,.55),0 0 10px rgba(255,190,80,.45)}}@media (prefers-reduced-motion:reduce){.bk.dang-o{animation:none}}
 .lk-ds-ck{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.lk-ck{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:12.5px;cursor:pointer;background:#fff}.lk-ck input{accent-color:#2f7d4f}.lk-ck:has(input:checked){background:#e7f3ec;border-color:#9fd0b0}.lk-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}.lk-dau{display:flex;justify-content:space-between;align-items:center;gap:8px}.lk-nut{display:flex;flex-wrap:wrap;gap:6px}.lk-nut .xoa{color:#c0392b}
@@ -1040,7 +1041,7 @@ function oDT(j, x, dt) {   // HTML rút gọn của 1 ô (đầy đủ ở toolt
   if (j === 1) return iconAgent(x);
   if (COT_TIEN[j]) return tienM(x);
   if (j === 9 && dt) return esc(x.slice(0, 3));
-  if (j === 4) { var tt = TRANG_THAI_OK(x); return '<span class="tt-i tt-' + tt + '" title="' + esc(x) + '">' + icn("tt" + tt, 14) + "</span>"; }
+  if (j === 4) { var tt = TRANG_THAI_OK(x); if (tt === "Book") return '<span class="tt-i tt-Book" title="' + esc(x) + '"></span>'; return '<span class="tt-i tt-' + tt + '" title="' + esc(x) + '">' + icn("tt" + tt, 14) + "</span>"; }
   if (j === 3) return esc(ngayDM(x));
   if (j === 13) return esc(tenGon(x, dt ? 14 : 22));
   if (j === 16) return iconCheck(esc(x));
@@ -1152,7 +1153,7 @@ function veBangSheet() {
     return '<td class="' + (so[j] ? "num " : "") + (j === 1 ? "agc " : "") + (r.ct[j] ? "ct" : "sua") + '" data-dong="' + r.dong + '" data-j="' + j + '"' + (st ? ' style="' + st + '"' : "") + ' title="' + esc(x) + (r.ct[j] ? " (công thức)" : "") + '">' + (j === 1 ? iconAgent(x) : b.tieuDe[j] === "Name" ? esc(tenGon(x, bkDT() ? 14 : 20)) : j === 16 ? iconCheck(esc(x)) : esc(bkDT() && !NH.bangCu && COT_TIEN[j] ? tienK(x) : x)) + "</td>";
   };
   $("#app").innerHTML = '<div class="nh"><div class="nh-bar"><button class="btn pri" data-act="nhThem">＋ Thêm dòng</button>' +
-    '<div class="nh-thang"><button class="btn" data-act="nhThang" data-v="-1" aria-label="Tháng trước">◀</button><b>' + (bkDT() ? th.slice(5, 7) + "/" + th.slice(0, 4) : tenThang(th).replace("Tháng ", "Th ")) + '</b><button class="btn" data-act="nhThang" data-v="1" aria-label="Tháng sau">▶</button></div>' +
+    '<div class="nh-thang"><button class="btn" data-act="nhThang" data-v="-1" aria-label="Tháng trước">◀</button><b>' + (bkDT() || innerWidth < 500 ? th.slice(5, 7) + "/" + th.slice(0, 4) : tenThang(th)) + '</b><button class="btn" data-act="nhThang" data-v="1" aria-label="Tháng sau">▶</button></div>' +
     (bkDT() && !the ? "" : '<button class="btn nh-ht" data-act="hoanTac" title="Hoàn tác (Ctrl+Z)" aria-label="Hoàn tác">↶</button>') + (the || bkDT() ? "" : nutCoThat()) +
     (window.innerWidth < 700 && the ? '<button class="btn" data-act="nhThe">📋 Bảng</button>' : "") +
     (bkDT() && !the ? '<button class="btn bt-i' + (DT_BAT.giam ? " on" : "") + '" data-act="dtBat" data-v="giam" aria-pressed="' + !!DT_BAT.giam + '" title="Bật / tắt cột giảm giá">' + icn("giam", 17) + '</button><button class="btn bt-i' + (DT_BAT.sua ? " on" : "") + '" data-act="dtBat" data-v="sua" aria-pressed="' + !!DT_BAT.sua + '" title="Bật / tắt cột sửa · ẩn · xoá">' + icn("mota", 17) + "</button>" : "") +
@@ -1239,9 +1240,9 @@ function gonNut(goc) {
   });
 }
 /* 🎨 icon nét đồng bộ: emoji đầu nút → SVG cùng bộ ICN_P (chữ vẫn giữ, tooltip giữ) */
-var EMOJI_ICN = {"＋": "them", "➕": "them", "+": "them", "◀": "trai", "▶": "phai", "↶": "hoan", "↩": "hoan", "↻": "tai", "🔄": "tai", "⟳": "tai", "⋯": "ba", "⤢": "vua", "☰": "menu", "🔔": "chuong", "🔕": "tat", "🗂": "the", "📋": "bang", "🔎": "kinh", "🔍": "kinh", "✏": "mota", "📝": "mota", "🗑": "xoa_", "💾": "luu", "✅": "ok", "✔": "ok", "✓": "ok", "✕": "dong", "❌": "dong", "🔒": "khoa", "🔓": "mokhoa", "📅": "lich", "🗓": "lich", "🧾": "hd", "💬": "chat", "📊": "bieudo", "👤": "ten", "🙈": "an", "👁": "hien", "🧹": "don", "🔗": "agent", "📲": "dt", "📱": "dt", "📄": "file", "🏷": "giam", "⚙": "caidat", "🛏": "room", "🚫": "cam", "⛔": "cam", "⚠": "canh", "🔁": "doi", "📌": "ghim", "📎": "kep", "💰": "tien", "💳": "tien", "📧": "mail", "📦": "file", "🛎": "chuong", "⬜": "the"};
+var EMOJI_ICN = {"＋": "them", "➕": "them", "+": "them", "◀": "trai", "▶": "phai", "↶": "hoan", "↩": "hoan", "↻": "tai", "🔄": "tai", "⟳": "tai", "⋯": "ba", "⤢": "vua", "☰": "menu", "🔔": "chuong", "🔕": "tat", "🗂": "the", "📋": "bang", "🔎": "kinh", "🔍": "kinh", "✏": "mota", "📝": "mota", "🗑": "xoa_", "💾": "luu", "✅": "ok", "✔": "ok", "✓": "ok", "✕": "dong", "❌": "dong", "🔒": "khoa", "🔓": "mokhoa", "📅": "lich", "🗓": "lich", "🧾": "hd", "💬": "chat", "📊": "bieudo", "👤": "ten", "🙈": "an", "👁": "hien", "🧹": "don", "🔗": "agent", "📲": "dt", "📱": "dt", "📄": "file", "🏷": "giam", "⚙": "caidat", "🛏": "room", "🚫": "cam", "⛔": "cam", "⚠": "canh", "🔁": "doi", "📌": "ghim", "📎": "kep", "💰": "tien", "💳": "tien", "📧": "mail", "📦": "file", "🛎": "chuong", "⬜": "the", "📗": "bang", "📒": "thuchi", "▦": "bang", "🏡": "nha", "🏠": "nha", "🔐": "khoa", "🕘": "lich", "🕒": "lich", "📵": "dt", "🖼": "file", "🗒": "mota", "🧮": "bieudo", "📈": "bieudo", "💵": "tien", "🌐": "agent", "📐": "vua", "🏁": "ok", "☑": "ok", "⏳": "choCoc", "🧷": "kep", "🔑": "khoa"};
 function veIcon(goc) {
-  [].forEach.call((goc || document).querySelectorAll("button, .btn, .menu-b"), function(el) {
+  [].forEach.call((goc || document).querySelectorAll("button, .btn, .menu-b, #menu a > span:first-child, .dr h2, .dr h3, .card > h3, .sec > h3, .bar > b, .menu-h, .day-h, .day-h > span:first-child, .kv > span:first-child"), function(el) {
     if (el.dataset.icn || el.closest(".dt-g")) return;
     var n = el.firstChild; while (n && n.nodeType === 3 && !n.nodeValue.trim()) n = n.nextSibling;
     if (!n || n.nodeType !== 3) return;
@@ -1271,7 +1272,7 @@ function veThuChi() {
   if (!TC.dl || TC.dl.thang !== th) { $("#app").innerHTML = '<div class="loading">Đang tải thu chi…</div>'; return apiNhanh("thuChi", [th], function(d) { TC.dl = d; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) veThuChi(); }); }
   if (Date.now() - (TC.luc || 0) > 20000) { TC.luc = Date.now(); tcTaiNgam(); }
   var d = TC.dl, bar = '<div class="bar"><button class="btn" data-act="tcThang" data-v="-1">◀</button><b style="min-width:110px;text-align:center">' + tenThang(th) + '</b><button class="btn" data-act="tcThang" data-v="1">▶</button>' +
-    '<button class="btn" data-act="tcTai" aria-label="Tải lại">↻</button><span class="tc-xem"><button class="btn on" data-act="tcXem" data-v="thang">📒 Sổ chi tháng</button><button class="btn" data-act="tcXem" data-v="nam">📊 Tổng kết năm</button></span>' + nutCoThat() + (d.chuaCo ? "" : '<button class="btn pri" data-act="tcThemDong">＋ Thêm dòng</button><button class="btn" data-act="tcThem" title="Nhập bằng form (chọn nhóm bằng icon)">📝 Form</button>' + '<button class="btn' + (TC.sheet ? " on" : "") + '" data-act="tcSheet" title="Nhập như trên sheet DÒNG TIỀN CHI / về giao diện gọn">▦ Kiểu sheet</button>' + '<a class="btn" href="' + esc(d.url) + '" target="_blank" rel="noopener">📗 ' + esc(d.ten) + "</a>") + "</div>";
+    '<button class="btn" data-act="tcTai" aria-label="Tải lại">↻</button><span class="tc-xem"><button class="btn on" data-act="tcXem" data-v="thang">📒 Sổ chi tháng</button><button class="btn" data-act="tcXem" data-v="nam">📊 Tổng kết năm</button></span>' + nutCoThat() + (d.chuaCo ? "" : '<button class="btn pri" data-act="tcThemDong">＋ Thêm dòng</button><button class="btn" data-act="tcThem" title="Nhập bằng form (chọn nhóm bằng icon)">📝 Form</button>' + '<button class="btn' + (TC.sheet ? " on" : "") + '" data-act="tcSheet" title="Nhập như trên sheet DÒNG TIỀN CHI / về giao diện gọn">▦ Kiểu sheet</button>' + '<a class="btn" href="' + esc(d.url) + '" target="_blank" rel="noopener" title="Mở ' + esc(d.ten) + '">📗 Sheet</a>') + "</div>";
   if (d.chuaCo) {
     $("#app").innerHTML = bar + '<div class="sec" style="max-width:560px;margin:16px auto;text-align:center"><p>Chưa có file CashFlow cho năm <b>' + esc(d.nam) + "</b>.</p>" +
       (d.coNamTruoc ? '<button class="btn pri" data-act="tcTaoNam" data-v="' + esc(d.nam) + '">📗 Tạo CashFlow_' + esc(d.nam.slice(2)) + " từ năm " + (Number(d.nam) - 1) + '</button><p class="sm muted">Chép nguyên file năm trước, làm trống sổ chi, nối tiền thu sang file Room năm ' + esc(d.nam) + ", mang số dư năm trước sang. Web cũng tự tạo từ 25/12 hằng năm.</p>" : '<p class="muted sm">Cũng chưa có file năm trước để chép.</p>') + "</div>";
@@ -1985,7 +1986,7 @@ document.addEventListener("mouseover", function(e) {
       '<div class="row"><span>Tổng / Cọc</span><span class="num">' + tien(b.invoice) + " / " + tien(b.coc) + "</span></div>" +
       '<div class="row"><span>Còn lại</span><b class="num">' + tien(b.conLai) + "</b></div>" +
       (b.moTa ? '<div class="sm muted" style="margin-top:4px;white-space:normal">' + esc(b.moTa) + "</div>" : "") : "") +
-    '<div class="row"><span>Dọn phòng</span><span>' + (b.daDon ? "✅ đã dọn" : b.ra <= Q.d.homNay ? "🧹 chưa dọn" : "—") + "</span></div>";
+    '<div class="row"><span>Dọn phòng</span><span>' + (b.daDon ? "đã dọn" : b.ra <= Q.d.homNay ? "🧹 chưa dọn" : "—") + "</span></div>";
   var r = el.getBoundingClientRect();
   tip.hidden = false;
   var x = Math.min(r.left, window.innerWidth - tip.offsetWidth - 12), y = r.bottom + 8;
@@ -2006,7 +2007,7 @@ function moChiTiet(dong) {
   if (chu) h += '<div class="seg" role="group" aria-label="Trạng thái">' + ["Waiting", "Keep", "Book", "Done"].map(function(t) {
     return '<button class="' + t + (b.trangThai === t ? " on" : "") + '" data-act="tt" data-v="' + t + '">' + (t === "Waiting" ? "💳 " : t === "Keep" ? "⏳ " : t === "Book" ? "📌 " : "🏁 ") + t + "</button>";
   }).join("") + "</div>" + (b.trangThai ? "" : '<div class="sm muted">Sheet chưa ghi trạng thái cho đơn này, bấm để chọn.</div>');
-  h += b.ra <= Q.d.homNay ? '<button class="tog ' + (b.daDon ? "ok" : "can") + '" data-act="donCT">' + (b.daDon ? "✅ Đã dọn · phòng sẵn sàng" : "🧹 Chưa dọn · bấm khi dọn xong") + "</button>"
+  h += b.ra <= Q.d.homNay ? '<button class="tog ' + (b.daDon ? "ok" : "can") + '" data-act="donCT">' + (b.daDon ? "Đã dọn · phòng sẵn sàng" : "🧹 Chưa dọn · bấm khi dọn xong") + "</button>"
     : '<div class="sm muted">🧹 Dọn phòng sau khi khách trả phòng ' + du(b.ra) + ".</div>";
   if (chu) {
     h += '<details class="sec doi-np"' + (Q.moDN ? " open" : "") + '><summary><b>📅 Đổi ngày / phòng</b></summary><div class="row3"><label class="fld">Nhận phòng<input type="date" id="dnVao" value="' + b.vao + '"></label>' +
@@ -2461,16 +2462,16 @@ function luuThemDon() {
 /* ---------- Chờ cọc ---------- */
 function veCho() {
   var ds = Q.d.cho, ab = Q.ab || [], abT = ab.filter(function(x) { return x.loai === "tien"; }), abH = ab.filter(function(x) { return x.loai === "huy"; }), abK = ab.filter(function(x) { return x.loai !== "tien" && x.loai !== "huy"; });   // tiền Airbnb chuyển về tách riêng
-  var abH = '<div class="bar" style="margin-top:4px"><b>🅰️ Email Airbnb cần xem</b><small class="muted">từ hộp thư oliagohome · chấp nhận yêu cầu trên Airbnb</small><button class="btn" data-act="abMoHet" style="margin-left:auto">' + (TB.abMo ? "▴ Ẩn bớt" : "▾ Hiện chi tiết") + '</button></div>' +
+  var abH = '<div class="bar" style="margin-top:4px"><b class="ab-i">' + IC_AG.ab.replace(/width="\d+" height="\d+"/, 'width="16" height="16"') + 'Email Airbnb cần xem</b><small class="muted">từ hộp thư oliagohome · chấp nhận yêu cầu trên Airbnb</small><button class="btn" data-act="abMoHet" style="margin-left:auto">' + (TB.abMo ? "▴ Ẩn bớt" : "▾ Hiện chi tiết") + '</button></div>' +
     (abK.length ? '<div class="cards">' + abK.map(function(x) {
       var tuoi = (Date.now() - x.luc) / 864e5, mo = tuoi < 1 ? "" : "filter:grayscale(" + Math.min(1, tuoi / 4).toFixed(2) + ");opacity:" + Math.max(.55, 1 - tuoi * .12).toFixed(2);   // càng cũ càng xám
-      return '<div class="card ab-the ab-' + x.loai + (TB.abMo ? " ab-mo" : "") + (tuoi < 1 ? " ab-moi" : "") + '"' + (mo ? ' style="' + mo + '"' : "") + '><h3><span>' + esc(AB_LOAI[x.loai] || "Email") + '</span><span class="muted sm">' + tbLuc(x.luc) + ' <button class="ab-xo" data-act="abXo" title="Hiện / ẩn chi tiết" aria-label="Chi tiết">' + icn("xo", 14) + '</button></span></h3><div>' + (x.khach ? "👤 <b>" + esc(x.khach) + "</b> " : "") + (x.phong ? "· 🛏 " + esc(x.phong) + " " : "") + (x.ngay ? "· 📅 " + esc(x.ngay) : "") + '</div><div class="sm ab-sub">' + esc(x.tieu) + '</div>' + (x.tin ? '<div class="ab-tin" data-act="abXo" title="Bấm để xem / thu gọn · cuộn để đọc tiếp">' + esc(x.tin) + "</div>" : '<div class="muted sm ab-tom" data-act="abXo">' + esc(x.tom) + "</div>") +
-        '<div class="acts">' + (x.link ? '<a class="btn pri" href="' + esc(x.link) + '" target="_blank" rel="noopener">' + (x.loai === "yeucau" ? "✅ Mở Airbnb để chấp nhận" : "🅰️ Mở trên Airbnb") + "</a>" : '<a class="btn" href="https://www.airbnb.com/hosting/reservations" target="_blank" rel="noopener">🅰️ Mở Airbnb</a>') +
+      return '<div class="card ab-the ab-' + x.loai + (TB.abMo ? " ab-mo" : "") + (tuoi < 1 ? " ab-moi" : "") + '"' + (mo ? ' style="' + mo + '"' : "") + '><h3><span>' + esc(AB_LOAI[x.loai] || "Email") + '</span><span class="muted sm">' + tbLuc(x.luc) + ' <button class="ab-xo" data-act="abXo" title="Hiện / ẩn chi tiết" aria-label="Chi tiết">' + icn("xo", 14) + '</button></span></h3><div>' + (x.khach ? '<span class="ab-i">' + icn("ten", 13) + "<b>" + esc(x.khach) + "</b></span>" : "") + (x.phong ? '<span class="ab-i">' + icn("room", 13) + esc(x.phong) + "</span>" : "") + (x.ngay ? '<span class="ab-i">' + icn("ngay", 13) + esc(x.ngay) + "</span>" : "") + '</div><div class="sm ab-sub">' + esc(x.tieu) + '</div>' + (x.tin ? '<div class="ab-tin" data-act="abXo" title="Bấm để xem / thu gọn · cuộn để đọc tiếp">' + esc(x.tin) + "</div>" : '<div class="muted sm ab-tom" data-act="abXo">' + esc(x.tom) + "</div>") +
+        '<div class="acts">' + (x.link ? '<a class="btn pri" href="' + esc(x.link) + '" target="_blank" rel="noopener">' + IC_AG.ab.replace(/width="\d+" height="\d+"/, 'width="14" height="14"') + (x.loai === "yeucau" ? " Mở Airbnb để chấp nhận" : " Mở trên Airbnb") + "</a>" : '<a class="btn" href="https://www.airbnb.com/hosting/reservations" target="_blank" rel="noopener">' + IC_AG.ab.replace(/width="\d+" height="\d+"/, 'width="14" height="14"') + ' Mở Airbnb</a>') +
         '<button class="btn" data-act="abXong" data-v="' + esc(x.id) + '">✓ Đã xử lý</button></div></div>';
     }).join("") + "</div>" : '<div class="empty sm">Chưa có email Airbnb mới.</div>') +
     (abH.length ? '<div class="bar" style="margin-top:10px"><b>❌ Huỷ đặt phòng</b><small class="muted">' + abH.length + " đơn Airbnb bị huỷ · ngày đã mở lại cho khách khác</small></div><div class=\"ab-tien-ds\">" + abH.map(function(x) {
       var ma = String(x.tieu + " " + (x.tin || "")).match(/\b(HM[A-Z0-9]{6,})\b/);
-      return '<div class="ab-tien ab-huy"><b>' + esc(x.khach || (ma ? ma[1] : "Huỷ")) + '</b><span>' + (x.phong ? "🛏 " + esc(x.phong) + " · " : "") + (x.ngay ? "📅 " + esc(x.ngay) + " · " : "") + esc(x.tin || x.tieu) + '</span><small class="muted">' + tbLuc(x.luc) + '</small>' + (x.link ? '<a class="btn" href="' + esc(x.link) + '" target="_blank" rel="noopener">Xem</a>' : '<span></span>') + '<button class="btn" data-act="abXong" data-v="' + esc(x.id) + '" title="Đã xem">✓</button></div>'; }).join("") + "</div>" : "") +
+      return '<div class="ab-tien ab-huy"><b>' + esc(x.khach || (ma ? ma[1] : "Huỷ")) + '</b><span>' + (x.phong ? '<i class="ab-i">' + icn("room", 12) + esc(x.phong) + "</i>" : "") + (x.ngay ? '<i class="ab-i">' + icn("ngay", 12) + esc(x.ngay) + "</i>" : "") + esc(x.tin || x.tieu) + '</span><small class="muted">' + tbLuc(x.luc) + '</small>' + (x.link ? '<a class="btn" href="' + esc(x.link) + '" target="_blank" rel="noopener">Xem</a>' : '<span></span>') + '<button class="btn" data-act="abXong" data-v="' + esc(x.id) + '" title="Đã xem">✓</button></div>'; }).join("") + "</div>" : "") +
     (abT.length ? '<div class="bar" style="margin-top:10px"><b>💰 Thanh toán từ Airbnb</b><small class="muted">' + abT.length + " khoản chuyển về</small></div><div class=\"ab-tien-ds\">" + abT.map(function(x) {
       var st = String(x.tieu + " " + (x.tin || "")).match(/₫\s?[\d.,]+/), nhan = String(x.tin || "").match(/muộn nhất vào ([^.]+)/);
       return '<div class="ab-tien"><b>' + esc(st ? st[0] : "") + '</b><span>' + (nhan ? "nhận muộn nhất " + esc(nhan[1]) : esc(x.tieu)) + '</span><small class="muted">' + tbLuc(x.luc) + '</small><a class="btn" href="https://www.airbnb.com.vn/users/transaction_history" target="_blank" rel="noopener">Xem</a><button class="btn" data-act="abXong" data-v="' + esc(x.id) + '" title="Đã xem">✓</button></div>'; }).join("") + "</div>" : "");
@@ -2495,7 +2496,7 @@ function veDon() {
       var viec = tra || cu;
       var h = '<div class="card"><h3><span>' + esc(p.icon) + " " + esc(p.ten) + '</span><span class="muted sm">' + esc(p.khu) + "</span></h3>";
       if (viec) h += '<div class="sm">🚪 ' + esc(viec.ten) + " trả phòng " + (viec.ra === k ? "trước 12:00" : ngan(viec.ra)) + "</div>" +
-        '<button class="tog big ' + (viec.daDon ? "ok" : "can") + '" data-act="don" data-v="' + viec.dong + '">' + (viec.daDon ? "✅ Đã dọn · sẵn sàng" : "🧹 Cần dọn · bấm khi xong") + "</button>";
+        '<button class="tog big ' + (viec.daDon ? "ok" : "can") + '" data-act="don" data-v="' + viec.dong + '">' + (viec.daDon ? "Đã dọn · sẵn sàng" : "🧹 Cần dọn · bấm khi xong") + "</button>";
       if (nhan) h += '<div class="sm">🛎️ ' + esc(nhan.ten) + " nhận phòng từ 14:00 · " + nhan.dem + " đêm" + (nhan.nl || nhan.te ? " · thêm " + (nhan.nl + nhan.te) + " khách" : "") + "</div>";
       if (dang) h += '<div class="sm">🛏️ ' + esc(dang.ten) + " đang ở (đến " + ngan(dang.ra) + ")</div>";
       if (!viec && !nhan && !dang) h += '<div class="sm muted">Phòng trống</div>';
@@ -2503,7 +2504,7 @@ function veDon() {
     }).join("");
     return '<div class="day-h">' + tieuDe + "</div><div class=\"cards\">" + the + "</div>";
   };
-  $("#app").innerHTML = '<div class="bar"><button class="btn" data-act="taiLai">↻ Tải lại</button><span class="muted sm">Bấm 🧹 khi dọn xong để phòng chuyển sang ✅ sẵn sàng.</span></div>' +
+  $("#app").innerHTML = '<div class="bar"><button class="btn" data-act="taiLai">↻ Tải lại</button><span class="muted sm">Bấm 🧹 khi dọn xong để phòng chuyển sang sẵn sàng.</span></div>' +
     khoi(hn, "Hôm nay · " + du(hn)) + khoi(mai, "Ngày mai · " + du(mai));
 }
 
@@ -2557,13 +2558,13 @@ function veThue() {
   var d = TH.dl, max = Math.max.apply(null, Object.keys(d.theoThang).map(function(k) { return d.theoThang[k]; }).concat([1]));
   var tongNam = Object.keys(d.theoThang).reduce(function(s, k) { return s + d.theoThang[k]; }, 0);
   var h = '<div class="bar"><button class="btn" data-act="thLui">◀</button><b style="min-width:120px;text-align:center">' + tenThang(d.thang) + '</b><button class="btn" data-act="thToi">▶</button>' +
-    '<button class="btn" data-act="thTai">↻</button>' + '<button class="btn' + (TH.sheet ? " on" : "") + '" data-act="thSheet" title="Nhập như trên sheet tax dd (đủ cột) / về giao diện gọn">▦ Kiểu sheet</button>' + '<button class="btn pri" data-act="thBaoCao">📊 Báo cáo năm ' + d.thang.slice(0, 4) + "</button>" + '<button class="btn" data-act="thDoiSoat" title="So tổng sổ thuế với tổng tiền từng đơn: khớp mã hoặc khớp tên → Done">🔁 Đối soát ngay</button>' + (Q.d.sheetUrl ? '<a class="btn" href="' + esc(Q.d.sheetUrl) + '" target="_blank" rel="noopener">📗 Mở sổ thuế (Sheets)</a>' : "") +
+    '<button class="btn" data-act="thTai">↻</button>' + '<button class="btn' + (TH.sheet ? " on" : "") + '" data-act="thSheet" title="Nhập như trên sheet tax dd (đủ cột) / về giao diện gọn">▦ Kiểu sheet</button>' + '<button class="btn pri" data-act="thBaoCao">📊 Báo cáo năm ' + d.thang.slice(0, 4) + "</button>" + '<button class="btn" data-act="thDoiSoat" title="So tổng sổ thuế với tổng tiền từng đơn: khớp mã hoặc khớp tên → Done">🔁 Đối soát ngay</button>' + (Q.d.sheetUrl ? '<a class="btn" href="' + esc(Q.d.sheetUrl) + '" target="_blank" rel="noopener">📗 Sheet</a>' : "") +
     (d.kyKeKhai ? '<span class="muted sm" style="margin-left:auto">Sheet đang ghi: ' + esc(d.kyKeKhai) + "</span>" : "") + "</div>";
   h += '<div class="kpis"><div class="kpi"><span>Tổng thu ' + tenThang(d.thang).toLowerCase() + '</span><b class="num">' + tien(d.tong) + "</b></div>" +
     '<div class="kpi"><span>Số lần thu</span><b class="num">' + d.dong.length + "</b></div>" +
     '<div class="kpi' + (d.thieu.length ? " warn" : "") + '"><span>Đơn chưa nhập thuế</span><b class="num">' + d.thieu.length + "</b></div>" +
     '<div class="kpi"><span>Tổng thu năm ' + d.thang.slice(0, 4) + '</span><b class="num">' + tien(tongNam) + "</b></div></div>";
-  h += '<div class="card"><h3>📊 Thu theo tháng (sổ thuế)</h3><div class="cot">' + Object.keys(d.theoThang).sort().map(function(k) {
+  h += '<div class="card"><h3>Thu theo tháng (sổ thuế)</h3><div class="cot">' + Object.keys(d.theoThang).sort().map(function(k) {
     var v = d.theoThang[k], pct = Math.round(v / max * 100);
     return '<button class="cot-i' + (k === d.thang ? " on" : "") + '" data-act="thChon" data-v="' + k + '" title="' + tenThang(k) + ": " + tien(v) + '">' +
       '<span class="cot-v">' + (v ? Math.round(v / 1e6 * 10) / 10 + "tr" : "") + '</span><span class="cot-b" style="height:' + Math.max(pct, v ? 3 : 0) + '%"></span><span class="cot-t">T' + Number(k.slice(5)) + "</span></button>";
