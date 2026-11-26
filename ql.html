@@ -1162,6 +1162,15 @@ function mauDong(r, th) {
   });
   return Object.assign({}, r, { nen: nen, chu: chu, gan: gan, hl: hl });
 }
+/** Tải ngầm sẵn tháng trước / tháng sau của Sổ booking (lưu trên máy) -> bấm ◀ ▶ là hiện ngay */
+function taiTruocThang(th) {
+  taiTruocThang.da = taiTruocThang.da || {};
+  [-1, 1].forEach(function(d, i) {
+    var t0 = dk(th + "-01"); t0.setMonth(t0.getMonth() + d); var t = kd(t0).slice(0, 7), args = [t, NH.theo], k = "olia_c_bangSheet_" + JSON.stringify(args);
+    if (taiTruocThang.da[k] || docBan(k)) return; taiTruocThang.da[k] = 1;
+    setTimeout(function() { api("bangSheet", args, function(d2) { luuBan(k, d2); }, function() { delete taiTruocThang.da[k]; }); }, 1500 + i * 1500);
+  });
+}
 function veBangSheet() {
   var th = NH.thang || Q.d.homNay.slice(0, 7);
   if (!NH.bang || NH.bang.thang !== th || NH.bang.theo !== NH.theo) {
@@ -1171,6 +1180,7 @@ function veBangSheet() {
   if (Date.now() - (NH.bangLuc || 0) > 20000 && !NH.lamMoi) { NH.lamMoi = 1; NH.bangLuc = Date.now();   // đang xem lâu: lấy bản mới ngầm
     apiNhanh("bangSheet", [th, NH.theo], function(b, luu) { if (luu) return; NH.lamMoi = 0; NH.bang = b; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); }, function() { NH.lamMoi = 0; });
     setTimeout(function() { NH.lamMoi = 0; }, 15000); }
+  if (th !== "all") taiTruocThang(th);
   var b = NH.bang, the = window.innerWidth < 700 && NH.the, w = [130, 56, 100, 66, 58, 74, 90, 80, 50, 66, 64, 64, 50, 130, 50, 50, 170, 80, 80, 96, 90, 90];
   var so = { 6: 1, 7: 1, 8: 1, 12: 1, 14: 1, 15: 1, 17: 1, 18: 1, 19: 1, 20: 1, 21: 1 };   // cột số (H I J N P Q S T U V W) canh phải
   var cot = b.tieuDe.map(function(t, j) { return j; }).filter(function(j) { return (NH.mo || (j !== 0 && j !== 2)) && !(!NH.bangCu && bkDT() && (j === 3 || j === 6)); });   // điện thoại: ẩn thêm Booking Date (E), Published room (H)   // ẩn B (Name VNE id) và D (Phone)
