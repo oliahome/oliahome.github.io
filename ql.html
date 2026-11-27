@@ -542,6 +542,8 @@ html.toi .tabs,html.toi .tabs2{background:var(--card)!important;border-color:var
 html.toi .o-thue .t-ck{color:#d9d2c4!important}html.toi .o-thue .t-ck.on,html.toi .o-thue .t-ng{color:#8ff0b2!important}
 /* thanh lịch: dòng ngày/tiền xuống thêm 1 dòng khi còn chỗ (tên + 2 dòng thông tin) */
 .bk span{white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;text-overflow:clip}
+.lane .bk{top:5px!important;bottom:5px!important;height:auto!important;display:flex!important;flex-direction:column;justify-content:center}   /* thanh cao bằng dòng phòng: đủ 3 dòng chữ */
+.bk-ng,.bk-con{white-space:nowrap;font-style:normal}   /* ngày và số tiền còn lại không bị cắt giữa chừng: thiếu chỗ thì cả cụm xuống dòng */
 /* cột thao tác: 4 icon to, lấp đầy ô */
 .tac-g{grid-template-columns:repeat(2,30px)!important;gap:4px!important}.tac-g button{width:30px;height:28px}.tac-g svg{width:20px!important;height:20px!important}
 /* chữ gần tông nền: nâng tương phản vừa phải (dịu mắt) */
@@ -1318,6 +1320,18 @@ function chiTietDT(r, b, ncot) {
 }
 /* gộp khách cùng tên: xếp sát nhau nếu ngày IN cách nhau ≤ NH.gop ngày, ô Invoice gộp 1 (tổng) */
 /** Xếp dòng Sổ booking: "dat" = theo thời gian đặt (thứ tự nhập trên sheet, mặc định) · "in" = theo ngày nhận phòng */
+/** Cùng 1 khách (cùng tên + cùng ngày IN) ở nhiều phòng: tô chung 1 màu — lấy màu của dòng đầu tiên có tô trong nhóm */
+function mauCungKhach(ds, th) {
+  var nhom = {}, k = function(r) { return boDauQL(String(r.o[13] || "")).trim().toLowerCase().replace(/\s+/g, " ") + "|" + (ngayIN(r, th) || ""); };
+  ds.forEach(function(r) { var x = k(r); if (x.charAt(0) === "|") return; (nhom[x] = nhom[x] || []).push(r); });
+  var coMau = function(r) { return (r.nen || []).some(function(c) { var l = String(c || "").toLowerCase(); return l && l !== "#ffffff"; }); };
+  Object.keys(nhom).forEach(function(x) {
+    var g = nhom[x]; if (g.length < 2) return;
+    var mau = g.filter(coMau)[0] || g[0];
+    g.forEach(function(r) { if (r === mau) return; r.nen = mau.nen.slice(); r.chu = mau.chu.slice(); r.gan = mau.gan; r.hl = mau.hl; r.xong = mau.xong; });
+  });
+  return ds;
+}
 function xepDs(ds, th) {
   var a = ds.slice();
   if (NH.xep === "in") a.sort(function(x, y) { var p = ngayIN(x, th) || "9999", q = ngayIN(y, th) || "9999"; return p < q ? -1 : p > q ? 1 : x.dong - y.dong; });
@@ -1481,6 +1495,7 @@ function veBangSheet() {
   // dòng ẩn: chỉ hiện (mờ) những dòng ẩn trong N ngày gần đây (chọn 1/3/6 ngày, "tất cả" hoặc "không")
   var nAn = NH.anNgay, bay = Date.now(), thx = th === "all" ? Q.d.homNay.slice(0, 7) : th;   // "Tất cả": tính năm của ngày IN theo tháng hiện tại
   var ds = b.ds.filter(function(r) { return !r.an || nAn === "all" || (nAn !== "0" && r.anLuc && bay - r.anLuc <= Number(nAn) * 864e5); }).map(function(r) { return NH.bangCu ? r : mauDong(r, thx); }), soAn = 0;
+  if (!NH.bangCu) ds = mauCungKhach(ds, thx);
   var o = function(r, x, j) {
     var st = (r.nen[j] && r.nen[j] !== "#ffffff" ? "background:" + r.nen[j] + ";" : "") + (r.chu[j] && r.chu[j] !== "#000000" ? "color:" + r.chu[j] + ";" : "") + (r.dam[j] ? "font-weight:700;" : "");
     return '<td class="' + (so[j] ? "num " : "") + (j === 1 ? "agc " : "") + (r.ct[j] ? "ct" : "sua") + '" data-dong="' + r.dong + '" data-j="' + j + '"' + (st ? ' style="' + st + '"' : "") + ' title="' + esc(x) + (r.ct[j] ? " (công thức)" : "") + '">' + (j === 1 ? iconAgent(x) : b.tieuDe[j] === "Name" ? esc(tenGon(x, bkDT() ? 14 : 20)) : j === 16 ? iconCheck(esc(x)) : esc(bkDT() && !NH.bangCu && COT_TIEN[j] ? tienK(x) : x)) + "</td>";
@@ -2197,10 +2212,10 @@ function veTimeline() {
       var l = Math.max(a, 0), r = Math.min(z, n);
       if (r <= 0 || l >= n || Q.an[TRANG_THAI_OK(b.trangThai)]) return "";
       var hep = laHep(l, r), cls = "bk k-" + kenhKhach(b.agent) + (b.vao <= hn && hn < b.ra ? " dang-o" : "") + " " + (TRANG_THAI_OK(b.trangThai)) + ((r - l) * colW < 130 ? " chat" : "") + (hep ? " hep" : "") + (a < 0 ? " cut-l" : "") + (z > n ? " cut-r" : "");
-      var con = laChu() && b.conLai > 0 && b.trangThai !== "Done" ? " · còn " + Math.round(b.conLai / 1000) + "k" : "";
+      var con = laChu() && b.conLai > 0 && b.trangThai !== "Done" ? ' <i class="bk-con">· còn ' + Math.round(b.conLai / 1000) + "k</i>" : "";
       return '<button class="' + cls + '" data-act="mo" data-v="' + b.dong + '" style="left:' + (l * colW + 2) + "px;width:" + ((r - l) * colW - 4) + 'px">' +
         demTag(b.vao, b.ra) +
-        '<b>' + bkIcon(b) + (b.khop === "ten" ? '<i class="nghi" title="Tự Done vì khớp TÊN khách trong sổ thuế (không khớp mã) — kiểm tra lại">!</i>' : "") + (b.choCoc ? "⏳ " : "") + '<i class="bk-t" data-ten="' + esc(b.ten) + '">' + esc(tenVua(b.ten, (r - l) * colW - (hep ? 8 : 34))) + "</i>" + (hep ? " " + ngayNganBk(b.vao, b.ra) : "") + "</b><span>" + (hep ? thangBk(b.vao, b.ra) : ngan(b.vao) + "→" + ngan(b.ra)) + con + "</span></button>";
+        '<b>' + bkIcon(b) + (b.khop === "ten" ? '<i class="nghi" title="Tự Done vì khớp TÊN khách trong sổ thuế (không khớp mã) — kiểm tra lại">!</i>' : "") + (b.choCoc ? "⏳ " : "") + '<i class="bk-t" data-ten="' + esc(b.ten) + '">' + esc(tenVua(b.ten, (r - l) * colW - (hep ? 8 : 34))) + "</i>" + (hep ? " " + ngayNganBk(b.vao, b.ra) : "") + '</b><span><i class="bk-ng">' + (hep ? thangBk(b.vao, b.ra) : ngan(b.vao) + "→" + ngan(b.ra)) + "</i>" + con + "</span></button>";
     }).join("") + vachDon(cua, abP, n, colW, hn) + "</div>";
   });
   var jNay = soDem(Q.tu, hn); if (jNay >= 0 && jNay < n) h += '<div class="tl-qua" id="tlQua" style="left:' + cotPhong + 'px"></div><div class="tl-now" id="tlNow" data-x0="' + (cotPhong + jNay * colW) + '" data-w="' + colW + '" data-g="' + cotPhong + '"><i></i></div>';
