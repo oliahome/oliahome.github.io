@@ -551,6 +551,13 @@ html.toi .t-gop{background:#5a3e17;color:#ffd79a}
 .o-thue .t-tien{grid-column:1/-1;font-size:11.5px;font-weight:700;line-height:1.1;color:#6b5f4a;font-variant-numeric:tabular-nums}.o-thue .t-tien.t-chung{display:block;text-align:center}html.toi .o-thue .t-tien{color:#d9d2c4}   /* số tiền nhập thuế mỗi lần */
 .lane .bk{justify-content:flex-start!important;padding-top:5px!important;gap:2px}.lane .bk b{font-size:13px!important;line-height:1.2}   /* tên luôn ở trên, không bị cắt */
 .bk-ng{font-weight:600;opacity:.95}.bk-con{display:inline-block!important;margin-top:2px;padding:0 6px;border-radius:6px;background:rgba(0,0,0,.22);font-weight:800;line-height:1.5}   /* "còn …k" thành ô nhãn */
+.gy-ds{position:fixed;z-index:120;width:320px;max-height:340px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.25);padding:4px}
+.gy-dau{font-size:11px;font-weight:700;color:var(--muted);padding:4px 8px}
+.gy-mu{display:grid;grid-template-columns:auto 1fr auto;gap:0 8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}.gy-mu:hover,.gy-mu.on{background:var(--soft)}
+.gy-mu b{font-size:12.5px}.gy-mu span{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gy-mu small{grid-column:1/-1;display:flex;align-items:center;gap:3px;font-size:11.5px;color:var(--muted)}
+.gy-khop{grid-row:1;grid-column:3;font-style:normal;font-size:10.5px;font-weight:800;padding:0 6px;border-radius:99px;background:#e7f3ec;color:#2f7d4f}html.toi .gy-khop{background:#1c3326;color:#8ff0b2}
+.gy-rong{padding:8px;color:var(--muted);font-size:12.5px}
+.gy-pop{display:flex;flex-direction:column;gap:3px;min-width:170px}.gy-pop b{font-size:14px}.gy-pop span{display:flex;align-items:center;gap:5px;font-size:13px}.gy-pop small{color:var(--muted)}
 /* cột thao tác: 4 icon to, lấp đầy ô */
 .tac-g{grid-template-columns:repeat(2,30px)!important;gap:4px!important}.tac-g button{width:30px;height:28px}.tac-g svg{width:20px!important;height:20px!important}
 /* chữ gần tông nền: nâng tương phản vừa phải (dịu mắt) */
@@ -2962,17 +2969,70 @@ function suaOThue(td) {
   var c = Number(td.dataset.c), h = Number(td.dataset.h), cu = td.textContent, laNgay = c === (TH.sh || {}).cotNgay;
   td.classList.add("dang"); td.innerHTML = '<input class="nh-o' + (td.classList.contains("num") ? " num" : "") + '" value="' + esc(cu) + '"' + (laNgay ? ' placeholder="ngày/tháng"' : "") + ">";
   var o = td.firstChild, xong = false; o.focus(); o.select();
-  var huy = function() { if (xong) return; xong = true; td.classList.remove("dang"); td.textContent = cu; };
+  var gy = (c === 9 || c === 5) ? moGoiYKhach(td, o, h, function(b) {   // chọn khách gợi ý -> điền mã + giao dịch
+    xong = true; td.classList.remove("dang"); td.textContent = "Đang lưu…";
+    var s2 = { 9: b.code }; var rr = thueDong(h); if (!rr || !String(rr.o[4] || "").trim() || c === 5) s2[5] = "khách đặt phòng - " + b.ten;
+    api("suaThue", [h, s2], function() { toast("✔ Đã gán " + b.code + " · " + b.ten + " cho dòng " + h); TH.dl = null; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); }, function(e) { td.textContent = cu; loiChung(e); });
+  }) : null;
+  var huy = function() { if (xong) return; xong = true; td.classList.remove("dang"); td.textContent = cu; if (gy) gy.dong(); };
   var luu = function() {
     if (xong) return; var v = o.value.trim(); if (v === cu) return huy();
     if (laNgay && v) { var g = docNgayNhap(v); if (!g) { toast("⚠️ Ngày chưa đúng, gõ ngày/tháng (vd 21/11)"); o.focus(); return; } v = g; }
-    xong = true; td.classList.remove("dang"); td.textContent = "Đang lưu…";
+    if (gy) gy.dong(); xong = true; td.classList.remove("dang"); td.textContent = "Đang lưu…";
     var s = {}; s[c] = v;
     api("suaThue", [h, s], function() { toast("✔ Đã ghi sheet tax dd dòng " + h); TH.dl = null; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); }, function(e) { td.textContent = cu; loiChung(e); });
   };
-  o.addEventListener("keydown", function(e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); luu(); } else if (e.key === "Escape") huy(); });
-  o.addEventListener("blur", luu);
+  o.addEventListener("keydown", function(e) {
+    if (gy && gy.phim(e)) return;
+    if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); luu(); } else if (e.key === "Escape") huy(); });
+  o.addEventListener("blur", function() { setTimeout(function() { if (gy && gy.dangChon) return; luu(); }, 120); });
 }
+function thueDong(h) { var d = TH.sh || {}; return (d.ds || []).concat(d.moi ? [d.moi] : []).filter(function(r) { return r.hang === h; })[0]; }
+/** Ngày của dòng sổ thuế (cột Ngày + cột tháng) -> yyyy-mm-dd */
+function ngayDongThue(h) {
+  var r = thueDong(h), th = TH.thang || Q.d.homNay.slice(0, 7), ng = r ? parseInt(String(r.o[1] || "").trim(), 10) : 0, t = r ? parseInt(String(r.o[3] || "").trim(), 10) : 0;
+  if (!ng) return Q.d.homNay; t = t || Number(th.slice(5)); return th.slice(0, 4) + "-" + ("0" + t).slice(-2) + "-" + ("0" + ng).slice(-2);
+}
+/** Gợi ý khách cho dòng sổ thuế: gần ngày nhập (đặt cọc trước tới hết ngày ở), khớp số tiền xếp đầu; gõ để lọc */
+function goiYKhach(h, loc) {
+  var ngay = ngayDongThue(h), r = thueDong(h), tien = r ? Number(String(r.o[5] || "").replace(/[^\d]/g, "")) || 0 : 0, q = boDauQL(String(loc || "")).toLowerCase().trim();
+  var ds = ((Q.lich && Q.lich.ds) || []).filter(function(b) { return b.code && b.ten; }).map(function(b) {
+    var cach = ngay < cong(b.vao, -45) ? soDem(ngay, b.vao) : ngay > b.ra ? soDem(b.ra, ngay) : 0;   // trong khoảng cọc trước 45 ngày -> hết ngày trả phòng = 0
+    var khop = tien && [b.invoice, b.coc, b.conLai].some(function(x) { return x > 0 && Math.abs(x - tien) <= 1000; });
+    return { b: b, diem: cach * 10 + Math.abs(soDem(b.vao, ngay)) * 0.1 - (khop ? 1000 : 0), khop: khop };
+  }).filter(function(x) { return !q || boDauQL(x.b.ten + " " + x.b.code).toLowerCase().indexOf(q) >= 0; });
+  return ds.sort(function(a, b) { return a.diem - b.diem; }).slice(0, 8);
+}
+function moGoiYKhach(td, o, h, chon) {
+  var w = document.createElement("div"); w.className = "gy-ds"; document.body.appendChild(w);
+  var api2 = { i: -1, ds: [], dangChon: false };
+  var dat = function() { var r = td.getBoundingClientRect(); w.style.left = Math.max(8, Math.min(innerWidth - 330, r.left)) + "px"; w.style.top = (r.bottom + 4) + "px"; };
+  var ve2 = function() {
+    api2.ds = goiYKhach(h, o.value === td.dataset.cu ? "" : o.value); dat();
+    w.innerHTML = '<div class="gy-dau">Khách gần ngày ' + ngan(ngayDongThue(h)) + "</div>" + (api2.ds.length ? api2.ds.map(function(x, i) {
+      return '<div class="gy-mu' + (i === api2.i ? " on" : "") + '" data-i="' + i + '"><b>' + esc(x.b.code) + "</b><span>" + esc(x.b.ten) + "</span><small>" + icn("vao", 12) + ngan(x.b.vao) + " " + icn("ra", 12) + ngan(x.b.ra) + (x.b.invoice ? " · " + tienM(x.b.invoice) : "") + "</small>" + (x.khop ? '<i class="gy-khop">khớp tiền</i>' : "") + "</div>"; }).join("") : '<div class="gy-rong">Không có khách phù hợp</div>');
+  };
+  td.dataset.cu = o.value; ve2();
+  o.addEventListener("input", function() { api2.i = -1; ve2(); });
+  w.addEventListener("mousedown", function(e) { var m = e.target.closest(".gy-mu"); if (!m) return; e.preventDefault(); api2.dangChon = true; var x = api2.ds[Number(m.dataset.i)]; api2.dong(); chon(x.b); });
+  api2.dong = function() { if (w.parentNode) w.remove(); };
+  api2.phim = function(e) {
+    if (!api2.ds.length) return false;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); api2.i = (api2.i + (e.key === "ArrowDown" ? 1 : -1) + api2.ds.length) % api2.ds.length; ve2(); return true; }
+    if (e.key === "Enter" && api2.i >= 0 && !e.isComposing) { e.preventDefault(); api2.dangChon = true; var x = api2.ds[api2.i]; api2.dong(); chon(x.b); return true; }
+    return false;
+  };
+  return api2;
+}
+/* rê chuột vào ô mã khách trong sổ thuế: popup nhỏ tên + ngày nhận/trả phòng */
+document.addEventListener("mouseover", function(e) {
+  var td = e.target.closest && e.target.closest('.tx-s td[data-c="9"]'), tip = $("#tip"); if (!tip) return;
+  if (!td || td.querySelector("input")) { if (tip.dataset.tx) { tip.hidden = true; delete tip.dataset.tx; } return; }
+  var ma = td.textContent.trim().toLowerCase(), b = ((Q.lich && Q.lich.ds) || []).filter(function(x) { return String(x.code || "").toLowerCase() === ma; })[0]; if (!b) return;
+  var r = td.getBoundingClientRect();
+  tip.innerHTML = '<div class="gy-pop"><b>' + esc(b.ten) + '</b><span>' + icn("vao", 14) + du(b.vao) + "</span><span>" + icn("ra", 14) + du(b.ra) + "</span><small>" + esc(b.phong || "") + (b.invoice ? " · " + tienM(b.invoice) : "") + "</small></div>";
+  tip.style.left = Math.max(8, Math.min(innerWidth - 230, r.left)) + "px"; tip.style.top = (r.bottom + 6) + "px"; tip.style.width = "auto"; tip.hidden = false; tip.dataset.tx = "1";
+});
 /* Esc: đóng thẻ nhập thuế đang mở, trở lại dòng gọn trong danh sách tra cứu */
 document.addEventListener("keydown", function(e) {
   if (e.key !== "Escape") return;
