@@ -544,6 +544,10 @@ html.toi .o-thue .t-ck{color:#d9d2c4!important}html.toi .o-thue .t-ck.on,html.to
 .bk span{white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;text-overflow:clip}
 .lane .bk{top:5px!important;bottom:5px!important;height:auto!important;display:flex!important;flex-direction:column;justify-content:center}   /* thanh cao bằng dòng phòng: đủ 3 dòng chữ */
 .bk-ng,.bk-con{white-space:nowrap;font-style:normal}   /* ngày và số tiền còn lại không bị cắt giữa chừng: thiếu chỗ thì cả cụm xuống dòng */
+.o-thue .t-chung{display:block;text-align:center;margin-top:1px}   /* 2 lần khai cùng ngày: ghi 1 ngày ở giữa */
+.o-thue.thue-gop{box-shadow:inset 4px 0 #e9a23b}   /* nhóm khách nhiều phòng nhập thuế 1 lần: vạch cam nối liền các dòng */
+.t-gop{display:inline-block;margin-left:4px;padding:0 5px;border-radius:99px;font-size:10.5px;font-style:normal;font-weight:800;background:#fde7c8;color:#8a4b0f;vertical-align:1px}
+html.toi .t-gop{background:#5a3e17;color:#ffd79a}
 /* cột thao tác: 4 icon to, lấp đầy ô */
 .tac-g{grid-template-columns:repeat(2,30px)!important;gap:4px!important}.tac-g button{width:30px;height:28px}.tac-g svg{width:20px!important;height:20px!important}
 /* chữ gần tông nền: nâng tương phản vừa phải (dịu mắt) */
@@ -1400,7 +1404,7 @@ function bangDT(b, ds, mo, dt) {
               : r.gop === -1 ? '<div class="ct hd-v gop-tiep" title="Gộp với đơn cùng tên phía trên · đơn này: ' + esc(r.o[19]) + '">〃</div>' : oj(r, 19).replace('<div class="', '<div class="hd-v ');
             return td + '><div class="hdg">' + hd + "<div>" + oj(r, 20) + oj(r, 21) + "</div></div></td>";
           }
-          if (g[0] === "thue") return '<td class="o-thue">' + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck' + (co ? " on" : "") + '" title="Thuế lần ' + l + (co ? ": đã nhập" : ": chưa nhập — tích để ghi sổ thuế") + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + '><span>L' + l + "</span>" + (r.ngThue && r.ngThue[l - 1] ? '<small class="t-ng">' + esc(r.ngThue[l - 1]) + "</small>" : "") + "</label>"; }).join("") + "</td>";
+          if (g[0] === "thue") { var ng = r.ngThue || [], chung = ng[0] && ng[0] === ng[1], gop = r.gopThue > 1 ? '<i class="t-gop" title="1 lần nhập thuế chung cho ' + r.gopThue + ' phòng của cùng khách">🔗×' + r.gopThue + "</i>" : ""; return '<td class="o-thue' + (gop ? " thue-gop" : "") + '">' + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck' + (co ? " on" : "") + '" title="Thuế lần ' + l + (co ? ": đã nhập" : ": chưa nhập — tích để ghi sổ thuế") + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + '><span>L' + l + "</span>" + (!chung && ng[l - 1] ? '<small class="t-ng">' + esc(ng[l - 1]) + (l === 1 ? gop : "") + "</small>" : "") + "</label>"; }).join("") + (chung ? '<small class="t-ng t-chung">' + esc(ng[0]) + gop + "</small>" : "") + "</td>"; }
           if (g[0] === 10) return td + ">" + oIO(r) + "</td>";
           return td + ">" + g.map(function(j) { return oj(r, j); }).join("") + "</td>";
         }).join("") + "</tr>";
