@@ -1077,7 +1077,10 @@ function batDau() {
     if (moi && daVe && Q.d && Q.d.homNay !== d.homNay) daVe = false;   // bản lưu là của hôm trước: vẽ lại từ đầu
     var lich = d.lich, dangXem = daVe && Q.tab === "tl" && $("#tl") ? ngayDauThay() : "";
     delete d.lich; Q.d = d;
-    if (!daVe) { Q.tu = cong(d.homNay, -21); TL.den = cong(d.homNay, -1); Q.tab = d.vai === "nv" ? "don" : d.lk ? tabDauLk(d.lk.quyen) : "tl"; veTabs(); ganTimKiem(); kepTuNay(); }
+    if (!daVe) { Q.tu = cong(d.homNay, -21); TL.den = cong(d.homNay, -1); Q.tab = d.vai === "nv" ? "don" : d.lk ? tabDauLk(d.lk.quyen) : "tl";
+      if (d.vai === "chu" && !d.lk) try { var dx = JSON.parse(localStorage.getItem("olia_dang_xem") || "null");   // mở lại trang đang làm trước khi tải lại (trong 7 ngày)
+        if (dx && Date.now() - dx.luc < 7 * 864e5 && ["tl", "cho", "thue", "ds", "chat", "nhap", "so", "thuchi", "don"].indexOf(dx.tab) >= 0) { Q.tab = dx.tab; if (/^\d{4}-\d{2}$/.test(dx.th)) TH.thang = dx.th; if (/^\d{4}-\d{2}$/.test(dx.tc)) TC.thang = dx.tc; } } catch (e) {}
+      veTabs(); ganTimKiem(); kepTuNay(); }
     else { veTabs(); if (dangXem) TL.den = dangXem; }
     if (lich && d.lichSo === "all") { Q.lich = lich; if (!daVe || ["tl", "don", "cho"].indexOf(Q.tab) >= 0) ve(); }
     else if (moi) taiLich();
@@ -1174,7 +1177,10 @@ function vuaKhung() {
     for (var i = 0; i < 3 && z > minZ; i++) { var r = t.getBoundingClientRect().width; if (r <= W + 0.5) break; z = Math.max(minZ, z * W / r - 0.002); t.style.zoom = z.toFixed(3); }   // đo lại cho khớp mép
   });
 }
+/** Nhớ trang đang làm (tab + tháng thuế / thu chi) để tải lại trang mở đúng chỗ */
+function luuDangXem() { try { localStorage.setItem("olia_dang_xem", JSON.stringify({ tab: Q.tab, th: TH.thang || "", tc: TC.thang || "", luc: Date.now() })); } catch (e) {} }
 function ve() {
+  luuDangXem();
   veTabs();
   if (Q.tab === "tl") veTimeline();
   else if (Q.tab === "cho") veCho();
@@ -1649,6 +1655,7 @@ var NHOM_P = { "CHI PHÍ CỐ ĐỊNH": "M4 11l8-7 8 7v9H4zM10 20v-5h4v5", "THU�
   "KHÁC": "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" };
 var IC_NHOM = {}; Object.keys(NHOM_P).forEach(function(k) { ICN_P["nh_" + k] = NHOM_P[k]; IC_NHOM[k] = '<span class="ic-nh">' + icn("nh_" + k, 15) + "</span>"; });   // icon nhóm chi: cùng bộ nét vẽ
 function veThuChi() {
+  if (Q.tab === "thuchi") luuDangXem();
   if (TC.xem === "nam") return veTongKet();
   var th = TC.thang || Q.d.homNay.slice(0, 7);
   if (TC.sheet && !TC.moi && TC.dl && TC.dl.thang === th && !TC.dl.chuaCo) TC.moi = moiTrong();   // kiểu sheet: luôn có dòng trống để nhập tiếp
@@ -3249,6 +3256,7 @@ document.addEventListener("keydown", function(e) {
   if (w && w._goc) { e.preventDefault(); w.replaceWith(w._goc); }
 });
 function veThue(nen) {   // nen=true: làm mới ngầm (dữ liệu về), không dựng lại trang nếu đang xem bảng kiểu sheet
+  if (Q.tab === "thue") luuDangXem();
   if (!TH.dl || TH.dl.thang !== (TH.thang || Q.d.homNay.slice(0, 7))) return taiThue();
   if (nen === true && TH.sheet && document.querySelector("#thSheetO .tx-s") && TH.veThang === TH.dl.thang) return veThueSheet(TH.dl.thang);
   TH.veThang = TH.dl.thang;
