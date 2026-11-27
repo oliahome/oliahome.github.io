@@ -558,6 +558,7 @@ html.toi .t-gop{background:#5a3e17;color:#ffd79a}
 .gy-khop{grid-row:1;grid-column:3;font-style:normal;font-size:10.5px;font-weight:800;padding:0 6px;border-radius:99px;background:#e7f3ec;color:#2f7d4f}html.toi .gy-khop{background:#1c3326;color:#8ff0b2}
 .gy-rong{padding:8px;color:var(--muted);font-size:12.5px}
 .gy-pop{display:flex;flex-direction:column;gap:3px;min-width:170px}.gy-pop b{font-size:14px}.gy-pop span{display:flex;align-items:center;gap:5px;font-size:13px}.gy-pop small{color:var(--muted)}
+.tx-s td.tx-ngay{text-align:center;font-variant-numeric:tabular-nums;font-weight:700}   /* ô Ngày gộp ngày/tháng */
 /* cột thao tác: 4 icon to, lấp đầy ô */
 .tac-g{grid-template-columns:repeat(2,30px)!important;gap:4px!important}.tac-g button{width:30px;height:28px}.tac-g svg{width:20px!important;height:20px!important}
 /* chữ gần tông nền: nâng tương phản vừa phải (dịu mắt) */
@@ -2957,9 +2958,12 @@ function veThueSheet(th) {
   apiNhanh("thueSheet", [th], function(d) {
     var o = $("#thSheetO"); if (!o || !TH.sheet) return; TH.sh = d;
     var dong = function(r, moi) { return '<tr' + (moi ? ' class="tx-moi"' : "") + '><td class="nh-so">' + r.hang + "</td>" + r.o.map(function(x, j) {
-      return '<td class="' + (r.ct[j] ? "ct" : "sua") + (j + 1 === d.cotTien ? " num" : "") + '" data-h="' + r.hang + '" data-c="' + (j + 1) + '">' + esc(x) + "</td>"; }).join("") + "</tr>"; };
+      if (j === 0 || j === 2 || j === 3 || j === 7 || j === 9) return "";   // bỏ cột A, H, J; ngày · / · tháng gộp vào 1 ô "Ngày"
+      if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(ng + (th2 ? "/" + th2 : "")) : "") + "</td>"; }
+      return '<td class="' + (r.ct[j] ? "ct" : "sua") + (j + 1 === d.cotTien ? " num" : "") + '" data-h="' + r.hang + '" data-c="' + (j + 1) + '"' + mauTx(r, j) + ">" + esc(x) + "</td>"; }).join("") + "</tr>"; };
+    var mauTx = function(r, j) { var n = (r.nen || [])[j], c = (r.chu || [])[j], st = ""; if (n && n !== "#ffffff") st += "background:" + n + ";"; if (c && c !== "#000000" && n && n !== "#ffffff") st += "color:" + c + ";"; return st ? ' style="' + st + '"' : ""; };   // tô màu như trên sheet
     o.innerHTML = '<div class="muted sm" style="margin:4px 0 6px">Sheet tax dd · ' + d.ds.length + " dòng tháng " + th.slice(5) + "/" + th.slice(0, 4) + " · bấm ô để sửa (Enter lưu, Esc huỷ) · dòng vàng cuối là dòng trống để nhập tiếp</div>" +
-      '<div class="nh-cuon vk"><table class="nh-b nh-s tx-s"><thead><tr><th>Dòng</th>' + d.tieuDe.map(function(t) { return "<th>" + esc(t) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      '<div class="nh-cuon vk"><table class="nh-b nh-s tx-s"><thead><tr><th>Dòng</th>' + d.tieuDe.map(function(t, j) { return j === 0 || j === 2 || j === 3 || j === 7 || j === 9 ? "" : j === 1 ? "<th>Ngày</th>" : "<th>" + esc(t) + "</th>"; }).join("") + "</tr></thead><tbody>" +
       d.ds.map(function(r) { return dong(r); }).join("") + (d.moi ? dong(d.moi, true) : "") + "</tbody></table></div>";
     vuaKhung();
     o.querySelector(".tx-s").addEventListener("click", function(e) { var td = e.target.closest("td.sua"); if (td && !td.querySelector("input")) suaOThue(td); });
@@ -2977,9 +2981,10 @@ function suaOThue(td) {
   var huy = function() { if (xong) return; xong = true; td.classList.remove("dang"); td.textContent = cu; if (gy) gy.dong(); };
   var luu = function() {
     if (xong) return; var v = o.value.trim(); if (v === cu) return huy();
-    if (laNgay && v) { var g = docNgayNhap(v); if (!g) { toast("⚠️ Ngày chưa đúng, gõ ngày/tháng (vd 21/11)"); o.focus(); return; } v = g; }
+    var g = null; if (laNgay && v) { g = docNgayNhap(v); if (!g) { toast("⚠️ Ngày chưa đúng, gõ ngày/tháng (vd 21/11)"); o.focus(); return; } }
     if (gy) gy.dong(); xong = true; td.classList.remove("dang"); td.textContent = "Đang lưu…";
     var s = {}; s[c] = v;
+    if (laNgay) s = { 2: g || "" };   // cột B là ngày đầy đủ (hiện số ngày), cột tháng do sheet tự tính
     api("suaThue", [h, s], function() { toast("✔ Đã ghi sheet tax dd dòng " + h); TH.dl = null; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); }, function(e) { td.textContent = cu; loiChung(e); });
   };
   o.addEventListener("keydown", function(e) {
