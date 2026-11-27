@@ -778,7 +778,7 @@ function luuBan(k, d) {
     localStorage.setItem(k, JSON.stringify({ t: Date.now(), d: d })); localStorage.setItem("olia_c_ds", JSON.stringify(ds));
   } catch (e) { try { JSON.parse(localStorage.getItem("olia_c_ds") || "[]").forEach(function(x) { localStorage.removeItem(x); }); localStorage.removeItem("olia_c_ds"); } catch (e2) {} }
 }
-function docBan(k) { try { var g = JSON.parse(localStorage.getItem(k) || "null"); return g && g.t > ghiLuc() && Date.now() - g.t < 3 * 864e5 ? g.d : null; } catch (e) { return null; } }
+function docBan(k) { try { var g = JSON.parse(localStorage.getItem(k) || "null"); return g && (g.t > ghiLuc() || !/bangSheet|thue|thuChi/.test(k)) && Date.now() - g.t < 3 * 864e5 ? g.d : null; } catch (e) { return null; } }   // kể cả bản cũ hơn lần sửa gần nhất: hiện ngay để không gián đoạn, bản mới về sẽ vẽ lại
 /** ok(dữ liệu, laBanLuu): gọi ngay bằng bản lưu (nếu có), rồi gọi lại khi bản mới từ máy chủ khác bản lưu */
 function apiNhanh(ten, args, ok, loi) {
   var k = "olia_c_" + ten + "_" + JSON.stringify(args || []), cu = docBan(k), sCu = cu ? JSON.stringify(cu) : "";
@@ -1077,7 +1077,9 @@ function kepTuNay() {
 }
 function taiLich(cb) {
   kepTuNay();
-  api("lich", [Q.tu, "all"], function(l) { Q.lich = l; ve(); cb && cb(); });   // tải hết mọi đơn: cuộn đi đâu cũng có sẵn dữ liệu
+  var k = "olia_c_lich_" + JSON.stringify([Q.tu, "all"]), cu = !cb && docBan(k);   // hiện ngay lịch đã lưu trên máy (trừ khi vừa sửa và cần mở lại đơn), bản mới về thì vẽ lại
+  if (cu && !Q.lich) { Q.lich = cu; ve(); }
+  api("lich", [Q.tu, "all"], function(l) { luuBan(k, l); Q.lich = l; ve(); cb && cb(); });   // tải hết mọi đơn: cuộn đi đâu cũng có sẵn dữ liệu
 }
 /* 📐 bảng vừa khung: cột rộng theo nội dung; tổng rộng hơn màn hình thì thu nhỏ cả bảng để luôn thấy đủ các cột (nút 🔎 Cỡ thật để xem chữ to + cuộn ngang) */
 var VK = { that: (function() { try { return window.innerWidth >= 700 && localStorage.getItem("olia_co_that") === "1"; } catch (e) { return false; } })() };   // điện thoại: luôn mở ở chế độ vừa màn hình
