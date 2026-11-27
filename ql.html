@@ -560,6 +560,8 @@ html.toi .t-gop{background:#5a3e17;color:#ffd79a}
 .gy-pop{display:flex;flex-direction:column;gap:3px;min-width:170px}.gy-pop b{font-size:14px}.gy-pop span{display:flex;align-items:center;gap:5px;font-size:13px}.gy-pop small{color:var(--muted)}
 .tx-s td.tx-ngay{text-align:center;font-variant-numeric:tabular-nums;font-weight:700}   /* ô Ngày gộp ngày/tháng */
 .tx-s .tx-tg{display:block;font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.1}   /* giờ nhập dưới ngày */
+.tx-s td.tx-nhap{text-align:center;font-variant-numeric:tabular-nums;font-weight:700;line-height:1.2}
+.tx-xep{display:inline-flex;gap:2px;padding:3px;border-radius:12px;border:1px solid var(--line);background:var(--soft)}.tx-xep button{border:0;background:none;padding:4px 10px 3px;border-radius:9px;font:inherit;font-weight:700;color:var(--fg);cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;gap:1px;line-height:1}.tx-xep button small{font-size:10.5px}
 /* cột thao tác: 4 icon to, lấp đầy ô */
 .tac-g{grid-template-columns:repeat(2,30px)!important;gap:4px!important}.tac-g button{width:30px;height:28px}.tac-g svg{width:20px!important;height:20px!important}
 /* chữ gần tông nền: nâng tương phản vừa phải (dịu mắt) */
@@ -1272,7 +1274,7 @@ var IC_AN = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
   IC_XOA = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg>';
 /* Danh sách dạng Google Sheet: cột B → W, đúng chữ + màu ô như sheet booking. Bấm vào ô để sửa thẳng (ô công thức khoá) */
 /* 📱 Bảng Booking trên điện thoại: ẩn Dòng / Booking Date / Published room, tiêu đề thành icon nét đồng bộ, tiền gọn theo k */
-var ICN_P = { mau: "M12 3a9 9 0 1 0 0 18c1 0 1.6-.8 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1 0-.9.7-1.5 1.6-1.5H16a5 5 0 0 0 5-5c0-4.3-4-7.8-9-7.8zM7.5 12.5h.01M9.5 8h.01M14.5 8h.01M17 12h.01", agent: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
+var ICN_P = { xepNgay: "M3 6.5h12v12H3zM3 10.5h12M7 4.5v3.5M11 4.5v3.5M6.5 14h2M10 14h2M20 5v13M17 15l3 3 3-3", xepNhap: "M9.5 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM9.5 8.5V12l2.5 1.6M20 5v13M17 15l3 3 3-3", mau: "M12 3a9 9 0 1 0 0 18c1 0 1.6-.8 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1 0-.9.7-1.5 1.6-1.5H16a5 5 0 0 0 5-5c0-4.3-4-7.8-9-7.8zM7.5 12.5h.01M9.5 8h.01M14.5 8h.01M17 12h.01", agent: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
   status: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 12.5l2.7 2.7L16 9.8", code: "M9 4L7 20M17 4l-2 16M4 9h16M3.5 15h16",
   giam: "M3.5 12.5V4.5a1 1 0 0 1 1-1h8l8 8-9 9zM8 8h.01", room: "M3 18V7M3 13h18v5M21 18v-5a3 3 0 0 0-3-3h-7v3M7 11.5h.01",
   vao: "M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M3 12h11M10 8l4 4-4 4", ra: "M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M9 12h12M17 8l4 4-4 4",
@@ -2958,14 +2960,17 @@ function tenThang(th) { return "Tháng " + Number(th.slice(5)) + "/" + th.slice(
 function veThueSheet(th) {
   apiNhanh("thueSheet", [th], function(d) {
     var o = $("#thSheetO"); if (!o || !TH.sheet) return; TH.sh = d;
-    var dong = function(r, moi) { return '<tr' + (moi ? ' class="tx-moi"' : "") + '><td class="nh-so">' + r.hang + "</td>" + r.o.map(function(x, j) {
+    var dong = function(r, moi) { return '<tr' + (moi ? ' class="tx-moi"' : "") + '><td class="nh-so"' + (mauTx(r, 4) && r._mau ? mauTx(r, 4) : "") + ">" + r.hang + "</td>" + r.o.map(function(x, j) {
       if (j === 0 || j === 2 || j === 3 || j === 7 || j === 9 || j === 10) return "";   // bỏ cột A, H, J; ngày · / · tháng gộp vào 1 ô "Ngày"
-      if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(("0" + ng).slice(-2) + (th2 ? "/" + ("0" + th2).slice(-2) : "")) : "") + (r.tg ? '<small class="tx-tg">' + esc(r.tg) + "</small>" : "") + "</td>"; }
+      if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(("0" + ng).slice(-2) + (th2 ? "/" + ("0" + th2).slice(-2) : "")) : "") + "</td>"; }
+      if (j === 13) return '<td class="ct tx-nhap"' + mauTx(r, j) + ">" + (r.tg ? esc(r.tgNgay) + '<small class="tx-tg">' + esc(r.tg) + "</small>" : "") + "</td>";   // cột N -> thời gian nhập (từ cột O)
       if (j === 12) { var bk0 = timMaKhach(r.o[8]); return '<td class="ct"' + mauTx(r, j) + ">" + (bk0 ? esc(("0" + dk(bk0.ra).getDate()).slice(-2) + "/" + ("0" + (dk(bk0.ra).getMonth() + 1)).slice(-2)) : "") + "</td>"; }   // C-out: ngày trả phòng theo mã khách
       return '<td class="' + (r.ct[j] ? "ct" : "sua") + (j + 1 === d.cotTien ? " num" : "") + '" data-h="' + r.hang + '" data-c="' + (j + 1) + '"' + mauTx(r, j) + ">" + esc(x) + "</td>"; }).join("") + "</tr>"; };
-    var mauTx = function(r, j) { var n = (r.nen || [])[j], c = (r.chu || [])[j], st = ""; if (n && n !== "#ffffff") st += "background:" + n + ";"; if (c && c !== "#000000" && n && n !== "#ffffff") st += "color:" + c + ";"; return st ? ' style="' + st + '"' : ""; };   // tô màu như trên sheet
+    var mauTx = function(r, j) {   // tô màu như trên sheet; dòng có ô tô màu -> tô NGUYÊN DÒNG bằng màu xuất hiện nhiều nhất
+      if (r._mau === undefined) { var dem = {}; (r.nen || []).forEach(function(x, k) { if (x && x !== "#ffffff" && k !== 0 && k !== 7 && k !== 9 && k !== 10) dem[x] = (dem[x] || 0) + 1; }); r._mau = Object.keys(dem).sort(function(a, b) { return dem[b] - dem[a]; })[0] || ""; }
+      var n = r._mau || (r.nen || [])[j], c = (r.chu || [])[j], st = ""; if (n && n !== "#ffffff") st += "background:" + n + ";"; if (c && c !== "#000000" && n && n !== "#ffffff") st += "color:" + c + ";"; return st ? ' style="' + st + '"' : ""; };
     o.innerHTML = '<div class="muted sm" style="margin:4px 0 6px">Sheet tax dd · ' + d.ds.length + " dòng tháng " + th.slice(5) + "/" + th.slice(0, 4) + " · " + (TH.xep === "nhap" ? "xếp theo thứ tự nhập" : "xếp theo ngày") + " · bấm ô để sửa (Enter lưu, Esc huỷ) · dòng vàng cuối là dòng trống để nhập tiếp</div>" +
-      '<div class="nh-cuon vk"><table class="nh-b nh-s tx-s"><thead><tr><th>Dòng</th>' + d.tieuDe.map(function(t, j) { return j === 0 || j === 2 || j === 3 || j === 7 || j === 9 || j === 10 ? "" : j === 1 ? "<th>Ngày</th>" : "<th>" + esc(t) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      '<div class="nh-cuon vk"><table class="nh-b nh-s tx-s"><thead><tr><th>Dòng</th>' + d.tieuDe.map(function(t, j) { return j === 0 || j === 2 || j === 3 || j === 7 || j === 9 || j === 10 ? "" : j === 1 ? "<th>Ngày</th>" : j === 13 ? "<th>Thời gian nhập</th>" : "<th>" + esc(t) + "</th>"; }).join("") + "</tr></thead><tbody>" +
       d.ds.slice().sort(function(a, b) { if (TH.xep === "nhap") return (a.tgMs && b.tgMs ? a.tgMs - b.tgMs : 0) || a.hang - b.hang;   // thứ tự nhập: theo thời điểm nhập (cột O), chưa có thì theo dòng
         var k = function(r) { return (parseInt(r.o[3], 10) || 0) * 100 + (parseInt(r.o[1], 10) || 0); }; return k(a) - k(b) || a.hang - b.hang; })   // theo cột Ngày
         .map(function(r) { return dong(r); }).join("") + (d.moi ? dong(d.moi, true) : "") + "</tbody></table></div>";
@@ -3056,7 +3061,7 @@ function veThue() {
   var d = TH.dl, max = Math.max.apply(null, Object.keys(d.theoThang).map(function(k) { return d.theoThang[k]; }).concat([1]));
   var tongNam = Object.keys(d.theoThang).reduce(function(s, k) { return s + d.theoThang[k]; }, 0);
   var h = '<div class="bar"><button class="btn" data-act="thLui">◀</button><b style="min-width:120px;text-align:center">' + tenThang(d.thang) + '</b><button class="btn" data-act="thToi">▶</button>' +
-    '<button class="btn" data-act="thTai">↻</button>' + '<button class="btn' + (TH.sheet ? " on" : "") + '" data-act="thSheet" title="Nhập như trên sheet tax dd (đủ cột) / về giao diện gọn">▦ Kiểu sheet</button>' + (TH.sheet ? '<button class="btn" data-act="thXep" title="Đổi cách sắp xếp: theo cột Ngày / theo thứ tự đã nhập">' + (TH.xep === "nhap" ? "🕘 Thứ tự nhập" : "📅 Theo ngày") + " ⇅</button>" : "") + '<button class="btn pri" data-act="thBaoCao">📊 Báo cáo năm ' + d.thang.slice(0, 4) + "</button>" + '<button class="btn" data-act="thDoiSoat" title="So tổng sổ thuế với tổng tiền từng đơn: khớp mã hoặc khớp tên → Done">🔁 Đối soát ngay</button>' + (Q.d.sheetUrl ? '<a class="btn" href="' + esc(Q.d.sheetUrl) + '" target="_blank" rel="noopener">📗 Sheet</a>' : "") +
+    '<button class="btn" data-act="thTai">↻</button>' + '<button class="btn' + (TH.sheet ? " on" : "") + '" data-act="thSheet" title="Nhập như trên sheet tax dd (đủ cột) / về giao diện gọn">▦ Kiểu sheet</button>' + (TH.sheet ? '<span class="seg2 tx-xep"><button class="' + (TH.xep !== "nhap" ? "on" : "") + '" data-act="thXep" data-v="ngay" title="Xếp theo cột Ngày (sớm → muộn)">' + icn("xepNgay", 22) + '<small>Ngày</small></button><button class="' + (TH.xep === "nhap" ? "on" : "") + '" data-act="thXep" data-v="nhap" title="Xếp theo thứ tự đã nhập (nhập trước ở trên)">' + icn("xepNhap", 22) + "<small>Nhập</small></button></span>" : "") + '<button class="btn pri" data-act="thBaoCao">📊 Báo cáo năm ' + d.thang.slice(0, 4) + "</button>" + '<button class="btn" data-act="thDoiSoat" title="So tổng sổ thuế với tổng tiền từng đơn: khớp mã hoặc khớp tên → Done">🔁 Đối soát ngay</button>' + (Q.d.sheetUrl ? '<a class="btn" href="' + esc(Q.d.sheetUrl) + '" target="_blank" rel="noopener">📗 Sheet</a>' : "") +
     (d.kyKeKhai ? '<span class="muted sm" style="margin-left:auto">Sheet đang ghi: ' + esc(d.kyKeKhai) + "</span>" : "") + "</div>";
   h += '<div class="kpis"><div class="kpi"><span>Tổng thu ' + tenThang(d.thang).toLowerCase() + '</span><b class="num">' + tien(d.tong) + "</b></div>" +
     '<div class="kpi"><span>Số lần thu</span><b class="num">' + d.dong.length + "</b></div>" +
@@ -3391,7 +3396,7 @@ document.addEventListener("click", function(e) {
   }
   else if (a === "nhSheet") { NH.bangCu = !NH.bangCu; try { localStorage.setItem("olia_nh_sheet", NH.bangCu ? "1" : "0"); } catch (e) {} toast(NH.bangCu ? "▦ Kiểu sheet: đủ cột, màu y sheet" : "Bảng gọn"); veNhap(); }
   else if (a === "tcSheet") { TC.sheet = !TC.sheet; try { localStorage.setItem("olia_tc_sheet", TC.sheet ? "1" : "0"); } catch (e) {} veThuChi(); }
-  else if (a === "thXep") { TH.xep = TH.xep === "nhap" ? "ngay" : "nhap"; try { localStorage.setItem("olia_tx_xep", TH.xep); } catch (e) {} veThue(); }
+  else if (a === "thXep") { TH.xep = v === "nhap" ? "nhap" : "ngay"; try { localStorage.setItem("olia_tx_xep", TH.xep); } catch (e) {} veThue(); }
   else if (a === "thSheet") { TH.sheet = !TH.sheet; try { localStorage.setItem("olia_th_sheet", TH.sheet ? "1" : "0"); } catch (e) {} veThue(); }
   else if (a === "dtKieu") { DT_BAT.kieu = bkDT() ? "pc" : "dt"; try { localStorage.setItem("olia_dt_bat", JSON.stringify(DT_BAT)); } catch (e) {} toast(bkDT() ? "📱 Kiểu điện thoại" : "Kiểu iPad / máy tính"); veNhap(); }
   else if (a === "dtBat") { DT_BAT[v] = !DT_BAT[v]; try { localStorage.setItem("olia_dt_bat", JSON.stringify(DT_BAT)); } catch (e) {} veNhap(); }
