@@ -1055,7 +1055,7 @@ function taiTruocCacTab() {
   var ds = [
     ["bangSheet", [NH.thang || th0, NH.theo], function(bs) { if (!NH.bang || NH.bang.thang === bs.thang) { NH.bang = bs; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); } }],
     ["thuChi", [th0], function(x) { if (!TC.dl || TC.dl.thang === x.thang) { TC.dl = x; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) giuOVe(); } }],
-    ["thue", [th0], function(x) { if (!TH.dl || TH.dl.thang === x.thang) { TH.dl = x; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(); } }]
+    ["thue", [th0], function(x) { if (!TH.dl || TH.dl.thang === x.thang) { TH.dl = x; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(true); } }]
   ];
   ds.forEach(function(x) { var cu = docBan("olia_c_" + x[0] + "_" + JSON.stringify(x[1])); if (cu) x[2](cu, true); });
   ds.forEach(function(x) {   // gọi SONG SONG cùng lúc (đo thực tế: song song ~5 giây, gộp 1 lượt ~6,6 giây vì máy chủ chạy tuần tự)
@@ -2977,9 +2977,22 @@ function taiThue(th) {
 function lechThang(th, n) { var d = dk(th + "-01"); d.setMonth(d.getMonth() + n); return kd(d).slice(0, 7); }
 function tenThang(th) { return "Tháng " + Number(th.slice(5)) + "/" + th.slice(0, 4); }
 /* ▦ Thuế kiểu sheet: bảng 14 cột y như sheet "tax dd", bấm ô sửa (Enter lưu, Esc huỷ), dòng trống cuối để nhập tiếp như trên sheet */
+/** Bảng sổ thuế: hiện ngay bản đã nhớ trong máy, tải ngầm bản mới, chỉ vẽ lại khi dữ liệu thật sự đổi (không nháy "Đang đọc…") */
+function thueSheetNho(th, ok, loi) {
+  TH.shMem = TH.shMem || {}; var m = TH.shMem[th];
+  if (m) ok(m.d);
+  apiNhanh("thueSheet", [th], function(d, luu) {
+    if (luu && m) return;   // bản trong localStorage cũ hơn bản đang nhớ
+    var sj = JSON.stringify(d); if (m && m.s === sj) return;
+    TH.shMem[th] = m = { d: d, s: sj };
+    if (dangSua() || document.querySelector(".tx-s td.dang")) { TH.shCho = th; return; }   // đang gõ ô: vẽ lại sau
+    ok(d);
+  }, m ? function() {} : loi);
+}
 function veThueSheet(th) {
-  apiNhanh("thueSheet", [th], function(d) {
+  thueSheetNho(th, function(d) {
     var o = $("#thSheetO"); if (!o || !TH.sheet) return; TH.sh = d;
+    var cu0 = o.querySelector(".nh-cuon"), cuon = cu0 ? [cu0.scrollTop, cu0.scrollLeft] : null, cuonTrang = window.scrollY;
     var dong = function(r, moi) { var o1 = function(x, j) {
       if (j === 0 || j === 2 || j === 3 || j === 7 || j === 9 || j === 10) return "";   // bỏ cột A, H, J; ngày · / · tháng gộp vào 1 ô "Ngày"
       if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(("0" + ng).slice(-2) + (th2 ? "/" + ("0" + th2).slice(-2) : "")) : "") + "</td>"; }
@@ -2998,6 +3011,7 @@ function veThueSheet(th) {
         var k = function(r) { return (parseInt(r.o[3], 10) || 0) * 100 + (parseInt(r.o[1], 10) || 0); }; return k(b) - k(a) || b.hang - a.hang; })   // theo cột Ngày
         .map(function(r) { return dong(r); }).join("") + "</tbody></table></div>";
     vuaKhung();
+    if (cuon) { var cm = o.querySelector(".nh-cuon"); if (cm) { cm.scrollTop = cuon[0]; cm.scrollLeft = cuon[1]; } window.scrollTo(0, cuonTrang); }   // giữ chỗ đang xem
     o.querySelector(".tx-s").addEventListener("click", function(e) {
       var bx = e.target.closest("button[data-xoa]"); if (bx) return xoaDongThue(Number(bx.dataset.xoa));
       if (e.target.closest("[data-act=txGhi]")) { TH.anGhi = !TH.anGhi; try { localStorage.setItem("olia_tx_ghi", TH.anGhi ? "1" : "0"); } catch (e2) {} return veThueSheet(th); }
@@ -3010,7 +3024,7 @@ function xoaDongThue(h) {
   var mo = [r.o[1] && ("ngày " + String(r.o[1]).trim() + (r.o[3] ? "/" + String(r.o[3]).trim() : "")), r.o[5] && String(r.o[5]).trim(), r.o[8] && String(r.o[8]).trim(), r.o[4] && String(r.o[4]).trim()].filter(Boolean).join(" · ");
   if (!confirm("Xoá dòng " + h + " trong sheet tax dd?\n" + (mo || "(dòng trống)") + "\n\nXoá nội dung các ô nhập tay, giữ công thức. Đơn mang mã này sẽ bỏ tích thuế nếu sổ không còn lần nhập tương ứng.")) return;
   var tr = document.querySelector('.tx-s button[data-xoa="' + h + '"]'); if (tr) tr.closest("tr").style.opacity = ".4";
-  api("xoaThue", [h], function(k) { toast("🗑 Đã xoá dòng " + h + (k && k.boTich ? " · bỏ tích thuế " + k.boTich + " đơn" : "")); TH.dl = null; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); },
+  api("xoaThue", [h], function(k) { toast("🗑 Đã xoá dòng " + h + (k && k.boTich ? " · bỏ tích thuế " + k.boTich + " đơn" : "")); TH.luc = 0; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); },
     function(e) { if (tr) tr.closest("tr").style.opacity = ""; loiChung(e); });
 }
 /** Chống trùng dòng sổ thuế: cùng mã + cùng số tiền + ngày tiền vào cách ≤ 3 ngày, hoặc mã đã đủ 2 lần nhập; chưa có mã thì cùng số tiền + cùng ngày */
@@ -3035,7 +3049,7 @@ function suaOThue(td) {
     var s2 = { 9: b.code }; var rr = thueDong(h); if (!rr || !String(rr.o[4] || "").trim() || c === 5) s2[5] = "khách đặt phòng - " + b.ten;
     if (!rr || !String(rr.o[1] || "").trim()) s2[2] = Q.d.homNay;   // chưa có ngày tiền vào: mặc định ngày nhập
     if ((!rr || !String(rr.o[5] || "").replace(/[^\d]/g, "")) && (b.conLai > 0 || b.invoice > 0)) s2[6] = String(b.conLai > 0 ? b.conLai : b.invoice);   // chưa có số tiền: tiền còn lại
-    api("suaThue", [h, s2], function() { toast("✔ Đã gán " + b.code + " · " + b.ten + " cho dòng " + h); TH.dl = null; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); }, function(e) { td.textContent = cu; loiChung(e); });
+    api("suaThue", [h, s2], function() { toast("✔ Đã gán " + b.code + " · " + b.ten + " cho dòng " + h); TH.luc = 0; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); }, function(e) { td.textContent = cu; loiChung(e); });
   }) : null;
   var huy = function() { if (xong) return; xong = true; td.classList.remove("dang"); td.textContent = cu; if (gy) gy.dong(); };
   var luu = function() {
@@ -3059,7 +3073,7 @@ function suaOThue(td) {
     api("suaThue", [h, s], function() {
       var dangXem = TH.thang || Q.d.homNay.slice(0, 7), sang = thangMoi && thangMoi !== dangXem;
       toast((nhanDien ? "🔎 Tự nhận diện: " + nhanDien.b.ten + " · " + nhanDien.b.code + " · checkout " + ngan(nhanDien.b.ra) + " (" + nhanDien.loai + ")" : "✔ Đã ghi sheet tax dd dòng " + h) + (sang ? " · chuyển sang tháng " + thangMoi.slice(5) + "/" + thangMoi.slice(0, 4) : ""));
-      TH.dl = null; if (sang) { TH.thang = thangMoi; veThue(); } else veThueSheet(dangXem); }, function(e) { td.textContent = cu; loiChung(e); });
+      TH.luc = 0; if (sang) { TH.thang = thangMoi; veThue(); } else veThueSheet(dangXem); }, function(e) { td.textContent = cu; loiChung(e); });
   };
   o.addEventListener("keydown", function(e) {
     if (gy && gy.phim(e)) return;
@@ -3070,6 +3084,8 @@ function suaOThue(td) {
 /** Khoảng dò khách theo ngày CHECK-IN so với ngày nhập tiền (giống máy chủ ND_THUE): từ 10 ngày trước, không giới hạn về sau */
 var ND_THUE = { truoc: 10, sau: null };
 function trongKhoangThue(b, ngay) { return b.vao >= cong(ngay, -ND_THUE.truoc) && (ND_THUE.sau == null || b.vao <= cong(ngay, ND_THUE.sau)); }
+/** Đơn còn cần thuế lần 1: chưa tích, hoặc đã tích mà sổ thuế (cả năm) chưa có dòng nào mang mã đơn */
+function canThue1(b) { var mc = (TH.sh || {}).maCo; return !b.thue1 || (mc ? mc.indexOf(String(b.code || "").toLowerCase()) < 0 : false); }
 /** 0 khớp · 1 chuyển chẵn lên / lệch ≤3% · 2 chuyển thiếu (50–97%, số tròn) · 9 không khớp (giống mucKhopTien_ máy chủ) */
 function mucKhopTien(can, tien) {
   can = Math.round(Number(can) || 0); tien = Math.round(Number(tien) || 0); if (can <= 0 || tien <= 0) return 9;
@@ -3080,9 +3096,9 @@ function mucKhopTien(can, tien) {
   return 9;
 }
 function timKhachTheoTien(tien, ngay) {
-  var hn = ngay || Q.d.homNay, ds = ((Q.lich && Q.lich.ds) || []).filter(function(b) { return b.code && b.ten && !(b.thue1 && b.thue2) && trongKhoangThue(b, hn); }).map(function(b) {
+  var hn = ngay || Q.d.homNay, ds = ((Q.lich && Q.lich.ds) || []).filter(function(b) { return b.code && b.ten && (!(b.thue1 && b.thue2) || canThue1(b)) && trongKhoangThue(b, hn); }).map(function(b) {
     var loai = "", bac = 9;
-    [["còn lại", b.thue2 ? 0 : b.conLai], ["cọc", b.thue1 ? 0 : b.coc], ["tổng", b.thue1 ? 0 : b.invoice]].forEach(function(x) { var d = Math.abs((x[1] || 0) - tien); if (!(x[1] > 0)) return;   // đơn đã nhập lần đó rồi -> không nhận diện lại
+    [["còn lại", b.thue2 || hn < cong(b.vao, -3) ? 0 : b.conLai], ["cọc", canThue1(b) ? b.coc : 0], ["tổng", canThue1(b) ? b.invoice : 0]].forEach(function(x) { var d = Math.abs((x[1] || 0) - tien); if (!(x[1] > 0)) return;   // đơn đã nhập lần đó rồi -> không nhận diện lại
       var bb = mucKhopTien(x[1], tien); if (bb < bac) { bac = bb; loai = ["khớp ", "chuyển chẵn ", "chuyển thiếu "][bb] + x[0]; } });
     return { b: b, bac: bac, loai: loai, cach: Math.abs(soDem(b.vao, hn)) };
   }).filter(function(x) { return x.bac < 9; }).sort(function(a, b) { return a.bac - b.bac || a.cach - b.cach; });
@@ -3092,7 +3108,7 @@ function timKhachTheoTien(tien, ngay) {
 }
 /** Cộng 2–3 đơn CHƯA có thuế lần 1 (ưu tiên cùng khách + cùng ngày nhận) cho khớp số tiền: cọc cộng cọc, hoặc tổng cộng tổng */
 function timKhachGop(tien, ngay) {
-  var hn = ngay || Q.d.homNay, ung = ((Q.lich && Q.lich.ds) || []).filter(function(b) { return b.code && b.ten && !b.thue1 && trongKhoangThue(b, hn); })
+  var hn = ngay || Q.d.homNay, ung = ((Q.lich && Q.lich.ds) || []).filter(function(b) { return b.code && b.ten && canThue1(b) && trongKhoangThue(b, hn); })
     .sort(function(a, b) { return Math.abs(soDem(a.vao, hn)) - Math.abs(soDem(b.vao, hn)); }).slice(0, 18), tot = null;
   ["coc", "invoice"].forEach(function(f) {
     (function thu(bd, chon, tong) {
@@ -3163,9 +3179,11 @@ document.addEventListener("keydown", function(e) {
   if (!w) { var ds = document.querySelectorAll(".th-mo"); w = ds[ds.length - 1]; }
   if (w && w._goc) { e.preventDefault(); w.replaceWith(w._goc); }
 });
-function veThue() {
+function veThue(nen) {   // nen=true: làm mới ngầm (dữ liệu về), không dựng lại trang nếu đang xem bảng kiểu sheet
   if (!TH.dl || TH.dl.thang !== (TH.thang || Q.d.homNay.slice(0, 7))) return taiThue();
-  if (Date.now() - (TH.luc || 0) > 20000) { TH.luc = Date.now(); apiNhanh("thue", [TH.dl.thang], function(d, luu) { if (luu) return; TH.dl = d; if (Q.tab === "thue" && !dangSua()) veThue(); }, function() {}); }
+  if (nen === true && TH.sheet && document.querySelector("#thSheetO .tx-s") && TH.veThang === TH.dl.thang) return veThueSheet(TH.dl.thang);
+  TH.veThang = TH.dl.thang;
+  if (Date.now() - (TH.luc || 0) > 20000) { TH.luc = Date.now(); apiNhanh("thue", [TH.dl.thang], function(d, luu) { if (luu) return; TH.dl = d; if (Q.tab === "thue" && !dangSua()) veThue(true); }, function() {}); }
   var d = TH.dl, max = Math.max.apply(null, Object.keys(d.theoThang).map(function(k) { return d.theoThang[k]; }).concat([1]));
   var tongNam = Object.keys(d.theoThang).reduce(function(s, k) { return s + d.theoThang[k]; }, 0);
   var h = '<div class="bar"><button class="btn" data-act="thLui">◀</button><b style="min-width:120px;text-align:center">' + tenThang(d.thang) + '</b><button class="btn" data-act="thToi">▶</button>' +
@@ -3193,7 +3211,7 @@ function veThue() {
     '<datalist id="thGoiY">' + goiYSo(d.dong).map(function(x) { return '<option value="' + esc(x) + '">'; }).join("") + "</datalist></div>" +
     '<div class="tl"><table class="so"><thead><tr><th class="c-ngay">Ngày</th><th>Nội dung</th><th class="c-ma">Mã</th><th>Ghi chú</th><th class="r">Số tiền</th></tr></thead><tbody id="soBody"></tbody>' +
     '<tfoot><tr><td colspan="4"><b id="soNhan">Tổng cộng</b></td><td class="r num"><b id="soTong"></b></td></tr></tfoot></table></div>';
-  if (TH.sheet) { $("#app").innerHTML = h.slice(0, h.indexOf('<div class="kpis">')) + '<div id="thSheetO"><div class="loading">Đang đọc sheet tax dd…</div></div>'; return veThueSheet(d.thang); }
+  if (TH.sheet) { $("#app").innerHTML = h.slice(0, h.indexOf('<div class="kpis">')) + '<div id="thSheetO">' + (TH.shMem && TH.shMem[d.thang] ? "" : '<div class="loading">Đang đọc sheet tax dd…</div>') + "</div>"; return veThueSheet(d.thang); }
   $("#app").innerHTML = h;
   $("#thLoc").addEventListener("input", function(e) { TH.loc = e.target.value; veSoThu(); });
   $("#thChuaDone").addEventListener("change", function(e) { TH.chuaDone = e.target.checked; timThue(); });
