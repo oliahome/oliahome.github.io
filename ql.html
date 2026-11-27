@@ -787,8 +787,8 @@ function apiNhanh(ten, args, ok, loi) {
 }
 function dangSua() { var a = document.activeElement; return !!(a && a.closest && a.closest("#app, #drawer") && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)); }
 function api(ten, args, ok, loi) {
-  if (!DOC_QL[ten]) try { localStorage.setItem("olia_ghi", String(Date.now())); } catch (e) {}
-  google.script.run.withSuccessHandler(function(r) { r && r.ok ? ok(r.data) : (loi || loiChung)((r && r.loi) || "Có lỗi"); })
+  var ghi = !DOC_QL[ten] && ten !== "nhieu"; if (ghi) try { localStorage.setItem("olia_ghi", String(Date.now())); } catch (e) {}
+  google.script.run.withSuccessHandler(function(r) { if (r && r.ok && ghi && Q.d) lienKetSauGhi(); r && r.ok ? ok(r.data) : (loi || loiChung)((r && r.loi) || "Có lỗi"); })
     .withFailureHandler(function(e) { (loi || loiChung)(e && e.message ? e.message : "Mất kết nối"); })
     .apiQL(KEY, ten, args || []);
 }
@@ -991,6 +991,25 @@ function guiAnhQL(files) {
 }
 function loiChung(e) { toast("⚠️ " + e); }
 
+/* ⚡ Tải trước Sổ booking · Thu chi · Thuế trong 1 lượt gọi máy chủ (lệnh gộp "nhieu"); máy chủ cũ chưa có lệnh gộp thì tự gọi lẻ */
+function taiTruocCacTab() {
+  if (!Q.d || Q.d.vai === "nv") return;
+  var th0 = Q.d.homNay.slice(0, 7);
+  var ds = [
+    ["bangSheet", [NH.thang || th0, NH.theo], function(bs) { if (!NH.bang || NH.bang.thang === bs.thang) { NH.bang = bs; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); } }],
+    ["thuChi", [th0], function(x) { if (!TC.dl || TC.dl.thang === x.thang) { TC.dl = x; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) giuOVe(); } }],
+    ["thue", [th0], function(x) { if (!TH.dl || TH.dl.thang === x.thang) { TH.dl = x; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(); } }]
+  ];
+  if (laChu()) ds.forEach(function(x) { var cu = docBan("olia_c_" + x[0] + "_" + JSON.stringify(x[1])); if (cu) x[2](cu, true); });
+  var le = function() { ds.forEach(function(x, i) { setTimeout(function() { apiNhanh(x[0], x[1], x[2], function() {}); }, i * 800); }); };
+  if (!laChu()) return le();
+  api("nhieu", [ds.map(function(x) { return [x[0], x[1]]; })], function(kq) {
+    if (!Array.isArray(kq)) return le();
+    kq.forEach(function(r, i) { var x = ds[i]; if (!r || !r.ok) return; var k = "olia_c_" + x[0] + "_" + JSON.stringify(x[1]), sCu = JSON.stringify(docBan(k) || null); luuBan(k, r.data); if (JSON.stringify(r.data) !== sCu) x[2](r.data, false); });
+  }, le);
+}
+/** Sau mỗi thao tác ghi: lấy lại ngầm dữ liệu các tab (gộp 1 lượt) để mọi tab khớp nhau */
+function lienKetSauGhi() { clearTimeout(lienKetSauGhi.h); lienKetSauGhi.h = setTimeout(taiTruocCacTab, 1500); }
 function batDau() {
   if (!KEY) return veDangNhapGH();
   demTB();
@@ -1009,12 +1028,7 @@ function batDau() {
     if (moi && !chay) {
       chay = true;
       if (d.lk) guiTbLk();   // link 1 thiết bị: gửi thông tin máy cho chủ xem
-      if (d.vai !== "nv") setTimeout(function() {   // tải trước ngầm Sổ booking, Thu chi, Thuế tháng này -> bấm sang tab là có ngay
-        var th0 = d.homNay.slice(0, 7);
-        apiNhanh("bangSheet", [NH.thang || th0, NH.theo], function(bs) { if (!NH.bang || NH.bang.thang === bs.thang) { NH.bang = bs; NH.bangLuc = Date.now(); if (Q.tab === "nhap" && NH.che === "ds" && !dangSua()) veBangSheet(); } }, function() {});
-        setTimeout(function() { apiNhanh("thuChi", [th0], function(x) { if (!TC.dl || TC.dl.thang === x.thang) { TC.dl = x; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) giuOVe(); } }, function() {}); }, 800);
-        setTimeout(function() { apiNhanh("thue", [th0], function(x) { if (!TH.dl || TH.dl.thang === x.thang) { TH.dl = x; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(); } }, function() {}); }, 1600);
-      }, 900);
+      if (d.vai !== "nv") setTimeout(taiTruocCacTab, 900);   // tải trước ngầm Sổ booking, Thu chi, Thuế trong 1 lượt -> bấm sang tab là có ngay
       if (d.vai !== "nv") { demChat(); var nhip = 0; setInterval(function() { if (Q.tab === "chat" || ++nhip % 5 === 0) demChat(); }, 6000); }   // đang mở tab Chat: 6 giây/lần
     }
   };
@@ -1119,7 +1133,7 @@ var DT_BAT = (function() { try { return JSON.parse(localStorage.getItem("olia_dt
 if (DT_BAT.giam == null) DT_BAT.giam = true; if (DT_BAT.sua == null) DT_BAT.sua = true;   // cột sửa · highlight · ẩn · xoá mặc định hiện
 var NH_SHEET = (function() { try { return localStorage.getItem("olia_nh_sheet") === "1"; } catch (e) { return false; } })();
 var NH_GOP = (function() { try { var v = localStorage.getItem("olia_gop"); return v == null ? 60 : Number(v); } catch (e) { return 60; } })();
-var NH = { anNgay: (function() { try { return localStorage.getItem("olia_an_ngay") || "1"; } catch (e) { return "1"; } })(), dong: [], hen: {}, gop: NH_GOP, bangCu: NH_SHEET, mo: false, che: "nhap", xep: (function() { try { return localStorage.getItem("olia_nh_xep") === "in" ? "in" : "dat"; } catch (e) { return "dat"; } })(), thang: (function() { try { return localStorage.getItem("olia_nh_xem") === "thang" ? "" : "all"; } catch (e) { return "all"; } })(), theo: "vao", bang: null };   // mặc định xem "Tất cả" như sheet   // che: "nhap" | "ds"   // mo: đang xổ cột Tên FB + Phone (mặc định ẩn)
+var NH = { anNgay: (function() { try { return localStorage.getItem("olia_an_ngay") || "1"; } catch (e) { return "1"; } })(), dong: [], hen: {}, gop: NH_GOP, bangCu: NH_SHEET, mo: false, che: "nhap", xep: "dat", thang: "all", theo: "vao", bang: null };   // mặc định xem "Tất cả" như sheet   // che: "nhap" | "ds"   // mo: đang xổ cột Tên FB + Phone (mặc định ẩn)
 try { NH.mo = localStorage.getItem("olia_nh_mo") === "1"; } catch (e) {}
 var NH_COT = [   // [khoá, tiêu đề như sheet, rộng, kiểu]
   ["ten", "Name", 150], ["tenFb", "Tên FB / hiển thị", 140, "", 1], ["agent", "Agent", 100, "ds"], ["sdt", "Phone", 105, "", 1], ["ngayDat", "Booking Date", 78, "ngay"],
@@ -1276,8 +1290,22 @@ function chiTietDT(r, b, ncot) {
 function xepDs(ds, th) {
   var a = ds.slice();
   if (NH.xep === "in") a.sort(function(x, y) { var p = ngayIN(x, th) || "9999", q = ngayIN(y, th) || "9999"; return p < q ? -1 : p > q ? 1 : x.dong - y.dong; });
-  else a.sort(function(x, y) { return x.dong - y.dong; });
+  else {   // theo NGÀY BOOK (cột Booking Date); dòng chưa ghi ngày book lấy ngày của dòng phía trên trên sheet
+    a.sort(function(x, y) { return x.dong - y.dong; });
+    var truoc = "", k = {}; a.forEach(function(r) { var v = khoaBook(r, th); if (v) truoc = v; k[r.dong] = v || truoc; });
+    a.sort(function(x, y) { var p = k[x.dong] || "", q = k[y.dong] || ""; return p < q ? -1 : p > q ? 1 : x.dong - y.dong; });
+  }
   return a;
+}
+/** Ngày book (vd "Nov 27", "27/11", "2026-11-27") -> yyyy-mm-dd; năm suy từ ngày IN (book tháng sau IN = năm trước) */
+function khoaBook(r, th) {
+  var x = r.o && r.o[3], z = function(n) { return ("0" + n).slice(-2); }, p = ngayTach(x), m, t, d;
+  if (!String(x || "").trim()) return "";
+  if ((m = String(x).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1] + "-" + z(m[2]) + "-" + z(m[3]);
+  if (p) { t = p.t; d = p.d; } else if ((m = String(x).trim().match(/^(\d{1,2})[\/\s.-]+([A-Za-z]{3})/)) && THANG_EN[m[2].toLowerCase()]) { d = Number(m[1]); t = THANG_EN[m[2].toLowerCase()]; } else if ((m = String(x).match(/^(\d{1,2})[\/.-](\d{1,2})/))) { d = Number(m[1]); t = Number(m[2]); } else return "";
+  var vin = ngayIN(r, th) || "", y = Number(vin.slice(0, 4)) || Number(Q.d.homNay.slice(0, 4));
+  if (vin && t > Number(vin.slice(5, 7))) y--;
+  return y + "-" + z(t) + "-" + z(d);
 }
 function gopCungTen(ds, th) {
   var ngay = NH.gop | 0; if (!ngay) return ds;
@@ -1429,7 +1457,7 @@ function veBangSheet() {
   $("#app").innerHTML = '<div class="nh"><div class="nh-bar"><button class="btn pri" data-act="nhThem">＋ Thêm dòng</button>' +
     '<div class="nh-thang"><button class="btn" data-act="nhThang" data-v="-1" aria-label="Tháng trước">◀</button><b>' + (th === "all" ? "Tất cả" : bkDT() || innerWidth < 500 ? th.slice(5, 7) + "/" + th.slice(0, 4) : tenThang(th)) + '</b><button class="btn" data-act="nhThang" data-v="1" aria-label="Tháng sau">▶</button></div>' +
     '<button class="btn nh-tatca' + (th === "all" ? " on" : "") + '" data-act="nhTatCa" title="Xem tất cả dòng như trên sheet / về xem theo tháng">' + icn("bang", 16) + "<span>" + (th === "all" ? "Theo tháng" : "Tất cả") + "</span></button>" +
-    '<button class="btn nh-xep" data-act="nhXep" title="Đang xếp ' + (NH.xep === "in" ? "theo ngày nhận phòng" : "theo thời gian đặt (thứ tự trên sheet)") + ' · bấm để đổi">' + icn(NH.xep === "in" ? "vao" : "lich", 16) + "<span>" + (NH.xep === "in" ? "Ngày ở" : "Thời gian đặt") + "</span>" + icn("doi", 13) + "</button>" +
+    '<button class="btn nh-xep" data-act="nhXep" title="Đang xếp ' + (NH.xep === "in" ? "theo ngày nhận phòng" : "theo ngày book") + ' · bấm để đổi">' + icn(NH.xep === "in" ? "vao" : "lich", 16) + "<span>" + (NH.xep === "in" ? "Ngày ở" : "Ngày book") + "</span>" + icn("doi", 13) + "</button>" +
     '<button class="btn bt-i" data-act="moMauDong" title="Màu dòng: chỉnh màu sắp nhận phòng, highlight, Done">' + icn("mau", 17) + "</button>" +
     (bkDT() && !the ? "" : '<button class="btn nh-ht" data-act="hoanTac" title="Hoàn tác (Ctrl+Z)" aria-label="Hoàn tác">↶</button>') + (the || bkDT() ? "" : nutCoThat()) +
     (window.innerWidth < 700 && the ? '<button class="btn" data-act="nhThe">📋 Bảng</button>' : "") +
