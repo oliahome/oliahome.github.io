@@ -2959,12 +2959,13 @@ function veThueSheet(th) {
   apiNhanh("thueSheet", [th], function(d) {
     var o = $("#thSheetO"); if (!o || !TH.sheet) return; TH.sh = d;
     var dong = function(r, moi) { return '<tr' + (moi ? ' class="tx-moi"' : "") + '><td class="nh-so">' + r.hang + "</td>" + r.o.map(function(x, j) {
-      if (j === 0 || j === 2 || j === 3 || j === 7 || j === 9) return "";   // bỏ cột A, H, J; ngày · / · tháng gộp vào 1 ô "Ngày"
+      if (j === 0 || j === 2 || j === 3 || j === 7 || j === 9 || j === 10) return "";   // bỏ cột A, H, J; ngày · / · tháng gộp vào 1 ô "Ngày"
       if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(("0" + ng).slice(-2) + (th2 ? "/" + ("0" + th2).slice(-2) : "")) : "") + (r.tg ? '<small class="tx-tg">' + esc(r.tg) + "</small>" : "") + "</td>"; }
+      if (j === 12) { var bk0 = timMaKhach(r.o[8]); return '<td class="ct"' + mauTx(r, j) + ">" + (bk0 ? esc(("0" + dk(bk0.ra).getDate()).slice(-2) + "/" + ("0" + (dk(bk0.ra).getMonth() + 1)).slice(-2)) : "") + "</td>"; }   // C-out: ngày trả phòng theo mã khách
       return '<td class="' + (r.ct[j] ? "ct" : "sua") + (j + 1 === d.cotTien ? " num" : "") + '" data-h="' + r.hang + '" data-c="' + (j + 1) + '"' + mauTx(r, j) + ">" + esc(x) + "</td>"; }).join("") + "</tr>"; };
     var mauTx = function(r, j) { var n = (r.nen || [])[j], c = (r.chu || [])[j], st = ""; if (n && n !== "#ffffff") st += "background:" + n + ";"; if (c && c !== "#000000" && n && n !== "#ffffff") st += "color:" + c + ";"; return st ? ' style="' + st + '"' : ""; };   // tô màu như trên sheet
     o.innerHTML = '<div class="muted sm" style="margin:4px 0 6px">Sheet tax dd · ' + d.ds.length + " dòng tháng " + th.slice(5) + "/" + th.slice(0, 4) + " · " + (TH.xep === "nhap" ? "xếp theo thứ tự nhập" : "xếp theo ngày") + " · bấm ô để sửa (Enter lưu, Esc huỷ) · dòng vàng cuối là dòng trống để nhập tiếp</div>" +
-      '<div class="nh-cuon vk"><table class="nh-b nh-s tx-s"><thead><tr><th>Dòng</th>' + d.tieuDe.map(function(t, j) { return j === 0 || j === 2 || j === 3 || j === 7 || j === 9 ? "" : j === 1 ? "<th>Ngày</th>" : "<th>" + esc(t) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      '<div class="nh-cuon vk"><table class="nh-b nh-s tx-s"><thead><tr><th>Dòng</th>' + d.tieuDe.map(function(t, j) { return j === 0 || j === 2 || j === 3 || j === 7 || j === 9 || j === 10 ? "" : j === 1 ? "<th>Ngày</th>" : "<th>" + esc(t) + "</th>"; }).join("") + "</tr></thead><tbody>" +
       d.ds.slice().sort(function(a, b) { if (TH.xep === "nhap") return (a.tgMs && b.tgMs ? a.tgMs - b.tgMs : 0) || a.hang - b.hang;   // thứ tự nhập: theo thời điểm nhập (cột O), chưa có thì theo dòng
         var k = function(r) { return (parseInt(r.o[3], 10) || 0) * 100 + (parseInt(r.o[1], 10) || 0); }; return k(a) - k(b) || a.hang - b.hang; })   // theo cột Ngày
         .map(function(r) { return dong(r); }).join("") + (d.moi ? dong(d.moi, true) : "") + "</tbody></table></div>";
@@ -2995,6 +2996,7 @@ function suaOThue(td) {
     if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); luu(); } else if (e.key === "Escape") huy(); });
   o.addEventListener("blur", function() { setTimeout(function() { if (gy && gy.dangChon) return; luu(); }, 120); });
 }
+function timMaKhach(ma) { ma = String(ma || "").trim().toLowerCase(); return ma ? ((Q.lich && Q.lich.ds) || []).filter(function(b) { return String(b.code || "").toLowerCase() === ma; })[0] : null; }
 function thueDong(h) { var d = TH.sh || {}; return (d.ds || []).concat(d.moi ? [d.moi] : []).filter(function(r) { return r.hang === h; })[0]; }
 /** Ngày của dòng sổ thuế (cột Ngày + cột tháng) -> yyyy-mm-dd */
 function ngayDongThue(h) {
