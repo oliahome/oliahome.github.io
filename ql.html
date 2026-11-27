@@ -531,6 +531,9 @@ html.toi .tabs,html.toi .tabs2{background:var(--card)!important;border-color:var
 .nh-dt td.agc>div[data-j="4"]:empty{display:none!important}
 .nh-dt td.agc>div[data-j="3"]{display:flex!important;justify-content:center;width:100%!important;height:auto!important;margin-top:3px}.nh-dt td.agc>div[data-j="3"]:empty{display:none!important}
 .nh-dt td.agc .bk-ngd{white-space:nowrap}
+/* ô VAT: ngày khai thuế dd/mm nằm dưới dấu tích */
+.o-thue .t-ck{display:inline-grid!important;grid-template-columns:auto auto;align-items:center;justify-items:center;column-gap:2px;row-gap:0;vertical-align:top}
+.o-thue .t-ng{grid-column:1/-1;font-size:10.5px;font-weight:700;line-height:1.1;opacity:.85;font-variant-numeric:tabular-nums}
 html.toi .nh-dt .io,html.toi .nh-dt .io2{border-color:rgba(255,236,200,.6);background:rgba(0,0,0,.28);color:#fff4df!important;opacity:1!important}
 html.toi .nh-dt .io *,html.toi .nh-dt .io2 *{color:#fff4df!important;opacity:1!important}
 html.toi .nh-dt .io .io-t,html.toi .nh-dt .io2 .io-t{background:rgba(255,255,255,.1);border-right-color:rgba(255,236,200,.4);color:#ffd79a!important}
@@ -991,7 +994,7 @@ function guiAnhQL(files) {
 }
 function loiChung(e) { toast("⚠️ " + e); }
 
-/* ⚡ Tải trước Sổ booking · Thu chi · Thuế trong 1 lượt gọi máy chủ (lệnh gộp "nhieu"); máy chủ cũ chưa có lệnh gộp thì tự gọi lẻ */
+/* ⚡ Tải trước Sổ booking · Thu chi · Thuế cùng lúc (song song) -> bấm sang tab là có ngay */
 function taiTruocCacTab() {
   if (!Q.d || Q.d.vai === "nv") return;
   var th0 = Q.d.homNay.slice(0, 7);
@@ -1000,15 +1003,13 @@ function taiTruocCacTab() {
     ["thuChi", [th0], function(x) { if (!TC.dl || TC.dl.thang === x.thang) { TC.dl = x; TC.luc = Date.now(); if (Q.tab === "thuchi" && !dangSua()) giuOVe(); } }],
     ["thue", [th0], function(x) { if (!TH.dl || TH.dl.thang === x.thang) { TH.dl = x; TH.luc = Date.now(); if (Q.tab === "thue" && !dangSua()) veThue(); } }]
   ];
-  if (laChu()) ds.forEach(function(x) { var cu = docBan("olia_c_" + x[0] + "_" + JSON.stringify(x[1])); if (cu) x[2](cu, true); });
-  var le = function() { ds.forEach(function(x, i) { setTimeout(function() { apiNhanh(x[0], x[1], x[2], function() {}); }, i * 800); }); };
-  if (!laChu()) return le();
-  api("nhieu", [ds.map(function(x) { return [x[0], x[1]]; })], function(kq) {
-    if (!Array.isArray(kq)) return le();
-    kq.forEach(function(r, i) { var x = ds[i]; if (!r || !r.ok) return; var k = "olia_c_" + x[0] + "_" + JSON.stringify(x[1]), sCu = JSON.stringify(docBan(k) || null); luuBan(k, r.data); if (JSON.stringify(r.data) !== sCu) x[2](r.data, false); });
-  }, le);
+  ds.forEach(function(x) { var cu = docBan("olia_c_" + x[0] + "_" + JSON.stringify(x[1])); if (cu) x[2](cu, true); });
+  ds.forEach(function(x) {   // gọi SONG SONG cùng lúc (đo thực tế: song song ~5 giây, gộp 1 lượt ~6,6 giây vì máy chủ chạy tuần tự)
+    var k = "olia_c_" + x[0] + "_" + JSON.stringify(x[1]);
+    api(x[0], x[1], function(d) { var sCu = JSON.stringify(docBan(k) || null); luuBan(k, d); if (JSON.stringify(d) !== sCu) x[2](d, false); }, function() {});
+  });
 }
-/** Sau mỗi thao tác ghi: lấy lại ngầm dữ liệu các tab (gộp 1 lượt) để mọi tab khớp nhau */
+/** Sau mỗi thao tác ghi: lấy lại ngầm dữ liệu các tab cùng lúc để mọi tab khớp nhau */
 function lienKetSauGhi() { clearTimeout(lienKetSauGhi.h); lienKetSauGhi.h = setTimeout(taiTruocCacTab, 1500); }
 function batDau() {
   if (!KEY) return veDangNhapGH();
@@ -1355,7 +1356,7 @@ function bangDT(b, ds, mo, dt) {
               : r.gop === -1 ? '<div class="ct hd-v gop-tiep" title="Gộp với đơn cùng tên phía trên · đơn này: ' + esc(r.o[19]) + '">〃</div>' : oj(r, 19).replace('<div class="', '<div class="hd-v ');
             return td + '><div class="hdg">' + hd + "<div>" + oj(r, 20) + oj(r, 21) + "</div></div></td>";
           }
-          if (g[0] === "thue") return '<td class="o-thue">' + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck' + (co ? " on" : "") + '" title="Thuế lần ' + l + (co ? ": đã nhập" : ": chưa nhập — tích để ghi sổ thuế") + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + '>L' + l + "</label>"; }).join("") + "</td>";
+          if (g[0] === "thue") return '<td class="o-thue">' + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck' + (co ? " on" : "") + '" title="Thuế lần ' + l + (co ? ": đã nhập" : ": chưa nhập — tích để ghi sổ thuế") + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + '><span>L' + l + "</span>" + (r.ngThue && r.ngThue[l - 1] ? '<small class="t-ng">' + esc(r.ngThue[l - 1]) + "</small>" : "") + "</label>"; }).join("") + "</td>";
           if (g[0] === 10) return td + ">" + oIO(r) + "</td>";
           return td + ">" + g.map(function(j) { return oj(r, j); }).join("") + "</td>";
         }).join("") + "</tr>";
