@@ -520,6 +520,16 @@ html.toi .tabs,html.toi .tabs2{background:var(--card)!important;border-color:var
 .tl-thang{z-index:2}
 .tl-homnay{font-size:8px!important;padding:1px 4px!important;letter-spacing:0!important;max-width:calc(100% - 4px);white-space:nowrap}
 .tl-h.td.we::after{display:none}
+@media(max-width:700px){.tl-r .cham{display:none}.tl-r>span{white-space:nowrap;font-size:13px;letter-spacing:-.1px;gap:3px!important}.tl-r{padding:0 6px 0 9px!important}.hn-a{display:none}.tl-homnay{font-size:9px!important;padding:1px 6px!important}}
+html.toi .nh-dt .io,html.toi .nh-dt .io2{border-color:rgba(255,236,200,.6);background:rgba(0,0,0,.28);color:#fff4df!important;opacity:1!important}
+html.toi .nh-dt .io *,html.toi .nh-dt .io2 *{color:#fff4df!important;opacity:1!important}
+html.toi .nh-dt .io .io-t,html.toi .nh-dt .io2 .io-t{background:rgba(255,255,255,.1);border-right-color:rgba(255,236,200,.4);color:#ffd79a!important}
+html.toi .nh-dt .io .io-d,html.toi .nh-dt .io2 .io-d{border-top-color:rgba(255,236,200,.3)}
+.hd-b{margin:6px 0 8px;padding-left:20px;display:grid;gap:7px;font-size:14px;line-height:1.45}.hd-ab{border:1.5px solid #e9a23b;border-radius:12px;background:var(--keep-bg)}
+html.toi .tac-g button,html.toi .dt-mo,html.toi .nh-tac button{color:#f1e4c8!important;opacity:1!important}html.toi .tac-g button svg,html.toi .dt-mo svg{filter:none}
+html.toi .nh-tac button.xoa{color:#ff9b8a!important}
+.nh-tac button{opacity:.85}.dt-mo{opacity:.9}
+html.toi .tac-g button:hover,html.toi .dt-mo:hover{background:rgba(255,255,255,.12);border-radius:6px}
 html.toi .dem-tag{background:#f4f1ea!important;color:#3f3a32!important}
 html.toi .modal>div,html.toi .drawer>div,html.toi .dr{background:var(--card);color:var(--fg)}
 .gd-nut{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;flex:none;padding:0;line-height:0}
@@ -1932,7 +1942,11 @@ function hoiNgayThue(r, lan, neo) {
   var luu = function() {
     var n = $("#htLuu"); n.disabled = true;
     api("nhapThue", [r.dong, r.code, lan, $("#htNgay").value, Number($("#htTien").value), $("#htGhi").value], function() {
-      toast("🧾 Đã ghi thuế lần " + lan + " · " + (r.code || "")); dong(); NH.bang = null; TH.dl = null; veNhap();
+      r["thue" + lan] = true; var xong = r.thue1 && r.thue2;   // hiện ngay trên bảng, không chờ tải lại
+      if (xong) { r.tt = "Done"; if (r.o) r.o[4] = "Done"; }
+      toast(xong ? "✅ Đủ 2 lần thuế → chuyển Done · có nút ẩn dòng ở cột thao tác" : "🧾 Đã ghi thuế lần " + lan + " · " + (r.code || ""));
+      dong(); TH.dl = null; NH.bangLuc = 0; if (NH.bang) veBangSheet(); else veNhap();
+      setTimeout(function() { if (Q.tab === "nhap" && !dangSua()) veNhap(); }, 1500);   // lấy bản mới ngầm từ sheet
     }, function(e) { n.disabled = false; $("#htLoi").innerHTML = '<div class="err">' + esc(e) + "</div>"; });
   };
   $("#htLuu").addEventListener("click", luu);
@@ -1963,7 +1977,7 @@ function veTimeline() {
   var n = Q.soNgay, ngay = [], hn = Q.d.homNay;
   for (var i = 0; i < n; i++) ngay.push(cong(Q.tu, i));
   var rong = Math.max(320, ($("#app").clientWidth || window.innerWidth) - 2);
-  var cotPhong = TL.cotPhong = window.innerWidth < 420 ? 74 : window.innerWidth < 700 ? 84 : 110;
+  var cotPhong = TL.cotPhong = window.innerWidth < 420 ? 86 : window.innerWidth < 700 ? 94 : 110;
   var colW = TL.colW = Math.max(window.innerWidth < 700 ? 18 : 40, Math.floor((rong - cotPhong) / Q.zoom));   // điện thoại: co cột để thấy trọn số ngày đang chọn, không phải lướt
   var h = '<div class="bar"><button class="btn" data-act="lui" aria-label="Lùi">◀</button><button class="btn" data-act="homnay">Hôm nay</button><button class="btn" data-act="toi" aria-label="Tới">▶</button>' +
     '<input class="btn" type="date" id="tuNgay" value="' + (TL.den || hn) + '"><div class="bar2"><select class="btn" id="soNgay" aria-label="Số ngày hiển thị">' + [7, 14, 30].map(function(x) {
@@ -1980,7 +1994,7 @@ function veTimeline() {
   h += '<div class="tl" id="tl"><div class="tl-g" style="grid-template-columns:' + cotPhong + "px repeat(" + n + "," + colW + 'px)">';
   h += '<div class="tl-c tl-h tl-r" style="z-index:5;grid-row:1;grid-column:1">Phòng</div>' + ngay.map(function(k, j) {
     var d = dk(k), cls = (laT6T7(k) ? " we" : "") + (k === hn ? " td" : "") + (d.getDate() === 1 ? " m1" : "");
-    return '<div class="tl-c tl-h' + cls + '" style="grid-row:1;grid-column:' + (j + 2) + '">' + (d.getDate() === 1 ? '<i class="tl-thang">Tháng ' + (d.getMonth() + 1) + "</i>" : "") + THU[d.getDay()] + "<b>" + d.getDate() + "/" + (d.getMonth() + 1) + "</b>" + (k === hn ? '<i class="tl-homnay">HÔM NAY</i>' : "") + "</div>";
+    return '<div class="tl-c tl-h' + cls + '" style="grid-row:1;grid-column:' + (j + 2) + '">' + (d.getDate() === 1 ? '<i class="tl-thang">Tháng ' + (d.getMonth() + 1) + "</i>" : "") + THU[d.getDay()] + "<b>" + d.getDate() + "/" + (d.getMonth() + 1) + "</b>" + (k === hn ? '<i class="tl-homnay"><span class="hn-a">HÔM </span>NAY</i>' : "") + "</div>";
   }).join("");
   Q.d.phong.forEach(function(p, pi) {
     var cua = Q.lich.ds.filter(function(b) { return b.phong === p.id; }), R = pi + 2;
@@ -2491,6 +2505,13 @@ function moFB(d) {
 function moICal() {
   var ds = (Q.d.link && Q.d.link.ical) || [];
   var h = '<div class="dr" role="dialog" aria-modal="true"><div style="display:flex;justify-content:space-between;align-items:center"><h2>📅 Đồng bộ lịch Airbnb</h2><button class="x" data-act="dong">×</button></div>' +
+    '<div class="sec hd-ab" id="hdAB"><h3>📖 Hướng dẫn khoá phòng Airbnb từ web Olia</h3>' +
+    '<ol class="hd-b"><li><b>Làm 1 lần cho mỗi phòng:</b> mở Airbnb → <b>Lịch</b> → chọn phòng → <b>Tình trạng còn phòng</b> → <b>Kết nối lịch</b> → <b>Nhập lịch</b>. Dán link của đúng phòng ở mục 2️⃣ bên dưới (bấm <b>Chép</b>), đặt tên <i>Olia Home</i> → <b>Nhập lịch</b>.</li>' +
+    '<li><b>Mỗi lần cần khoá:</b> trên web Olia vào <b>Lịch</b> → nút <b>🔒 Khoá / 🚫 Đóng</b> (hoặc bấm vào ô trống của phòng trên lịch) → chọn phòng, ngày vào – ngày ra, kiểu <b>Khoá tạm</b> hoặc <b>Đóng phòng</b> → Lưu.</li>' +
+    '<li><b>Airbnb tự chặn:</b> ngày khoá hiện trên Airbnb là <i>“Olia Home - Closed”</i>. Airbnb tự cập nhật lịch nhập sau <b>vài tiếng</b> (không tức thì).</li>' +
+    '<li><b>Cần chặn gấp:</b> vào Airbnb → Lịch → chọn ngày → <b>Chặn đêm</b> bằng tay, rồi vẫn khoá trên web để 2 bên khớp.</li>' +
+    '<li><b>Mở lại:</b> xoá khoá trên web → Airbnb tự mở ngày ở lần cập nhật kế tiếp.</li></ol>' +
+    '<p class="sm muted">Đơn <b>Book / Done</b> đặt qua web, Facebook… cũng tự chặn trên Airbnb. Đơn <b>Keep</b> (chờ cọc) và đơn huỷ thì không chặn.</p></div>' +
     '<div class="sec"><h3>1️⃣ Airbnb → Olia (chặn ngày đã đặt trên Airbnb)</h3><p class="sm">Trên Airbnb: <b>Lịch → Tình trạng còn phòng → Kết nối lịch → Xuất lịch</b>, chép link .ics của từng phòng rồi dán vào ô <b>ICAL_&lt;Phòng&gt;</b> trong sheet ⚙️ Cài đặt web. Web đọc lại mỗi 15 phút.</p>' +
     ds.map(function(x) { return '<div class="kv"><span>' + esc(x.ten) + "</span><span>" + (x.nhap ? '<span class="ok-t">✓ đã có link</span>' : '<span class="muted">chưa có link</span>') + "</span></div>"; }).join("") + "</div>" +
     '<div class="sec"><h3>2️⃣ Olia → Airbnb (chặn ngày khách đặt qua web, Facebook…)</h3><p class="sm">Trên Airbnb: <b>Kết nối lịch → Nhập lịch</b>, dán link của đúng phòng bên dưới. Link chỉ hoạt động sau khi web được triển khai công khai.</p>' +
@@ -2573,7 +2594,7 @@ function veMenu() {
   if (laLk) { m.innerHTML = '<div class="menu-h">🔗 ' + esc(Q.d.lk.ten) + '</div><div class="sm muted" style="padding:4px 12px 8px">Link chỉ dùng trên thiết bị này</div>' + dong("🏡", "Trang đặt phòng", L.web); return; }
   var gd = gdLay(), gdNut = '<button data-act="doiGD" class="menu-gd"><span>' + GD_IC[gd] + '</span>' + GD_TEN[gd] + '</button>';
   m.innerHTML = '<div class="menu-h">Giao diện</div>' + gdNut + (laChu() ? '<div class="menu-h">Việc nhanh</div>' + nut("themDon", "➕", "Thêm đơn") + nut("moKhoa", "🔒", "Khoá phòng tạm") +
-      '<div class="menu-h">Cài đặt</div>' + nut("moGia", "💰", "Giá phòng & ngày lễ") + nut("moMaGiam", "🏷️", "Mã giảm giá") + nut("moICal", "📅", "Đồng bộ Airbnb") +
+      '<div class="menu-h">Cài đặt</div>' + nut("moGia", "💰", "Giá phòng & ngày lễ") + nut("moMaGiam", "🏷️", "Mã giảm giá") + nut("moICal", "📅", "Đồng bộ Airbnb") + nut("moHDAB", "📖", "Hướng dẫn khoá Airbnb") +
       nut("moFB", "💬", "Kết nối Messenger") + nut("moDay", "📲", "Thông báo điện thoại") + '<button data-act="chuong"><span>' + (CHUONG.bat ? "🔔" : "🔕") + "</span>Âm báo: " + (CHUONG.bat ? "bật" : "tắt") + "</button>" +
       nut("moQuyen", "👤", "Phân quyền") + nut("moLink", "🔗", "Link truy cập 1 thiết bị") + nut("moNhatKy", "📝", "Nhật ký thao tác") + nut("moFile", "🗂️", "File dữ liệu") : "") +
     '<div class="menu-h">Mở nhanh</div>' +
@@ -2996,6 +3017,7 @@ document.addEventListener("click", function(e) {
   }
   else if (a === "menu") { var mn = $("#menu"); if (mn.hidden) veMenu(); mn.hidden = !mn.hidden; return; }
   else if (a === "moICal") moICal();
+  else if (a === "moHDAB") { moICal(); var hd = $("#hdAB"); if (hd) hd.scrollIntoView({ block: "start" }); }
   else if (a === "moGia") { $("#menu").hidden = true; moGia(); }
   else if (a === "boLe") { var kk = v.split("|"); el.disabled = true; api("datMucNgay", [kk[0], kk[1], "Cod"], function(d2) { toast("Đã trả " + d2.soNgay + " ngày về giá thường"); moGia(d2); }, function(er) { el.disabled = false; loiChung(er); }); }
   else if (a === "moFB") { $("#menu").hidden = true; moFB(); }
