@@ -533,7 +533,37 @@ html.toi .tabs,html.toi .tabs2{background:var(--card)!important;border-color:var
 .nh-dt td.agc .bk-ngd{white-space:nowrap}
 /* ô VAT: ngày khai thuế dd/mm nằm dưới dấu tích */
 .o-thue .t-ck{display:inline-grid!important;grid-template-columns:auto auto;align-items:center;justify-items:center;column-gap:2px;row-gap:0;vertical-align:top}
-.o-thue .t-ng{grid-column:1/-1;font-size:10.5px;font-weight:700;line-height:1.1;opacity:.85;font-variant-numeric:tabular-nums}
+.o-thue .t-ng{grid-column:1/-1;font-size:13px;font-weight:800;line-height:1.15;opacity:1;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+/* cột thuế dễ đọc: chữ L1/L2 to đậm, ô tích to, ngày rõ; đã khai = xanh, chưa = xám đậm */
+.o-thue .t-ck{font-size:14px!important;font-weight:800!important;color:#6b5f4a!important;margin:0 4px!important;column-gap:3px!important}
+.o-thue .t-ck input{width:18px!important;height:18px!important}
+.o-thue .t-ck.on{color:#1f6b3f!important}
+.o-thue .t-ng{color:#1f6b3f}
+html.toi .o-thue .t-ck{color:#d9d2c4!important}html.toi .o-thue .t-ck.on,html.toi .o-thue .t-ng{color:#8ff0b2!important}
+/* thanh lịch: dòng ngày/tiền xuống thêm 1 dòng khi còn chỗ (tên + 2 dòng thông tin) */
+.bk span{white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;text-overflow:clip}
+/* cột thao tác: 4 icon to, lấp đầy ô */
+.tac-g{grid-template-columns:repeat(2,30px)!important;gap:4px!important}.tac-g button{width:30px;height:28px}.tac-g svg{width:20px!important;height:20px!important}
+/* chữ gần tông nền: nâng tương phản vừa phải (dịu mắt) */
+.hdg .hd-v{color:#5d5140}html.toi .hdg .hd-v{color:#d8cfbe}
+.nh-b .ct small,.nh-b .sua small{opacity:1!important;color:inherit}
+.nh-b .nh-tac .tac-g svg{width:20px!important;height:20px!important}
+/* khung số đêm cùng kiểu viền với khung ngày IN/OUT */
+html.toi .nh-dt [data-j="12"]{border-color:rgba(255,236,200,.6)!important;background:rgba(0,0,0,.28);color:#fff4df!important}
+html.toi .nh-dt [data-j="12"] .oi{color:#ffd79a!important;opacity:1!important}
+/* người lớn / trẻ em: icon to hết cỡ ô, số đứng cạnh, 2 icon cùng cỡ */
+.nh-b [data-j="14"],.nh-b [data-j="15"]{display:flex!important;align-items:center;justify-content:center;gap:4px;height:auto!important;min-height:26px}
+.nh-b [data-j="14"] .oi,.nh-b [data-j="15"] .oi{position:static!important;margin:0!important;line-height:0}
+.nh-b [data-j="14"] .oi svg,.nh-b [data-j="15"] .oi svg{width:24px!important;height:24px!important;stroke-width:2}
+.nh-b [data-j="14"] span,.nh-b [data-j="15"] span{font-size:17px;font-weight:800}
+.nh-b [data-j="14"] .oi.rong,.nh-b [data-j="15"] .oi.rong{opacity:.45!important}
+/* người lớn | trẻ em nằm ngang, icon cao gần bằng ô */
+.nh-b td:has(>[data-j="14"]){white-space:nowrap;text-align:center;padding:0 4px!important}
+.nh-b td:has(>[data-j="14"])>[data-j="14"],.nh-b td:has(>[data-j="14"])>[data-j="15"]{display:inline-flex!important;width:auto!important;vertical-align:middle;margin:0 3px;border:0!important}
+.nh-b td:has(>[data-j="14"]) .oi svg{width:34px!important;height:34px!important;stroke-width:1.8}
+.nh-b td:has(>[data-j="14"]) span{font-size:18px}
+.nh-b td:has(>[data-j="14"])>[data-j="14"],.nh-b td:has(>[data-j="14"])>[data-j="15"]{min-width:max-content!important;max-width:none!important;gap:2px!important;overflow:visible!important}
+.nh-b td:has(>[data-j="14"]) .oi{width:auto!important;min-width:0!important;flex:none!important;display:inline-flex!important}
 html.toi .nh-dt .io,html.toi .nh-dt .io2{border-color:rgba(255,236,200,.6);background:rgba(0,0,0,.28);color:#fff4df!important;opacity:1!important}
 html.toi .nh-dt .io *,html.toi .nh-dt .io2 *{color:#fff4df!important;opacity:1!important}
 html.toi .nh-dt .io .io-t,html.toi .nh-dt .io2 .io-t{background:rgba(255,255,255,.1);border-right-color:rgba(255,236,200,.4);color:#ffd79a!important}
@@ -1272,7 +1302,7 @@ function oDT(j, x, dt) {   // HTML rút gọn của 1 ô (đầy đủ ở toolt
   if (j === 4) { var tt = TRANG_THAI_OK(x); if (tt === "Book") return ""; return '<span class="tt-i tt-' + tt + '" title="' + esc(x) + '">' + icn("tt" + tt, 14) + '</span><small class="tt-ch">' + ({ Waiting: "Chờ" }[tt] || tt) + "</small>"; }
   if (j === 3) return String(x || "").trim() ? '<span class="bk-ngd" title="Ngày book">' + icn("lich", 11) + esc(ngayDM(x)) + "</span>" : "";
   if (j === 13) return esc(tenGon(x, dt ? 18 : 28));
-  if (j === 16) return iconCheck(esc(x));
+  if (j === 16) return iconCheck(esc(x.charAt(0).toLocaleUpperCase("vi") + x.slice(1)));   // ghi chú: tự viết hoa chữ đầu khi hiển thị
   return esc(x);
 }
 /* chi tiết đầy đủ 1 dòng (nút xổ) + nút sửa / ẩn / xoá */
