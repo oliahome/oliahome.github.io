@@ -510,7 +510,8 @@ html.toi .tac-g button[data-act="nhAn"]{background:#5a3e17;color:#ffd79a;box-sha
 @media(pointer:coarse){.nh-b input[type=checkbox],.bar input[type=checkbox],.md-bat input,.lk-ck input{width:24px;height:24px;min-width:24px}.nh-b label:has(input[type=checkbox]){padding:4px;display:inline-flex;align-items:center;gap:3px}}
 html.toi .tabs,html.toi .tabs2{background:var(--card)!important;border-color:var(--line)!important}
 .bar2{display:contents}
-@media(max-width:820px){.top-in .gd-nut{display:none!important}
+@media(max-width:820px){.top-in .gd-nut{display:none!important}}
+@media(max-width:599px){
  .bar:has(#tuNgay){flex-wrap:wrap;gap:6px}.bar:has(#tuNgay)>#tuNgay{flex:1;min-width:0}
  .bar2{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;width:100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.bar2::-webkit-scrollbar{display:none}
  .bar2>*{flex:none}.bar2 .tags{display:flex;flex-wrap:nowrap;gap:4px;margin:0}.bar2 #tlThang:empty{display:none}}
@@ -530,6 +531,15 @@ html.toi .tac-g button,html.toi .dt-mo,html.toi .nh-tac button{color:#f1e4c8!imp
 html.toi .nh-tac button.xoa{color:#ff9b8a!important}
 .nh-tac button{opacity:.85}.dt-mo{opacity:.9}
 html.toi .tac-g button:hover,html.toi .dt-mo:hover{background:rgba(255,255,255,.12);border-radius:6px}
+@media(min-width:600px) and (max-width:820px){.bar:has(#tuNgay){flex-wrap:nowrap!important;gap:5px;overflow-x:auto;scrollbar-width:none}.bar:has(#tuNgay)::-webkit-scrollbar{display:none}
+ .bar:has(#tuNgay)>*{flex:none}.bar:has(#tuNgay) #tuNgay{width:132px;min-width:0}.bar:has(#tuNgay) .btn{padding-left:8px;padding-right:8px;min-width:40px}.bar:has(#tuNgay) .tagf{padding:3px 8px;font-size:12px}
+ .bar2{display:flex;flex-wrap:nowrap;gap:5px;align-items:center;flex:none}.bar2>*{flex:none}.bar2 .tags{display:flex;flex-wrap:nowrap;gap:4px;margin:0}.bar2 #tlThang:empty{display:none}}
+/* iPad ngang / màn vừa: thanh đầu 1 dòng, thanh công cụ 1 dòng (thiếu chỗ thì vuốt ngang) */
+@media(min-width:821px) and (max-width:1199px){.top-in{flex-wrap:nowrap!important;gap:8px}.top-in .tim{flex:1 1 110px!important;min-width:0!important;width:auto!important}.top-in .tim input{min-width:0;width:100%}
+ .xem-ip{display:none!important}.top-in .tabs{flex:none;min-width:0}.top-in .tabs button{padding-left:12px;padding-right:12px}}
+@media(min-width:600px){.bar:has([data-act="nhTatCa"]),.bar:has(#tuNgay){flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;gap:6px}
+ .bar:has([data-act="nhTatCa"])::-webkit-scrollbar,.bar:has(#tuNgay)::-webkit-scrollbar{display:none}.bar:has([data-act="nhTatCa"])>*,.bar:has(#tuNgay)>*,.bar:has(#tuNgay) .bar2>*{flex:none!important;margin-left:0!important;white-space:nowrap}.bar:has(#tuNgay) .bar2{display:flex;flex:none;gap:6px;align-items:center}.bar:has(#tuNgay) .tags{display:flex;flex-wrap:nowrap;gap:4px}.bar:has(#tuNgay) .tagf{white-space:nowrap}}
+@media(min-width:600px) and (max-width:1199px){.nh-bar{gap:6px!important}.nh-bar>*{flex:none}.nh-bar [data-act="nhThem"],.nh-bar [data-act="coThat"]{font-size:0!important;gap:0!important;padding-left:12px!important;padding-right:12px!important}.nh-bar [data-act="nhThem"] svg,.nh-bar [data-act="coThat"] svg{width:18px;height:18px}.nh-bar .btn{padding-left:10px;padding-right:10px}}
 html.toi .dem-tag{background:#f4f1ea!important;color:#3f3a32!important}
 html.toi .modal>div,html.toi .drawer>div,html.toi .dr{background:var(--card);color:var(--fg)}
 .gd-nut{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;flex:none;padding:0;line-height:0}
@@ -1981,7 +1991,7 @@ function veTimeline() {
   var colW = TL.colW = Math.max(window.innerWidth < 700 ? 18 : 40, Math.floor((rong - cotPhong) / Q.zoom));   // điện thoại: co cột để thấy trọn số ngày đang chọn, không phải lướt
   var h = '<div class="bar"><button class="btn" data-act="lui" aria-label="Lùi">◀</button><button class="btn" data-act="homnay">Hôm nay</button><button class="btn" data-act="toi" aria-label="Tới">▶</button>' +
     '<input class="btn" type="date" id="tuNgay" value="' + (TL.den || hn) + '"><div class="bar2"><select class="btn" id="soNgay" aria-label="Số ngày hiển thị">' + [7, 14, 30].map(function(x) {
-      return '<option value="' + x + '"' + (x === Q.zoom ? " selected" : "") + ">Xem " + x + " ngày</option>"; }).join("") + "</select>" +
+      return '<option value="' + x + '"' + (x === Q.zoom ? " selected" : "") + ">" + (innerWidth <= 820 ? "" : "Xem ") + x + " ngày</option>"; }).join("") + "</select>" +
     '<button class="btn" data-act="taiLai" aria-label="Tải lại">↻</button>' + (laChu() ? '<button class="btn pri" data-act="themDon">➕ Thêm đơn</button><button class="btn" data-act="moKhoa">🔒 Khoá / 🚫 Đóng</button>' : "") +
     '<label class="btn tl-nay" title="Chỉ hiện từ hôm nay, không lướt về ngày đã qua"><input type="checkbox" id="tlTuNay"' + (TL.tuNay ? " checked" : "") + "> Từ hôm nay</label>" + '<b id="tlThang" class="muted"></b>' +
     '<div class="tags">' + ["Book", "Waiting", "Keep", "Done", "Airbnb"].map(function(t) {
