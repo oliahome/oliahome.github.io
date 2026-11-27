@@ -559,6 +559,7 @@ html.toi .t-gop{background:#5a3e17;color:#ffd79a}
 .gy-rong{padding:8px;color:var(--muted);font-size:12.5px}
 .gy-pop{display:flex;flex-direction:column;gap:3px;min-width:170px}.gy-pop b{font-size:14px}.gy-pop span{display:flex;align-items:center;gap:5px;font-size:13px}.gy-pop small{color:var(--muted)}
 .tx-s td.tx-ngay{text-align:center;font-variant-numeric:tabular-nums;font-weight:700}   /* ô Ngày gộp ngày/tháng */
+.tx-s .tx-tg{display:block;font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.1}   /* giờ nhập dưới ngày */
 /* cột thao tác: 4 icon to, lấp đầy ô */
 .tac-g{grid-template-columns:repeat(2,30px)!important;gap:4px!important}.tac-g button{width:30px;height:28px}.tac-g svg{width:20px!important;height:20px!important}
 /* chữ gần tông nền: nâng tương phản vừa phải (dịu mắt) */
@@ -2945,7 +2946,7 @@ function veDon() {
 }
 
 /* ---------- Thuế: sổ thu tiền theo tháng ---------- */
-var TH = { thang: "", dl: null, sheet: (function() { try { return localStorage.getItem("olia_th_sheet") !== "0"; } catch (e) { return true; } })() };
+var TH = { xep: (function() { try { return localStorage.getItem("olia_tx_xep") === "nhap" ? "nhap" : "ngay"; } catch (e) { return "ngay"; } })(), thang: "", dl: null, sheet: (function() { try { return localStorage.getItem("olia_th_sheet") !== "0"; } catch (e) { return true; } })() };
 function taiThue(th) {
   TH.thang = th || TH.thang || Q.d.homNay.slice(0, 7);
   $("#app").innerHTML = '<div class="loading">Đang đọc sổ thuế…</div>';
@@ -2959,12 +2960,14 @@ function veThueSheet(th) {
     var o = $("#thSheetO"); if (!o || !TH.sheet) return; TH.sh = d;
     var dong = function(r, moi) { return '<tr' + (moi ? ' class="tx-moi"' : "") + '><td class="nh-so">' + r.hang + "</td>" + r.o.map(function(x, j) {
       if (j === 0 || j === 2 || j === 3 || j === 7 || j === 9) return "";   // bỏ cột A, H, J; ngày · / · tháng gộp vào 1 ô "Ngày"
-      if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(ng + (th2 ? "/" + th2 : "")) : "") + "</td>"; }
+      if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(("0" + ng).slice(-2) + (th2 ? "/" + ("0" + th2).slice(-2) : "")) : "") + (r.tg ? '<small class="tx-tg">' + esc(r.tg) + "</small>" : "") + "</td>"; }
       return '<td class="' + (r.ct[j] ? "ct" : "sua") + (j + 1 === d.cotTien ? " num" : "") + '" data-h="' + r.hang + '" data-c="' + (j + 1) + '"' + mauTx(r, j) + ">" + esc(x) + "</td>"; }).join("") + "</tr>"; };
     var mauTx = function(r, j) { var n = (r.nen || [])[j], c = (r.chu || [])[j], st = ""; if (n && n !== "#ffffff") st += "background:" + n + ";"; if (c && c !== "#000000" && n && n !== "#ffffff") st += "color:" + c + ";"; return st ? ' style="' + st + '"' : ""; };   // tô màu như trên sheet
-    o.innerHTML = '<div class="muted sm" style="margin:4px 0 6px">Sheet tax dd · ' + d.ds.length + " dòng tháng " + th.slice(5) + "/" + th.slice(0, 4) + " · bấm ô để sửa (Enter lưu, Esc huỷ) · dòng vàng cuối là dòng trống để nhập tiếp</div>" +
+    o.innerHTML = '<div class="muted sm" style="margin:4px 0 6px">Sheet tax dd · ' + d.ds.length + " dòng tháng " + th.slice(5) + "/" + th.slice(0, 4) + " · " + (TH.xep === "nhap" ? "xếp theo thứ tự nhập" : "xếp theo ngày") + " · bấm ô để sửa (Enter lưu, Esc huỷ) · dòng vàng cuối là dòng trống để nhập tiếp</div>" +
       '<div class="nh-cuon vk"><table class="nh-b nh-s tx-s"><thead><tr><th>Dòng</th>' + d.tieuDe.map(function(t, j) { return j === 0 || j === 2 || j === 3 || j === 7 || j === 9 ? "" : j === 1 ? "<th>Ngày</th>" : "<th>" + esc(t) + "</th>"; }).join("") + "</tr></thead><tbody>" +
-      d.ds.map(function(r) { return dong(r); }).join("") + (d.moi ? dong(d.moi, true) : "") + "</tbody></table></div>";
+      d.ds.slice().sort(function(a, b) { if (TH.xep === "nhap") return (a.tgMs && b.tgMs ? a.tgMs - b.tgMs : 0) || a.hang - b.hang;   // thứ tự nhập: theo thời điểm nhập (cột O), chưa có thì theo dòng
+        var k = function(r) { return (parseInt(r.o[3], 10) || 0) * 100 + (parseInt(r.o[1], 10) || 0); }; return k(a) - k(b) || a.hang - b.hang; })   // theo cột Ngày
+        .map(function(r) { return dong(r); }).join("") + (d.moi ? dong(d.moi, true) : "") + "</tbody></table></div>";
     vuaKhung();
     o.querySelector(".tx-s").addEventListener("click", function(e) { var td = e.target.closest("td.sua"); if (td && !td.querySelector("input")) suaOThue(td); });
   }, function(e) { var o = $("#thSheetO"); if (o) o.innerHTML = '<div class="err">' + esc(e) + "</div>"; });
@@ -3051,7 +3054,7 @@ function veThue() {
   var d = TH.dl, max = Math.max.apply(null, Object.keys(d.theoThang).map(function(k) { return d.theoThang[k]; }).concat([1]));
   var tongNam = Object.keys(d.theoThang).reduce(function(s, k) { return s + d.theoThang[k]; }, 0);
   var h = '<div class="bar"><button class="btn" data-act="thLui">◀</button><b style="min-width:120px;text-align:center">' + tenThang(d.thang) + '</b><button class="btn" data-act="thToi">▶</button>' +
-    '<button class="btn" data-act="thTai">↻</button>' + '<button class="btn' + (TH.sheet ? " on" : "") + '" data-act="thSheet" title="Nhập như trên sheet tax dd (đủ cột) / về giao diện gọn">▦ Kiểu sheet</button>' + '<button class="btn pri" data-act="thBaoCao">📊 Báo cáo năm ' + d.thang.slice(0, 4) + "</button>" + '<button class="btn" data-act="thDoiSoat" title="So tổng sổ thuế với tổng tiền từng đơn: khớp mã hoặc khớp tên → Done">🔁 Đối soát ngay</button>' + (Q.d.sheetUrl ? '<a class="btn" href="' + esc(Q.d.sheetUrl) + '" target="_blank" rel="noopener">📗 Sheet</a>' : "") +
+    '<button class="btn" data-act="thTai">↻</button>' + '<button class="btn' + (TH.sheet ? " on" : "") + '" data-act="thSheet" title="Nhập như trên sheet tax dd (đủ cột) / về giao diện gọn">▦ Kiểu sheet</button>' + (TH.sheet ? '<button class="btn" data-act="thXep" title="Đổi cách sắp xếp: theo cột Ngày / theo thứ tự đã nhập">' + (TH.xep === "nhap" ? "🕘 Thứ tự nhập" : "📅 Theo ngày") + " ⇅</button>" : "") + '<button class="btn pri" data-act="thBaoCao">📊 Báo cáo năm ' + d.thang.slice(0, 4) + "</button>" + '<button class="btn" data-act="thDoiSoat" title="So tổng sổ thuế với tổng tiền từng đơn: khớp mã hoặc khớp tên → Done">🔁 Đối soát ngay</button>' + (Q.d.sheetUrl ? '<a class="btn" href="' + esc(Q.d.sheetUrl) + '" target="_blank" rel="noopener">📗 Sheet</a>' : "") +
     (d.kyKeKhai ? '<span class="muted sm" style="margin-left:auto">Sheet đang ghi: ' + esc(d.kyKeKhai) + "</span>" : "") + "</div>";
   h += '<div class="kpis"><div class="kpi"><span>Tổng thu ' + tenThang(d.thang).toLowerCase() + '</span><b class="num">' + tien(d.tong) + "</b></div>" +
     '<div class="kpi"><span>Số lần thu</span><b class="num">' + d.dong.length + "</b></div>" +
@@ -3386,6 +3389,7 @@ document.addEventListener("click", function(e) {
   }
   else if (a === "nhSheet") { NH.bangCu = !NH.bangCu; try { localStorage.setItem("olia_nh_sheet", NH.bangCu ? "1" : "0"); } catch (e) {} toast(NH.bangCu ? "▦ Kiểu sheet: đủ cột, màu y sheet" : "Bảng gọn"); veNhap(); }
   else if (a === "tcSheet") { TC.sheet = !TC.sheet; try { localStorage.setItem("olia_tc_sheet", TC.sheet ? "1" : "0"); } catch (e) {} veThuChi(); }
+  else if (a === "thXep") { TH.xep = TH.xep === "nhap" ? "ngay" : "nhap"; try { localStorage.setItem("olia_tx_xep", TH.xep); } catch (e) {} veThue(); }
   else if (a === "thSheet") { TH.sheet = !TH.sheet; try { localStorage.setItem("olia_th_sheet", TH.sheet ? "1" : "0"); } catch (e) {} veThue(); }
   else if (a === "dtKieu") { DT_BAT.kieu = bkDT() ? "pc" : "dt"; try { localStorage.setItem("olia_dt_bat", JSON.stringify(DT_BAT)); } catch (e) {} toast(bkDT() ? "📱 Kiểu điện thoại" : "Kiểu iPad / máy tính"); veNhap(); }
   else if (a === "dtBat") { DT_BAT[v] = !DT_BAT[v]; try { localStorage.setItem("olia_dt_bat", JSON.stringify(DT_BAT)); } catch (e) {} veNhap(); }
