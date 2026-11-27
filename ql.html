@@ -155,7 +155,7 @@ table.so tr:hover td{background:#fbf6ee}
 .o-khac{display:inline-block;width:12px;height:12px;border-radius:3px;background:#fff1d6;border:1px solid #f0d9ae;vertical-align:-1px;margin-right:4px}
 .ma{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--soft);border-radius:5px;padding:1px 6px}
 /* ---- chống tràn chữ / ô ---- */
-html,body{overflow-x:hidden}
+html,body{overflow-x:clip}
 .tl-r{min-width:0;overflow:hidden}
 .tl-r small em{font-style:normal}
 .tl-r span,.tl-r small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block}
@@ -540,6 +540,8 @@ html.toi .tac-g button:hover,html.toi .dt-mo:hover{background:rgba(255,255,255,.
 @media(min-width:600px){.bar:has([data-act="nhTatCa"]),.bar:has(#tuNgay){flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;gap:6px}
  .bar:has([data-act="nhTatCa"])::-webkit-scrollbar,.bar:has(#tuNgay)::-webkit-scrollbar{display:none}.bar:has([data-act="nhTatCa"])>*,.bar:has(#tuNgay)>*,.bar:has(#tuNgay) .bar2>*{flex:none!important;margin-left:0!important;white-space:nowrap}.bar:has(#tuNgay) .bar2{display:flex;flex:none;gap:6px;align-items:center}.bar:has(#tuNgay) .tags{display:flex;flex-wrap:nowrap;gap:4px}.bar:has(#tuNgay) .tagf{white-space:nowrap}}
 @media(min-width:600px) and (max-width:1199px){.nh-bar{gap:6px!important}.nh-bar>*{flex:none}.nh-bar [data-act="nhThem"],.nh-bar [data-act="coThat"]{font-size:0!important;gap:0!important;padding-left:12px!important;padding-right:12px!important}.nh-bar [data-act="nhThem"] svg,.nh-bar [data-act="coThat"] svg{width:18px;height:18px}.nh-bar .btn{padding-left:10px;padding-right:10px}}
+.nh-cuon{max-height:none!important;overflow:visible!important}.nh-cuon.cuon-ngang{overflow-x:auto!important;overflow-y:visible}
+.nh-b th{top:var(--thTop,0px)!important}.nh-cuon.cuon-ngang .nh-b th{top:0!important}
 html.toi .dem-tag{background:#f4f1ea!important;color:#3f3a32!important}
 html.toi .modal>div,html.toi .drawer>div,html.toi .dr{background:var(--card);color:var(--fg)}
 .gd-nut{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;flex:none;padding:0;line-height:0}
@@ -992,9 +994,15 @@ function vuaKhung() {
     var t = bc.querySelector("table"); if (!t) return;
     [].forEach.call(t.querySelectorAll("colgroup"), function(c) { c.remove(); });
     t.style.width = ""; t.style.zoom = ""; bc.classList.toggle("vk-that", VK.that);
-    if (VK.that) { var a0 = t.querySelector("td.tk-a"); if (a0) [].forEach.call(t.querySelectorAll("td.tk-c2"), function(x) { x.style.left = a0.offsetWidth + "px"; }); return; }
+    if (VK.that) { bc.classList.add("cuon-ngang"); var a0 = t.querySelector("td.tk-a"); if (a0) [].forEach.call(t.querySelectorAll("td.tk-c2"), function(x) { x.style.left = a0.offsetWidth + "px"; }); return; }
     var W = bc.clientWidth - 2, w = t.scrollWidth;
-    if (w <= W) return;
+    var dinh = function() {   // danh sách trải dọc theo trang: tiêu đề cột dính dưới thanh đầu; bảng rộng quá thì cuộn ngang trong khung (mất dính dọc)
+      var z = parseFloat(t.style.zoom) || 1, top = ($(".top") ? $(".top").offsetHeight : 0);
+      bc.classList.toggle("cuon-ngang", t.getBoundingClientRect().width > W + 1);
+      t.style.setProperty("--thTop", (top / z).toFixed(1) + "px");
+    };
+    if (w <= W) return dinh();
+    setTimeout(dinh, 0);
     var minZ = innerWidth < 700 ? 0.62 : innerWidth < 1200 ? 0.75 : 0.5;   // không thu nhỏ quá mức đọc được: điện thoại 62%, iPad 75% — còn rộng thì cuộn ngang
     var z = Math.max(minZ, W / w); t.style.zoom = z.toFixed(3);
     for (var i = 0; i < 3 && z > minZ; i++) { var r = t.getBoundingClientRect().width; if (r <= W + 0.5) break; z = Math.max(minZ, z * W / r - 0.002); t.style.zoom = z.toFixed(3); }   // đo lại cho khớp mép
