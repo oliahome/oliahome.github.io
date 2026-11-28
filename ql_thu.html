@@ -3148,10 +3148,23 @@ function tagThue(r) {
   var t = Number(String(r.o[5] || "").replace(/[^\d-]/g, "")) || 0; if (t <= 0) return "";
   var ma = String(r.o[8] || "").trim(), bk = ma ? timMaKhach(ma) : null, ngay = ngayDongThue(r.hang), gc = String(r.o[6] || "");
   if (bk) {
-    var lan = /gộp:/i.test(gc) ? "gộp" : mucKhopTien(bk.invoice, t) === 0 ? "L1+L2 đủ" : mucKhopTien(bk.coc, t) <= 2 && ngay < cong(bk.vao, -3) ? "L1 cọc" : mucKhopTien(bk.conLai || bk.invoice - bk.coc, t) <= 2 ? "L2 còn lại" : mucKhopTien(bk.coc, t) <= 2 ? "L1 cọc" : "?";
+    var f0 = function(n) { return Math.round(n).toLocaleString("en-US"); }, truoc = ngay < cong(bk.vao, -3);
     var c = soDem(bk.vao, ngay), cach = c === 0 ? "đúng ngày in" : c < 0 ? "trước in " + (-c) + "n" : "sau in " + c + "n";
-    if (lan !== "?") return '<span class="tx-tag" title="' + esc(bk.ten + " · in " + ngan(bk.vao) + " → out " + ngan(bk.ra)) + '">' + esc(lan) + " · " + cach + "</span>";
-    return '<span class="tx-tag la" title="' + esc(bk.ten + " · cọc " + (bk.coc || 0).toLocaleString("en-US") + " · còn lại " + (bk.conLai || 0).toLocaleString("en-US") + " · tổng " + (bk.invoice || 0).toLocaleString("en-US") + " — không khớp " + t.toLocaleString("en-US")) + '">? lệch tiền · ' + cach + "</span>" + tagThayThe(r, t, ngay, ma);
+    var ten = boDauQL(String(bk.ten || "")).toLowerCase().trim(), nhom = ((TH.lichAll && TH.lichAll.length ? TH.lichAll : (Q.lich && Q.lich.ds)) || []).filter(function(b) { return boDauQL(String(b.ten || "")).toLowerCase().trim() === ten && Math.abs(soDem(b.vao, bk.vao)) <= 7; });
+    if (!nhom.some(function(b) { return b.code === bk.code; })) nhom.push(bk);
+    var con = function(b) { return Math.max(0, (b.invoice || 0) - (b.coc || 0)); }, tong = function(fn) { return nhom.reduce(function(a, b) { return a + fn(b); }, 0); };
+    var thu = [];   // [nhãn, số cần, gộp?]
+    thu.push(["L1+L2 đủ", bk.invoice, 0]); thu.push(truoc ? ["L1 cọc", bk.coc, 0] : ["L2 còn lại", con(bk), 0]); thu.push(truoc ? ["L2 còn lại", con(bk), 0] : ["L1 cọc", bk.coc, 0]);
+    if (nhom.length > 1) { var ma2 = nhom.map(function(b) { return b.code; }).join(" + ");
+      thu.push(["gộp " + nhom.length + " phòng · L1+L2 đủ", tong(function(b) { return b.invoice || 0; }), ma2]);
+      thu.push(truoc ? ["gộp " + nhom.length + " phòng · L1 cọc", tong(function(b) { return b.coc || 0; }), ma2] : ["gộp " + nhom.length + " phòng · L2 còn lại", tong(con), ma2]);
+      thu.push(truoc ? ["gộp " + nhom.length + " phòng · L2 còn lại", tong(con), ma2] : ["gộp " + nhom.length + " phòng · L1 cọc", tong(function(b) { return b.coc || 0; }), ma2]); }
+    var tot = null; thu.forEach(function(x) { if (!(x[1] > 0)) return; var m = mucKhopTien(x[1], t); if (m <= 1 && (!tot || m < tot.m)) tot = { x: x, m: m }; });
+    var chiTiet = "Khách CK " + f0(t) + " · cọc " + f0(bk.coc || 0) + " · còn lại " + f0(con(bk)) + " · tổng " + f0(bk.invoice || 0) + (nhom.length > 1 ? " · cả nhóm " + nhom.map(function(b) { return b.code; }).join(" + ") + ": cọc " + f0(tong(function(b) { return b.coc || 0; })) + ", tổng " + f0(tong(function(b) { return b.invoice || 0; })) : "");
+    if (tot) { var lech = t - tot.x[1];
+      return '<span class="tx-tag" title="' + esc(bk.ten + " · in " + ngan(bk.vao) + " → out " + ngan(bk.ra) + " · " + chiTiet + (tot.x[2] ? " · " + tot.x[2] : "")) + '">' + esc(tot.x[0]) + (lech ? (lech > 0 ? " · dư " : " · thiếu ") + f0(Math.abs(lech)) : " · khớp") + " · " + cach + "</span>"; }
+    var gan = thu.filter(function(x) { return x[1] > 0; }).sort(function(a, b) { return Math.abs(t - a[1]) - Math.abs(t - b[1]); })[0], lech2 = gan ? t - gan[1] : 0;
+    return '<span class="tx-tag la" title="' + esc(chiTiet) + '">? lệch ' + (lech2 > 0 ? "+" : "−") + f0(Math.abs(lech2)) + " so " + esc(gan ? gan[0].replace(/^L\d(\+L2)? ?/, "").trim() || gan[0] : "") + " " + f0(gan ? gan[1] : 0) + " · " + cach + "</span>" + tagThayThe(r, t, ngay, ma);
   }
   if (!ma && String(r.o[4] || "").trim() && !r.ct[4]) return "";   // khoản thu khác ghi tay
   var dsG = chamKhach(t, ngay, String(r.o[4] || "") + " " + gc).ds; if (!dsG.length) return ma ? '<span class="tx-tag la" title="Mã ' + esc(ma) + ' không có trong sổ booking cả năm' + (TH.lichAll ? "" : " (đang tải sổ cả năm…)") + '">? mã lạ</span>' + tagThayThe(r, t, ngay, ma) : "";
