@@ -873,7 +873,7 @@ function vaNut(a, b) {   // a: phần tử đang hiện, b: bản mới cùng th
 }
 /** Đặt nội dung mới cho 1 khung: lần đầu / đang "Đang tải" thì thay cả; còn lại chỉ vá phần khác (không nháy, không mất chỗ cuộn) */
 function datHTML(el, html) {
-  if (!el) return; var t = document.createElement(el.tagName); t.innerHTML = html;
+  if (!el) return; var t = el.cloneNode(false); t.innerHTML = html;   // bản sao rỗng giữ nguyên id/class của khung (không xoá id="app")
   if (!el.firstChild || (el.childNodes.length === 1 && el.querySelector(".loading"))) { el.innerHTML = html; return; }
   var y = window.scrollY; vaNut(el, t); if (window.scrollY !== y) window.scrollTo(0, y);
 }
