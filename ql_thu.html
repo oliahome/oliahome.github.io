@@ -826,6 +826,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-dt tbody td.agc .tt-i{width:16px;height:16px}.nh-dt tbody td.agc .tt-ch{font-size:9.5px}
 .nh-dt tbody td.o-gc-nhom{white-space:normal}.o-gc-nhom .gc-p{display:flex;gap:4px;align-items:baseline}.o-gc-nhom .gc-p small{opacity:.6;flex:none}
 @keyframes nhayTrung{0%,100%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,0)}20%,60%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,.55)}}.nh-dt tbody tr.nhay-trung>td{animation:nhayTrung 1.3s ease 2}
+.tg-nhap{all:unset;display:flex;justify-content:space-between;gap:6px;align-items:baseline;width:100%;cursor:pointer;border-radius:5px;box-sizing:border-box}.tg-nhap:hover{background:rgba(192,122,58,.12)}.tg-nhap b{color:#2b6cb0}.nh-coc{min-width:280px}.nh-coc .nc-o{display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:12px}.nh-coc .nc-o input{min-height:36px;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit}.nh-coc .nc-ph{margin:8px 0 4px;font-size:12.5px}.nh-coc .nc-ph div{display:flex;justify-content:space-between}.nh-coc .nc-ph i{font-style:normal;opacity:.55}
 </style>
 </head>
 <body>
@@ -1682,9 +1683,40 @@ function tienNhom(ds) {
   var cocSheet = ds.reduce(function(a, r) { return a + so(r.o[20]); }, 0), nhan = thu || cocSheet, coc50 = tong / 2, lech = nhan - coc50, con = tong - nhan;
   var phan = ds.map(function(r) { var v = so(r.o[19]), p = tong ? v / tong : 0; return String(r.o[9] || "").trim() + " " + String(r.o[5] || "") + ": " + f2(v) + (nhan ? " · nhận " + f2(nhan * p) + " · còn " + f2(v - nhan * p) : ""); }).join("\n");
   var tip = "Tổng = " + ds.map(function(r) { return f2(so(r.o[19])); }).join(" + ") + "\nĐã nhận " + f2(nhan) + (thu ? " (theo sổ thuế)" : " (theo cột cọc)") + " · cọc 50% = " + f2(coc50) + "\nPhân bổ theo tỉ lệ tiền phòng:\n" + phan;
-  return '<div class="tg-gon" title="' + esc(tip) + '"><div class="tg-d"><span>Tổng</span><b>' + f(tong) + '</b></div><div class="tg-d"><span>' + icn("coc", 12) + ' Đã nhận</span><b>' + (nhan ? f(nhan) : "—") + "</b></div>" +
+  return '<div class="tg-gon" title="' + esc(tip) + '"><div class="tg-d"><span>Tổng</span><b>' + f(tong) + '</b></div><button type="button" class="tg-d tg-nhap" data-act="nhoCoc" data-v="' + ds[0].dong + '" title="Bấm để nhập tiền cọc khách chuyển (tự chia cho từng phòng, tích thuế lần 1)"><span>' + icn("coc", 12) + ' Đã nhận</span><b>' + (nhan ? f(nhan) : "＋ nhập cọc") + "</b></button>" +
     (nhan && Math.abs(lech) > Math.max(1000, coc50 * 0.03) ? '<div class="tg-lech">' + (lech < 0 ? "cọc thiếu " : "cọc dư ") + f(Math.abs(lech)) + " so 50%</div>" : "") +
     '<div class="tg-d"><span>' + icn("con", 12) + ' Còn lại</span><b class="' + (con > 1000 ? "tn-thieu" : "tn-du") + '">' + (con > 1000 ? f(con) : "đủ ✓") + "</b></div></div>";
+}
+/** 💵 Nhập tiền cọc cho khách nhiều phòng: số tiền + ngày tiền vào bank -> chia theo tỉ lệ tiền phòng, ghi sổ thuế 1 dòng (gộp mã), cộng vào ô Cọc từng phòng, tích thuế lần 1 */
+function moNhapCoc(nut) {
+  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0], ds = (r && r.gopDs) || (r ? [r] : []); if (!ds.length) return;
+  var so = function(v) { return Number(String(v || "").replace(/[^\d-]/g, "")) || 0; }, f2 = function(n) { return Math.round(n).toLocaleString("en-US"); };
+  var tong = ds.reduce(function(a, x) { return a + so(x.o[19]); }, 0), daCoc = ds.reduce(function(a, x) { return a + so(x.o[20]); }, 0), goiY = Math.max(0, Math.round((tong / 2 - daCoc) / 1000) * 1000);
+  var cu = $("#nhCoc"); if (cu) cu.remove();
+  var p = document.createElement("div"); p.id = "nhCoc"; p.className = "tx-xn nh-coc"; p.setAttribute("role", "dialog");
+  p.innerHTML = '<div class="tx-xn-n"><b>Nhập tiền cọc · ' + esc(r.o[13] || "") + "</b> <small>(" + ds.length + " phòng · tổng " + f2(tong) + ")</small></div>" +
+    '<label class="nc-o">Số tiền khách chuyển<input id="ncTien" inputmode="numeric" value="' + (goiY || "") + '" placeholder="vd 2150000"></label>' +
+    '<label class="nc-o">Ngày tiền vào bank<input id="ncNgay" type="date" value="' + Q.d.homNay + '"></label>' +
+    '<div class="nc-ph" id="ncPh"></div><small class="muted">Ghi 1 dòng sổ thuế (gộp mã) · cộng vào ô Cọc từng phòng · tự tích thuế lần 1</small>' +
+    '<div class="tx-xn-b"><button type="button" class="btn" data-nc="0">Huỷ</button><button type="button" class="btn pri" data-nc="1">Tiếp tục</button></div>';
+  document.body.appendChild(p);
+  var b = nut.getBoundingClientRect(); p.style.left = (Math.max(8, Math.min(b.left, innerWidth - p.offsetWidth - 8)) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
+  var chia = function() { var t = so($("#ncTien").value), con = t; return ds.map(function(x, i) { var v = i === ds.length - 1 ? con : Math.round(t * so(x.o[19]) / (tong || 1) / 1000) * 1000; con -= v; return { r: x, v: v }; }); };
+  var ve = function() { $("#ncPh").innerHTML = chia().map(function(c) { return "<div><span>" + esc(String(c.r.o[9] || "").trim()) + " <i>" + esc(c.r.o[5] || "") + "</i></span><b>" + f2(c.v) + "</b></div>"; }).join(""); };
+  ve(); $("#ncTien").addEventListener("input", ve); setTimeout(function() { $("#ncTien").focus(); $("#ncTien").select(); }, 30);
+  var dong = function() { p.remove(); };
+  p.addEventListener("click", function(e) { var bt = e.target.closest("[data-nc]"); if (!bt) return; if (bt.dataset.nc !== "1") return dong();
+    var t = so($("#ncTien").value), ng = $("#ncNgay").value, cs = chia(); if (!(t > 0)) return toast("Nhập số tiền"); if (!/^\d{4}-\d{2}-\d{2}$/.test(ng)) return toast("Chọn ngày tiền vào");
+    xacNhan2(bt, "Ghi cọc <b>" + f2(t) + "</b> · ngày bank <b>" + ngan(ng) + "</b><br>" + cs.map(function(c) { return esc(String(c.r.o[9] || "").trim()) + " " + f2(c.v); }).join(" · ") + "<br><small>Sổ thuế + ô Cọc + tích thuế lần 1</small>", function(xong) {
+      var maDs = ds.map(function(x) { return String(x.o[5] || "").trim(); }).filter(String);
+      api("themThu", [{ soTien: t, ngay: ng, code: maDs[0], ghiChu: (maDs.length > 1 ? "gộp: " + maDs.join(" + ") + " · " : "") + "cọc nhập từ Sổ booking" }], function() {
+        var lam = function(i) { if (i >= cs.length) { xong(); dong(); toast("✔ Đã ghi cọc " + f2(t) + " · tích thuế lần 1"); NH.bangLuc = 0; if (typeof lamMoiBang === "function") lamMoiBang(); return; }
+          var c = cs[i], sua = {}; sua[22] = String(so(c.r.o[20]) + c.v); api("suaDong", [c.r.dong, sua], function() { ghiHoanTac(c.r.dong, sua); lam(i + 1); }, function(e) { toast("⚠ Ô cọc " + c.r.o[5] + ": " + e); lam(i + 1); }); };
+        lam(0);
+      }, function(e) { xong(); loiChung(e); });
+    });
+  });
+  p.addEventListener("keydown", function(e) { if (e.key === "Escape") dong(); });
 }
 /** 🧾 Khung VAT chung cho khách nhiều phòng: tổng nhóm, cọc 50% dự kiến, các lần nhập thuế (gộp trùng), đã thu / còn lại, tích L1/L2 từng phòng */
 function thueNhom(ds) {
@@ -4006,6 +4038,7 @@ document.addEventListener("click", function(e) {
   else if (a === "tcBoCho") { TC.cho = (TC.cho || []).filter(function(x) { return String(x.id) !== String(v); }); giuOVe(); }
   else if (a === "tcLuuMoi") luuDongChiMoi();
   else if (a === "nhoMenu") moNhoMenu(el);
+  else if (a === "nhoCoc") moNhapCoc(el);
   else if (a === "nhoHL") { var rg = NH.bang.ds.filter(function(x) { return x.dong === Number(v); })[0]; ((rg && rg.gopDs) || []).forEach(function(x, i) { setTimeout(function() { var b0 = document.createElement("button"); b0.dataset.act = "nhHL"; b0.dataset.v = x.dong; document.body.appendChild(b0); b0.click(); b0.remove(); }, i * 250); }); }
   else if (a === "nhAnTat") { if (NH.anNgay === "all" && NH.anTruoc != null) { NH.anNgay = NH.anTruoc; NH.anTruoc = null; } else { NH.anTruoc = NH.anNgay; NH.anNgay = "all"; } try { localStorage.setItem("olia_an_ngay", NH.anNgay); } catch (e) {} veNhap(); }   // 👁 hiện tất cả dòng ẩn / ẩn lại như trước
   else if (a === "tcNote") { TC.anNote = !TC.anNote; try { localStorage.setItem("olia_tc_note", TC.anNote ? "1" : "0"); } catch (e) {} giuOVe(); }
