@@ -739,7 +739,7 @@ body.top1 .top-in .tabs2{flex:none!important;margin:0!important;position:static!
 .tx-tag.ok-nut{border:1px solid #6aa874;background:#eef8ef;color:#2f6b38;cursor:pointer;font:inherit;font-size:.78em;opacity:1}.tx-tag.ok-nut:hover{background:#dcf0de}.tx-tag.ok-nut.chon{outline:2px solid #4f9a5b}.tx-tag.xn{background:#d8efd9;color:#22612a;opacity:1}.tx-tag.con{background:#e6eefb;color:#2b4f8a;opacity:1}html.toi .tx-tag.ok-nut{background:#1f3324;color:#a5e0ac;border-color:#4f9a5b}html.toi .tx-tag.xn{background:#24452a;color:#a5e0ac}html.toi .tx-tag.con{background:#23314a;color:#a9c4f0}
 /* sổ chi kiểu bảng thuế */
 .tc-xep{display:flex;align-items:center;gap:6px;margin:0 0 8px}.tc-xep .btn{min-height:32px;padding:4px 12px}
-.tc-b2{width:100%;min-width:640px}.tc-b2 thead th{background:#efe6d6!important;color:var(--fg)!important;border:1px solid var(--line)!important}html.toi .tc-b2 thead th{background:#3a342c!important}.tc-b2 td{border:1px solid var(--line)!important}.tc-b2 td{vertical-align:middle}.tc-b2 th.r{text-align:right}
+.tc-b2{width:100%;min-width:640px}.tc-b2 thead th{background:#efe6d6!important;color:var(--fg)!important;border:1px solid var(--line)!important}html.toi .tc-b2 thead th{background:#3a342c!important}.tc-b2 td{border:1px solid var(--line)!important}.tc-b2 td{vertical-align:middle!important}.tc-chip-n.trong{background:none;border:1px dashed rgba(120,110,95,.4);opacity:.7}.tc-b2 th.r{text-align:right}
 .tc-b2 td.tc-ngay2{position:relative;white-space:nowrap;text-align:center;font-weight:700;padding-left:22px!important;padding-right:26px!important;width:96px}
 .tc-b2 .tc-d{cursor:text;padding:2px 1px;border-radius:4px}.tc-b2 .tc-d:hover{background:rgba(0,0,0,.06)}
 .tc-b2 td.tc-ndc{min-width:220px;white-space:normal}.tc-b2 td.tc-ndc>div:first-child{line-height:1.35}.tc-b2 td.tc-ndc .sua{cursor:text}
@@ -1810,7 +1810,7 @@ function bangChi(d, th) {
   var mmMac = Number(th.slice(5, 7)), f0 = function(n) { return Number(n || 0).toLocaleString("vi-VN"); }, z2 = function(n) { return ("0" + n).slice(-2); };
   var bills = ["Bank", "ACB", "Tiền mặt"]; d.ds.forEach(function(z) { if (z.bill && bills.indexOf(z.bill) < 0) bills.push(z.bill); });
   var mauDong = function(x) { var m = x.mau && (x.mau[2] || x.mau[6]); return m && m[0] && m[0] !== "#ffffff" ? ' style="background:' + m[0] + ";color:" + m[1] + '"' : ""; };
-  var nhomChip = function(n, h) { return '<span class="tc-chip-n' + (h ? " sua" : "") + '"' + (h ? ' data-h="' + h + '" data-k="nhom" title="Bấm để đổi nhóm"' : "") + ">" + (IC_NHOM[n] || "") + " " + esc(String(n || "").toLowerCase()) + "</span>"; };
+  var nhomChip = function(n, h) { return '<span class="tc-chip-n' + (h ? " sua" : "") + (n ? "" : " trong") + '"' + (h ? ' data-h="' + h + '" data-k="nhom" title="Bấm để ' + (n ? "đổi" : "chọn") + ' nhóm chi"' : "") + ">" + (n ? (IC_NHOM[n] || "") + " " + esc(String(n).toLowerCase()) : "＋ chọn nhóm") + "</span>"; };
   var inp = function(x, k, w, them) { return '<input data-k="' + k + '" class="nh-o' + (/dd|mm|sl|donGia/.test(k) ? " num" : "") + '" size="' + w + '"' + (them || "") + ' value="' + esc(x[k] == null ? "" : x[k]) + '">'; };
   var dongMoi = function(x) {
     return '<tr class="tc-moi"><td class="tc-ngay2">' + inp(x, "dd", 2, ' inputmode="numeric" placeholder="ngày"') + "<span>/</span>" + inp(Object.assign({}, x, { mm: x.mm || mmMac }), "mm", 2, ' inputmode="numeric"') + "</td>" +
