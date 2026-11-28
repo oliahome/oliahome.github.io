@@ -736,6 +736,7 @@ body.top1 .top-in .tabs2{flex:none!important;margin:0!important;position:static!
 .tx-l{display:inline-block;font-size:11px;font-weight:700;padding:0 5px;border-radius:5px;margin-right:3px}.tx-l.co{background:#d8efd9;color:#22612a}.tx-l.chua{background:#f3e3d3;color:#8a4b17}html.toi .tx-l.co{background:#24452a;color:#a5e0ac}html.toi .tx-l.chua{background:#4a3424;color:#f2c99d}
 /* bóng đổ đậm hơn cho các khung nổi: bảng so sánh, xác nhận 2 lớp, popup khách */
 #txSS,.tx-xn,.tx-pop{box-shadow:0 18px 48px rgba(0,0,0,.32),0 4px 12px rgba(0,0,0,.18)!important;border-color:rgba(0,0,0,.14)!important}html.toi #txSS,html.toi .tx-xn,html.toi .tx-pop{box-shadow:0 18px 48px rgba(0,0,0,.65),0 4px 14px rgba(0,0,0,.45)!important;border-color:rgba(255,255,255,.14)!important}
+.tx-tag.ok-nut{border:1px solid #6aa874;background:#eef8ef;color:#2f6b38;cursor:pointer;font:inherit;font-size:.78em;opacity:1}.tx-tag.ok-nut:hover{background:#dcf0de}.tx-tag.ok-nut.chon{outline:2px solid #4f9a5b}.tx-tag.xn{background:#d8efd9;color:#22612a;opacity:1}.tx-tag.con{background:#e6eefb;color:#2b4f8a;opacity:1}html.toi .tx-tag.ok-nut{background:#1f3324;color:#a5e0ac;border-color:#4f9a5b}html.toi .tx-tag.xn{background:#24452a;color:#a5e0ac}html.toi .tx-tag.con{background:#23314a;color:#a9c4f0}
 </style>
 </head>
 <body>
@@ -3124,6 +3125,10 @@ function veThueSheet(th, sauGhi) {
       var bm = e.target.closest("[data-goimo]"); if (bm) { e.stopPropagation(); var hm = bm.dataset.goimo, w = bm.closest(".tx-goi-w"), dsm = w.querySelector(".tx-goi-ds");
         moSoSanh(bm, hm, th); return; }
       var bg = e.target.closest("[data-goiy]"); if (bg) { popGoiY(null); e.stopPropagation(); chonGoiY(bg, th); return; }
+      var bd = e.target.closest("[data-xndung]"); if (bd) { e.stopPropagation(); var hd = Number(bd.dataset.xndung), rd = thueDong(hd), gcd = rd ? String(rd.o[6] || "").trim() : "", bkd = rd ? timMaKhach(rd.o[8]) : null;
+        xacNhan2(bd, "Dòng " + hd + " · " + (rd ? String(rd.o[5] || "") : "") + "<br>Xác nhận <b>đúng khách" + (bkd ? " " + esc(bkd.ten) + " · " + esc(bkd.code) : " · mã " + esc(rd ? rd.o[8] : "")) + "</b><br><small>Ghi dấu \"✓ đã xác nhận\" vào ghi chú, không báo lệch / gợi ý nữa</small>", function(xong) {
+          api("suaThue", [hd, { 7: (gcd ? gcd + " · " : "") + "✓ đã xác nhận" }], function() { xong(); toast("✔ Đã xác nhận dòng " + hd); TH.luc = 0; veThueSheet(th, true); }, function(e2) { xong(); loiChung(e2); }); });
+        return; }
       if (e.target.closest("[data-act=txTg]")) { TH.anTg = !TH.anTg; try { localStorage.setItem("olia_tx_tg", TH.anTg ? "1" : "0"); } catch (e2) {} return veThueSheet(th); }
       var bl = e.target.closest("[data-lich]"); if (bl) { e.stopPropagation(); return chonNgayThue(Number(bl.dataset.lich), bl, th); }
       if (e.target.closest("[data-act=txGhi]")) { TH.anGhi = !TH.anGhi; try { localStorage.setItem("olia_tx_ghi", TH.anGhi ? "1" : "0"); } catch (e2) {} return veThueSheet(th); }
@@ -3180,15 +3185,18 @@ function tagThue(r) {
       thu.push(["gộp " + nhom.length + " phòng · L1+L2 đủ", tong(function(b) { return b.invoice || 0; }), ma2]);
       thu.push(truoc ? ["gộp " + nhom.length + " phòng · L1 cọc", tong(function(b) { return b.coc || 0; }), ma2] : ["gộp " + nhom.length + " phòng · L2 còn lại", tong(con), ma2]);
       thu.push(truoc ? ["gộp " + nhom.length + " phòng · L2 còn lại", tong(con), ma2] : ["gộp " + nhom.length + " phòng · L1 cọc", tong(function(b) { return b.coc || 0; }), ma2]); }
+    var daThu = ((TH.sh || {}).tienMa || {})[String(bk.code).toLowerCase()] || 0, conPhai = (bk.invoice || 0) - daThu;
+    var thuCon = !(TH.sh || {}).tienMa ? "" : conPhai > 1000 ? '<span class="tx-tag con" title="Tổng ' + f0(bk.invoice || 0) + " − đã vào sổ thuế " + f0(daThu) + '">còn phải thu ' + f0(conPhai) + (bk.thue2 ? "" : " · chưa nhập lần 2") + "</span>" : conPhai < -1000 ? '<span class="tx-tag la" title="Sổ thuế đã ghi nhiều hơn tổng tiền đơn">sổ dư ' + f0(-conPhai) + " so tổng</span>" : "";
+    if (/✓ đã xác nhận/.test(gc)) return '<span class="tx-tag xn" title="' + esc(chiTietTam(bk, t)) + '">✓ đã xác nhận đúng khách · ' + cach + "</span>" + thuCon;
     var tot = null; thu.forEach(function(x) { if (!(x[1] > 0)) return; var m = mucKhopTien(x[1], t); if (m <= 1 && (!tot || m < tot.m)) tot = { x: x, m: m }; });
     var chiTiet = "Khách CK " + f0(t) + " · cọc " + f0(bk.coc || 0) + " · còn lại " + f0(con(bk)) + " · tổng " + f0(bk.invoice || 0) + (nhom.length > 1 ? " · cả nhóm " + nhom.map(function(b) { return b.code; }).join(" + ") + ": cọc " + f0(tong(function(b) { return b.coc || 0; })) + ", tổng " + f0(tong(function(b) { return b.invoice || 0; })) : "");
     if (tot) { var lech = t - tot.x[1];
       return '<span class="tx-tag" title="' + esc(bk.ten + " · in " + ngan(bk.vao) + " → out " + ngan(bk.ra) + " · " + chiTiet + (tot.x[2] ? " · " + tot.x[2] : "")) + '">' + esc(tot.x[0]) + (lech ? (lech > 0 ? " · dư " : " · thiếu ") + f0(Math.abs(lech)) : " · khớp") + " · " + cach + "</span>"; }
     var gan = thu.filter(function(x) { return x[1] > 0; }).sort(function(a, b) { return Math.abs(t - a[1]) - Math.abs(t - b[1]); })[0], lech2 = gan ? t - gan[1] : 0;
-    return '<span class="tx-tag la" title="' + esc(chiTiet) + '">? lệch ' + (lech2 > 0 ? "+" : "−") + f0(Math.abs(lech2)) + " so " + esc(gan ? (/đủ/.test(gan[0]) ? "tổng" : /cọc/.test(gan[0]) ? "cọc" : "còn lại") + (gan[2] ? " gộp" : "") : "") + " " + f0(gan ? gan[1] : 0) + " · " + cach + "</span>" + tagThayThe(r, t, ngay, ma);
+    return '<span class="tx-tag la" title="' + esc(chiTiet) + '">? lệch ' + (lech2 > 0 ? "+" : "−") + f0(Math.abs(lech2)) + " so " + esc(gan ? (/đủ/.test(gan[0]) ? "tổng" : /cọc/.test(gan[0]) ? "cọc" : "còn lại") + (gan[2] ? " gộp" : "") : "") + " " + f0(gan ? gan[1] : 0) + " · " + cach + "</span>" + thuCon + nutDung(r.hang, bk) + tagThayThe(r, t, ngay, ma);
   }
   if (!ma && String(r.o[4] || "").trim() && !r.ct[4]) return "";   // khoản thu khác ghi tay
-  var dsG = chamKhach(t, ngay, String(r.o[4] || "") + " " + gc).ds; if (!dsG.length) return ma ? '<span class="tx-tag la" title="Mã ' + esc(ma) + ' không có trong sổ booking cả năm' + (TH.lichAll ? "" : " (đang tải sổ cả năm…)") + '">? mã lạ</span>' + tagThayThe(r, t, ngay, ma) : "";
+  var dsG = chamKhach(t, ngay, String(r.o[4] || "") + " " + gc).ds; if (!dsG.length) return ma ? '<span class="tx-tag la" title="Mã ' + esc(ma) + ' không có trong sổ booking cả năm' + (TH.lichAll ? "" : " (đang tải sổ cả năm…)") + '">? mã lạ</span>' + (/✓ đã xác nhận/.test(gc) ? '<span class="tx-tag xn">✓ đã xác nhận</span>' : nutDung(r.hang, null) + tagThayThe(r, t, ngay, ma)) : "";
   TH.goiY = TH.goiY || {}; TH.goiY[r.hang] = { ds: dsG, ma: ma, tien: t };
   return '<span class="tx-goi-w">' + nutGoiY(r.hang, 0) + (dsG.length > 1 ? '<button type="button" class="tx-goi-x" data-goimo="' + r.hang + '" title="Xem ' + dsG.length + ' khách có khả năng" aria-label="Xem thêm khách gợi ý">▾<small>' + dsG.length + "</small></button>" : "") + "</span>";
 }
@@ -3217,6 +3225,9 @@ function taiLichCaNam() {
   if (TH.lichAllDang) return; TH.lichAllDang = 1;
   api("lich", [(TH.thang || Q.d.homNay).slice(0, 4) + "-01-01", "all"], function(d) { TH.lichAll = d.ds || []; if (Q.tab === "thue" && TH.sheet) veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); }, function() { TH.lichAllDang = 0; });
 }
+function chiTietTam(bk, t) { var f0 = function(n) { return Math.round(n || 0).toLocaleString("en-US"); }; return bk.ten + " · khách CK " + f0(t) + " · cọc " + f0(bk.coc) + " · tổng " + f0(bk.invoice); }
+/** Nút "✓ Đúng khách": chủ xác nhận dòng này đúng khách / đúng mã dù số tiền lệch -> ghi dấu vào ghi chú (duyệt 2 lớp) */
+function nutDung(h, bk) { return '<button type="button" class="tx-tag ok-nut" data-xndung="' + h + '" title="Xác nhận dòng này đúng ' + esc(bk ? bk.ten + " · " + bk.code : "mã đang ghi") + ' (không báo lệch nữa)">✓ Đúng khách</button>'; }
 function nutGoiY(h, i) { var g = TH.goiY[h].ds[i], bs = g.gop || [g.b];
   return '<button type="button" class="tx-tag goi" data-goiy="' + h + "|" + bs.map(function(y) { return y.code; }).join("+") + '" data-gi="' + h + "|" + i + '">🔎 ' + esc(tenGon(bs[0].ten, 14)) + " · " + bs.map(function(y) { return esc(y.code); }).join("+") + " · " + g.diem + "%</button>"; }
 /** Chọn 1 gợi ý (ở tag hoặc bảng so sánh) -> khung duyệt 2 lớp -> ghi mã */
