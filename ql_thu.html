@@ -2258,16 +2258,16 @@ function suaO(td) {
   var ip = dsPh ? '<select class="nh-o">' + (dsPh.indexOf(cu) < 0 ? "<option selected>" + esc(cu) + "</option>" : "") + dsPh.map(function(t) { return "<option" + (t === cu ? " selected" : "") + ">" + esc(t) + "</option>"; }).join("") + "</select>"
     : j === COT_TT_J ? '<select class="nh-o">' + ["Waiting", "Keep", "Book", "Done"].map(function(t) { return "<option" + (t === cu ? " selected" : "") + ">" + t + "</option>"; }).join("") + "</select>"
     : '<input class="nh-o' + (td.classList.contains("num") ? " num" : "") + '" value="' + esc(COT_NGAY_J[j] ? hienNgaySua(cu) : cu) + '"' + (COT_NGAY_J[j] ? ' placeholder="ngày/tháng"' : "") + ">";
-  td.classList.add("dang"); td.innerHTML = ip;
+  var goc = td.innerHTML; td.classList.add("dang"); td.innerHTML = ip;   // goc: giữ nguyên hình ô cũ (icon / ô trống) để huỷ thì trả lại đúng
   var o = td.firstChild, xong = false; o.focus(); if (o.select) o.select();
-  var huy = function() { if (xong) return; xong = true; td.classList.remove("dang"); td.textContent = cu; };
+  var huy = function() { if (xong) return; xong = true; td.classList.remove("dang"); td.innerHTML = goc; };
   var luu = function() {
     if (xong) return; var v = o.value.trim();
     if (v === (COT_NGAY_J[j] ? hienNgaySua(cu) : cu)) return huy();
     if (COT_NGAY_J[j] && v) { var g = docNgayNhap(v); if (!g) { toast("⚠️ Ngày chưa đúng, gõ ngày/tháng (vd 21/11)"); o.focus(); return; } v = g; }
     xong = true; td.classList.remove("dang"); td.classList.add("luu"); td.textContent = "Đang lưu…";
     var s = {}; s[j + 2] = v;
-    api("suaDong", [dong, s], function() { ghiHoanTac(dong, s); toast("✔ Đã sửa dòng " + dong); taiLich(); if (NH.che === "ds") { td.classList.remove("luu"); lamMoiBang(); } else { NH.bang = null; veNhap(); } }, function(e) { td.classList.remove("luu"); td.textContent = cu; loiChung(e); });
+    api("suaDong", [dong, s], function() { ghiHoanTac(dong, s); toast("✔ Đã sửa dòng " + dong); taiLich(); if (NH.che === "ds") { td.classList.remove("luu"); lamMoiBang(); } else { NH.bang = null; veNhap(); } }, function(e) { td.classList.remove("luu"); td.innerHTML = goc; loiChung(e); });
   };
   o.addEventListener("keydown", function(e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); luu(); } else if (e.key === "Escape") huy(); });
   o.addEventListener("blur", luu);
