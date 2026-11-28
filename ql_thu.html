@@ -795,8 +795,6 @@ html.toi .nh-dt tbody tr.gop-dau>td{border-top-color:#c9853a!important}html.toi 
 .nh-dt tbody td.o-chung{vertical-align:middle!important}
 .nh-dt tbody td.nh-tac.o-chung{vertical-align:middle!important;text-align:center}.tac-nhom{justify-content:center}.tac-n{display:block;font-size:10.5px;opacity:.55;margin-top:1px}.nho-ds{display:flex;flex-direction:column;gap:5px;margin-top:6px}.nho-ds .btn{justify-content:flex-start;min-height:34px}
 .tt-nhom{display:block;font-size:10.5px;opacity:.7;margin-top:2px;white-space:nowrap}
-/* ô trống: ẩn icon mờ (rê chuột vào dòng mới hiện để biết ô gì mà nhập) */
-.nh-dt tbody .oi.rong{visibility:hidden}.nh-dt tbody tr:hover .oi.rong{visibility:visible;opacity:.3}@media(hover:none){.nh-dt tbody tr:hover .oi.rong{visibility:hidden}}
 /* Airbnb: viền trái màu logo #FF5A5F */
 .nh-dt tbody tr.ab>td:first-child{box-shadow:inset 4px 0 0 #ff5a5f}
 </style>
@@ -2164,7 +2162,9 @@ function luuChi(hang) {
   api("luuChi", [o], function() { $("#drawer").hidden = true; toast("✔ Đã ghi vào " + TC.dl.ten); TC.dl = null; veThuChi(); }, function(e) { nut.disabled = false; $("#tcLoi").innerHTML = '<div class="err-box">' + esc(e) + "</div>"; });
 }
 /* ↶ Hoàn tác (Ctrl+Z / ⌘Z hoặc nút ↶): nhớ giá trị cũ của các lần sửa ô / ẩn dòng, trả lại theo thứ tự ngược */
-var HT = [];
+var HT = (function() { try { return JSON.parse(sessionStorage.getItem("olia_ht") || "[]"); } catch (e) { return []; } })();   // ↶ nhớ qua lần tải lại trang (trong phiên)
+(function() { var goc = HT.push; HT.push = function() { var n = goc.apply(HT, arguments); while (HT.length > 30) HT.shift(); try { sessionStorage.setItem("olia_ht", JSON.stringify(HT)); } catch (e) {} return n; };
+  var gp = HT.pop; HT.pop = function() { var x = gp.apply(HT, arguments); try { sessionStorage.setItem("olia_ht", JSON.stringify(HT)); } catch (e) {} return x; }; })();
 var COT_NGAY_SHEET = { 5: 1, 12: 1, 13: 1 };   // cột E, L, M (ngày)
 function ngayTuHien(x) {   // "Nov 21" / "26/Oct" / "21/11" -> yyyy-mm-dd
   x = String(x || "").trim(); if (!x) return "";
@@ -2181,6 +2181,7 @@ function ghiHoanTac(dong, sua) {
 function hoanTac() {
   var h = HT.pop(); if (!h) return toast("Không còn thao tác nào để hoàn tác");
   var xong = function() { toast("↶ Đã hoàn tác dòng " + h.dong + (h.ten ? " (" + h.ten + ")" : "")); NH.bang = null; taiLich(); if (Q.tab === "nhap") veNhap(); };
+  if (h.loai === "thue") return api("suaThue", [h.hang, h.cu], function() { toast("↶ Đã hoàn tác dòng thuế " + h.hang); TH.luc = 0; if (Q.tab === "thue" && TH.sheet) veThueSheet(TH.thang || Q.d.homNay.slice(0, 7), true); }, function(e) { HT.push(h); loiChung(e); });
   if (h.loai === "chi") { var c0 = h.cu; return api("luuChi", [{ hang: h.hang, ngay: thangCua(h.th, c0.mm) + "-" + ("0" + (c0.dd || 1)).slice(-2), noiDung: c0.noiDung, nhom: c0.nhom, sl: c0.sl, donGia: c0.donGia, bill: c0.bill, note: c0.note }], function() { toast("↶ Đã hoàn tác khoản chi"); TC.dl = null; veThuChi(); }, function(e) { HT.push(h); loiChung(e); }); }
   var rH = NH.bang && NH.bang.ds.filter(function(x) { return x.dong === h.dong; })[0], xong2 = function() { toast("↶ Đã hoàn tác" + (h.ten ? " · " + h.ten : "")); };
   if (h.loai === "an") { if (rH) { rH.an = h.an; if (Q.tab === "nhap") veBangSheet(); } return api("anDong", [h.dong, h.an], rH ? xong2 : xong, function(e) { HT.push(h); loiChung(e); }); }
@@ -3311,7 +3312,7 @@ function veThueSheet(th, sauGhi) {
       var bg = e.target.closest("[data-goiy]"); if (bg) { popGoiY(null); e.stopPropagation(); chonGoiY(bg, th); return; }
       var bd = e.target.closest("[data-xndung]"); if (bd) { e.stopPropagation(); var hd = Number(bd.dataset.xndung), rd = thueDong(hd), gcd = rd ? String(rd.o[6] || "").trim() : "", bkd = rd ? timMaKhach(rd.o[8]) : null;
         xacNhan2(bd, "Dòng " + hd + " · " + (rd ? String(rd.o[5] || "") : "") + "<br>Xác nhận <b>đúng khách" + (bkd ? " " + esc(bkd.ten) + " · " + esc(bkd.code) : " · mã " + esc(rd ? rd.o[8] : "")) + "</b><br><small>Ghi dấu \"✓ đã xác nhận\" vào ghi chú, không báo lệch / gợi ý nữa</small>", function(xong) {
-          api("suaThue", [hd, { 7: (gcd ? gcd + " · " : "") + "✓ đã xác nhận" }], function() { xong(); toast("✔ Đã xác nhận dòng " + hd); TH.luc = 0; veThueSheet(th, true); }, function(e2) { xong(); loiChung(e2); }); });
+          htThue(hd, { 7: (gcd ? gcd + " · " : "") + "✓ đã xác nhận" }); api("suaThue", [hd, { 7: (gcd ? gcd + " · " : "") + "✓ đã xác nhận" }], function() { xong(); toast("✔ Đã xác nhận dòng " + hd); TH.luc = 0; veThueSheet(th, true); }, function(e2) { xong(); loiChung(e2); }); });
         return; }
       if (e.target.closest("[data-act=txTg]")) { TH.anTg = !TH.anTg; try { localStorage.setItem("olia_tx_tg", TH.anTg ? "1" : "0"); } catch (e2) {} return veThueSheet(th); }
       var bl = e.target.closest("[data-lich]"); if (bl) { e.stopPropagation(); return chonNgayThue(Number(bl.dataset.lich), bl, th); }
@@ -3416,12 +3417,14 @@ function nutDung(h, bk) { return '<button type="button" class="tx-tag ok-nut" da
 function nutGoiY(h, i) { var g = TH.goiY[h].ds[i], bs = g.gop || [g.b];
   return '<button type="button" class="tx-tag goi" data-goiy="' + h + "|" + bs.map(function(y) { return y.code; }).join("+") + '" data-gi="' + h + "|" + i + '">🔎 ' + esc(tenGon(bs[0].ten, 14)) + " · " + bs.map(function(y) { return esc(y.code); }).join("+") + " · " + g.diem + "%</button>"; }
 /** Chọn 1 gợi ý (ở tag hoặc bảng so sánh) -> khung duyệt 2 lớp -> ghi mã */
+/** Ghi giá trị cũ của các ô sổ thuế sắp sửa (để Ctrl+Z / ↶ trả lại) */
+function htThue(h, sua) { var r = thueDong(h); if (!r) return; var cu = {}; Object.keys(sua).forEach(function(k) { var c = Number(k); cu[c] = c === 2 ? (String(r.o[1] || "").trim() ? ngayDongThue(h) : "") : String(r.o[c - 1] == null ? "" : r.o[c - 1]).replace(/^(-?[\d,]+)$/, function(x) { return x.replace(/,/g, ""); }); }); HT.push({ loai: "thue", hang: h, cu: cu, ten: String(r.o[4] || r.o[8] || "") }); }
 function chonGoiY(bg, th) {
         var pg = bg.dataset.goiy.split("|"), hg = Number(pg[0]), mas = pg[1].split("+"), rg = thueDong(hg), cuMa = rg ? String(rg.o[8] || "").trim() : "";
         var gi = bg.dataset.gi ? TH.goiY[pg[0]].ds[Number(bg.dataset.gi.split("|")[1])] : null, bsg = gi ? (gi.gop || [gi.b]) : [];
         xacNhan2(bg, "Dòng " + hg + " · " + (rg ? String(rg.o[5] || "") : "") + "<br>Mã: <s>" + esc(cuMa || "(trống)") + "</s> → <b>" + esc(mas.join(" + ")) + "</b>" + (bsg[0] ? "<br>" + esc(bsg[0].ten) + " · " + ngan(bsg[0].vao) + " → " + ngan(bsg[0].ra) : "") + (gi ? "<br><small>" + esc(gi.loai) + "</small>" : ""), function(xong) {
           var sg = { 9: mas[0] }; if (mas.length > 1) sg[7] = (rg && String(rg.o[6] || "").trim() ? String(rg.o[6]).trim() + " · " : "") + "gộp: " + mas.join(" + ");
-          api("suaThue", [hg, sg], function() { xong(); var ss = $("#txSS"); if (ss) ss._dong(); toast("✔ Dòng " + hg + " → " + mas.join(" + ")); TH.luc = 0; veThueSheet(th, true); }, function(e2) { xong(); loiChung(e2); }); });
+          htThue(hg, sg); api("suaThue", [hg, sg], function() { xong(); var ss = $("#txSS"); if (ss) ss._dong(); toast("✔ Dòng " + hg + " → " + mas.join(" + ")); TH.luc = 0; veThueSheet(th, true); }, function(e2) { xong(); loiChung(e2); }); });
 }
 /** Mở bảng so sánh dạng khung nổi (không bị khung cuộn của bảng che); bấm ra ngoài / Esc để đóng */
 function moSoSanh(nut, h, th) {
@@ -3485,7 +3488,7 @@ function veChoKhach(d, th) {
     if (bs.length > 1) s2[7] = (String(x.r.o[6] || "").trim() ? String(x.r.o[6]).trim() + " · " : "") + "gộp: " + bs.map(function(y) { return y.code; }).join(" + ");
     xacNhan2(bt, "Dòng " + x.r.hang + " · " + x.tien.toLocaleString("en-US") + "<br>Gán mã → <b>" + esc(bs.map(function(y) { return y.code; }).join(" + ")) + "</b><br>" + esc(bs[0].ten) + " · " + ngan(bs[0].vao) + " → " + ngan(bs[0].ra) + "<br><small>" + esc(k.loai) + " · " + k.diem + "%</small>", function(xong) {
     bt.closest(".tx-cho-i").style.opacity = ".45";
-    api("suaThue", [x.r.hang, s2], function() { xong(); toast("✔ Dòng " + x.r.hang + " → " + bs[0].ten + " · " + bs.map(function(y) { return y.code; }).join(" + ")); TH.luc = 0; veThueSheet(th, true); },
+    htThue(x.r.hang, s2); api("suaThue", [x.r.hang, s2], function() { xong(); toast("✔ Dòng " + x.r.hang + " → " + bs[0].ten + " · " + bs.map(function(y) { return y.code; }).join(" + ")); TH.luc = 0; veThueSheet(th, true); },
       function(e2) { xong(); bt.closest(".tx-cho-i").style.opacity = ""; loiChung(e2); }); });
   };
 }
@@ -3521,7 +3524,7 @@ function suaOThue(td) {
     var s2 = { 9: b.code }; var rr = thueDong(h); if (!rr || !String(rr.o[4] || "").trim() || c === 5) s2[5] = "khách đặt phòng - " + b.ten;
     if (!rr || !String(rr.o[1] || "").trim()) s2[2] = Q.d.homNay;   // chưa có ngày tiền vào: mặc định ngày nhập
     if ((!rr || !String(rr.o[5] || "").replace(/[^\d]/g, "")) && (b.conLai > 0 || b.invoice > 0)) s2[6] = String(b.conLai > 0 ? b.conLai : b.invoice);   // chưa có số tiền: tiền còn lại
-    api("suaThue", [h, s2], function() { toast("✔ Đã gán " + b.code + " · " + b.ten + " cho dòng " + h); TH.luc = 0; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7), true); }, function(e) { td.innerHTML = goc; loiChung(e); });
+    htThue(h, s2); api("suaThue", [h, s2], function() { toast("✔ Đã gán " + b.code + " · " + b.ten + " cho dòng " + h); TH.luc = 0; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7), true); }, function(e) { td.innerHTML = goc; loiChung(e); });
   }) : null;
   var huy = function() { if (xong) return; xong = true; td.classList.remove("dang"); td.innerHTML = goc; if (gy) gy.dong(); };
   var luu = function() {
@@ -3542,7 +3545,7 @@ function suaOThue(td) {
     if (trung && !confirm("⚠️ Có thể TRÙNG dòng " + trung.hang + ": " + trung.mo + "\n\nVẫn lưu?")) { td.classList.remove("dang-luu"); td.innerHTML = goc; return; }
     var thangMoi = s[2] && /^\d{4}-\d{2}/.test(s[2]) ? s[2].slice(0, 7) : "";
     if (td.classList.contains("num") && /^-?[\d.,]+$/.test(v)) td.textContent = Number(String(v).replace(/[.,]/g, "")).toLocaleString("en-US");   // hiện ngay số vừa gõ
-    api("suaThue", [h, s], function() {
+    htThue(h, s); api("suaThue", [h, s], function() {
       var dangXem = TH.thang || Q.d.homNay.slice(0, 7), sang = thangMoi && thangMoi !== dangXem;
       toast((nhanDien ? "🔎 Tự nhận diện (" + nhanDien.diem + "%): " + nhanDien.b.ten + " · " + (nhanDien.gop ? nhanDien.gop.map(function(x) { return x.code; }).join(" + ") : nhanDien.b.code) + " (" + nhanDien.loai + ")" : tienSo0 > 0 && !s[9] ? "✔ Đã ghi · chưa chắc khách nào → xem hàng chờ \"Chưa rõ khách\"" : "✔ Đã ghi sheet tax dd dòng " + h) + (sang ? " · chuyển sang tháng " + thangMoi.slice(5) + "/" + thangMoi.slice(0, 4) : ""));
       TH.luc = 0; if (sang) { TH.thang = thangMoi; veThue(); } else veThueSheet(dangXem, true); }, function(e) { td.innerHTML = goc; loiChung(e); });
