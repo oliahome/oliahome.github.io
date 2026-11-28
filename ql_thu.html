@@ -835,6 +835,9 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-mau{width:min(440px,92vw)}.nh-mau textarea{width:100%;box-sizing:border-box;margin-top:8px;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);color:inherit}.nh-mau .nm-h{display:flex;gap:8px;margin-top:6px}.nh-mau .nm-h label{flex:1;display:flex;flex-direction:column;font-size:12px;gap:3px}.nh-mau .nm-h input{min-height:34px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:2px 8px;background:var(--card);color:inherit}.nh-mau .nm-xem{margin-top:6px;min-height:18px}
 .nh-mau .nm-coc{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:12.5px;flex-wrap:wrap}.nh-mau .nm-coc label{display:inline-flex;align-items:center;gap:4px}.nh-mau .nm-coc input[type=text],.nh-mau #mauCocTien{width:120px;min-height:32px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:2px 8px;background:var(--card);color:inherit}.nh-mau #mauCocTien:disabled{opacity:.45}
 .nh-n td.nh-gop{vertical-align:middle;background:color-mix(in srgb,var(--card) 92%,#e9a23b)}.nh-n tr.nh-dau td{border-top:2px solid #e9a23b}
+.nh-n thead th{height:50px;background:#f3ead8;color:#7a4a12;vertical-align:middle}.nh-n thead th .icn{display:block;margin:0 auto 2px}.nh-n thead th small{display:block;font-size:9.5px;font-weight:600;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nh-n td{height:44px;vertical-align:middle}.nh-n .nh-o{height:44px}.nh-n .nh-o[data-k="ten"]{font-size:16px;font-weight:700}.nh-n select.nh-o[data-k="phong"]{font-size:16px;font-weight:800;text-align:center}.nh-n .nh-o[data-k="dem"],.nh-n .nh-o[data-k="vao"],.nh-n .nh-o[data-k="ra"]{font-size:15px;font-weight:700;text-align:center}.nh-n td:has(.nh-g) .nh-o{padding-bottom:12px}
+.nh-n td.nh-ag .nh-agi{position:absolute;left:5px;top:50%;transform:translateY(-50%);pointer-events:none;line-height:0}.nh-n td.nh-ag .nh-o{padding-left:30px;font-size:12px}.nh-n tr:hover td{background:color-mix(in srgb,var(--card) 88%,#e9a23b)}
 </style>
 </head>
 <body>
@@ -1376,11 +1379,12 @@ var NH_SHEET = (function() { try { return localStorage.getItem("olia_nh_sheet") 
 var NH_GOP = (function() { try { var v = localStorage.getItem("olia_gop"); return v == null ? 60 : Number(v); } catch (e) { return 60; } })();
 var NH = { anNgay: (function() { try { return localStorage.getItem("olia_an_ngay") || "1"; } catch (e) { return "1"; } })(), dong: [], hen: {}, gop: NH_GOP, bangCu: NH_SHEET, mo: false, che: "nhap", xep: "dat", thang: "all", theo: "vao", bang: null };   // mặc định xem "Tất cả" như sheet   // che: "nhap" | "ds"   // mo: đang xổ cột Tên FB + Phone (mặc định ẩn)
 try { NH.mo = localStorage.getItem("olia_nh_mo") === "1"; } catch (e) {}
-var NH_COT = [   // [khoá, tiêu đề như sheet, rộng, kiểu]
-  ["ten", "Name", 150], ["tenFb", "Tên FB / hiển thị", 140, "", 1], ["agent", "Agent", 100, "ds"], ["sdt", "Phone", 105, "", 1], ["ngayDat", "Booking Date", 78, "ngay"],
-  ["trangThai", "Status", 74, "tt"], ["phong", "ROOM", 82, "phong"], ["vao", "IN", 78, "ngay"], ["ra", "OUT", 78, "ngay"], ["dem", "Nights", 52, "so"],
-  ["nlThem", "Người lớn +", 62, "so"], ["te", "Trẻ em", 52, "so"], ["giam", "Discount", 84, "tien"], ["ghiChu", "Mô tả", 160], ["inSom", "$ IN sớm", 80, "tien"],
+var NH_COT = [   // [khoá, tiêu đề, rộng, kiểu, ẩn mặc định] — thứ tự giống bảng danh sách bên dưới
+  ["agent", "Agent", 92, "ds"], ["ngayDat", "Booking Date", 78, "ngay"], ["trangThai", "Status", 74, "tt"], ["phong", "ROOM", 96, "phong"], ["giam", "Discount", 90, "tien"],
+  ["vao", "IN", 76, "ngay"], ["ra", "OUT", 76, "ngay"], ["dem", "Nights", 50, "so"], ["ten", "Name", 170], ["tenFb", "Tên FB / hiển thị", 140, "", 1], ["sdt", "Phone", 105, "", 1],
+  ["nlThem", "Người lớn +", 56, "so"], ["te", "Trẻ em", 56, "so"], ["ghiChu", "Mô tả", 170], ["inSom", "$ IN sớm", 80, "tien"],
   ["outTre", "$ OUT trễ", 80, "tien"], ["coc", "CỌC", 90, "tien"], ["tong", "INVOICE", 96, "tinh"], ["kq", "", 150, "tinh"]];
+var NH_ICN = { agent: "agent", ngayDat: "ngay", trangThai: "status", phong: "room", giam: "giam", vao: "vao", ra: "ra", dem: "dem", ten: "ten", tenFb: "ten", sdt: "dt", nlThem: "nl", te: "te", ghiChu: "mota", inSom: "som", outTre: "tre", coc: "coc", tong: "hd" };
 function dongNhapMoi(cu) {
   var hn = Q.d.homNay;
   return { ten: "", tenFb: "", agent: cu ? cu.agent : (Q.d.agent[0] || "Facebook"), sdt: "", ngayDat: hn, trangThai: cu ? cu.trangThai : "Book",
@@ -1413,7 +1417,7 @@ function htmlNhap() {
     }
     if (c[3] === "phong") return '<td><select class="nh-o" ' + ten + ">" + oPhongNhap(r) + "</select></td>";
     if (c[3] === "tt") return '<td><select class="nh-o" ' + ten + ">" + ["Waiting", "Keep", "Book", "Done"].map(function(t) { return "<option" + (t === v ? " selected" : "") + ">" + t + "</option>"; }).join("") + "</select></td>";
-    if (c[3] === "ds") return '<td><input class="nh-o" list="nhAgent" ' + ten + ' value="' + esc(v) + '"></td>';
+    if (c[3] === "ds") return '<td class="nh-ag"><span class="nh-agi">' + iconAgent(v) + '</span><input class="nh-o" list="nhAgent" ' + ten + ' value="' + esc(v) + '"></td>';
     if (c[3] === "ngay") { var g = docNgayNhap(v); return '<td><input class="nh-o' + (g === null ? " sai" : "") + '" ' + ten + ' placeholder="dd/mm" value="' + esc(/^\d{4}-/.test(v) ? v.slice(8, 10) + "/" + v.slice(5, 7) : v) + '"><small class="nh-g">' + (g ? hienNgayNhap(g) : g === null ? "sai ngày" : "") + "</small></td>"; }
     if (k === "giam" && r.giamMo) return '<td><input class="nh-o num" ' + ten + ' inputmode="numeric" value="' + esc(v) + '"><small class="nh-g">' + esc(r.giamMo) + "</small></td>";
     return '<td><input class="nh-o' + (c[3] === "tien" || c[3] === "so" ? " num" : "") + '" ' + ten + (c[3] === "tien" || c[3] === "so" ? ' inputmode="numeric"' : "") + ' value="' + esc(v) + '"></td>';
@@ -1423,7 +1427,7 @@ function htmlNhap() {
     '<button class="btn" data-act="nhHuyMoi">Bỏ</button><button class="btn pri" data-act="nhLuu"' + (dang ? "" : " disabled") + '>💾 Lưu ' + dang + " đơn</button></div>" +
     '<datalist id="nhAgent">' + ag.map(function(a) { return '<option value="' + esc(a) + '">'; }).join("") + "</datalist>" +
     '<div class="nh-cuon"><table class="nh-b nh-n" style="width:' + COT.reduce(function(s, c) { return s + c[2]; }, 68) + 'px"><colgroup><col style="width:34px">' + COT.map(function(c) { return '<col style="width:' + c[2] + 'px">'; }).join("") + "<col style=\"width:34px\"></colgroup>" +
-    '<thead><tr><th></th>' + COT.map(function(c) { return "<th>" + esc(c[1]) + "</th>"; }).join("") + "<th></th></tr></thead><tbody>" +
+    '<thead><tr><th></th>' + COT.map(function(c) { var ic = NH_ICN[c[0]]; return '<th title="' + esc(c[1]) + '">' + (ic ? icn(ic, 22) + '<small>' + esc(c[1].replace("Booking Date", "Ngày đặt").replace("Người lớn +", "NL +")) + "</small>" : esc(c[1])) + "</th>"; }).join("") + "<th></th></tr></thead><tbody>" +
     NH.dong.map(function(r, i) { return '<tr class="' + (r.kq ? "xong" : "") + (r.nhom ? " nh-nhom" : "") + (r.nhom && (!NH.dong[i - 1] || NH.dong[i - 1].nhom !== r.nhom) ? " nh-dau" : "") + '"><td class="nh-so">' + (i + 1) + "</td>" + COT.map(function(c) {
       var sp = nhGop(i, c[0]); if (sp === 0) return ""; var td = o(r, i, c); return sp > 1 ? td.replace("<td", '<td rowspan="' + sp + '" class="nh-gop"') : td; }).join("") + '<td><button class="nh-x" data-act="nhXoa" data-v="' + i + '" title="Xoá dòng">×</button></td></tr>'; }).join("") +
     "</tbody></table></div></section>";
@@ -2421,6 +2425,7 @@ function nhapDoi(i, k, v, veLai) {
   var r = NH.dong[i]; if (!r || r.kq) return;
   if (r.nhom && NH_GOP.indexOf(k) >= 0 && String(r[k]) !== String(v)) NH.dong.forEach(function(x, j) { if (j !== i && x.nhom === r.nhom && !x.kq && String(x[k]) === String(r[k])) nhapDoi(j, k, v); });
   r[k] = v; r.loi = "";
+  if (k === "agent") { var oa = document.querySelector('.nh-o[data-i="' + i + '"][data-k="agent"]'), ia = oa && oa.parentNode.querySelector(".nh-agi"); if (ia) ia.innerHTML = iconAgent(v); }
   var oNhap = function(kk) { return document.querySelector('.nh-o[data-i="' + i + '"][data-k="' + kk + '"]'); };
   var vaoK = docNgayNhap(r.vao), soDem = Math.round(Number(r.dem) || 0);
   if ((k === "dem" || (k === "vao" && (!r.ra || soDem))) && vaoK && (k !== "dem" || soDem > 0)) {   // có IN + số đêm -> tự tính OUT
