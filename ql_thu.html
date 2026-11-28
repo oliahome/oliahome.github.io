@@ -1588,7 +1588,7 @@ function gopCungTen(ds, th) {
     if (ten) ds.forEach(function(x, j) { if (!dung[j] && j > i && !x.huy && k(x) === ten && Math.abs(ms(x) - ms(r)) <= ngay * 864e5) { dung[j] = 1; nhom.push(x); } });
     if (nhom.length > 1) {
       var tong = nhom.reduce(function(s, x) { return s + (Number(String(x.o[19]).replace(/[^\d-]/g, "")) || 0); }, 0);
-      nhom.forEach(function(x, n) { x.gop = n ? -1 : nhom.length; x.gopTong = tong; x.gopGiua = n < nhom.length - 1; x.gopDs = nhom; if (n && nhom[0].nen) { x.nen = nhom[0].nen.slice(); x.chu = (nhom[0].chu || []).slice(); } });   // cùng khách: cùng 1 màu
+      (NH.nhomMap = NH.nhomMap || {})[nhom[0].dong] = nhom; nhom.forEach(function(x, n) { x.gop = n ? -1 : nhom.length; x.gopTong = tong; x.gopGiua = n < nhom.length - 1; x.gopDs = nhom; if (n && nhom[0].nen) { x.nen = nhom[0].nen.slice(); x.chu = (nhom[0].chu || []).slice(); } });   // cùng khách: cùng 1 màu
     }
     kq = kq.concat(nhom);
   });
@@ -1662,7 +1662,7 @@ function tacNhom(r) {
 /** Danh sách chọn phòng cho nút chung (bấm phòng = chạy đúng nút cũ của phòng đó) */
 function moNhoMenu(nut) {
   var cu = $("#nhoMenu"); if (cu) { cu.remove(); if (cu._nut === nut) return; }
-  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0], ds = (r && r.gopDs) || [], loai = nut.dataset.loai;
+  var ds = (NH.nhomMap || {})[Number(nut.dataset.v)] || [], loai = nut.dataset.loai;
   var p = document.createElement("div"); p.id = "nhoMenu"; p.className = "tx-xn"; p._nut = nut;
   p.innerHTML = '<div class="tx-xn-n"><b>' + ({ sdMo: "Sửa phòng nào?", nhAn: "Ẩn / hiện phòng nào?", nhXoaDong: "Xoá phòng nào?" }[loai] || "") + '</b></div><div class="nho-ds">' + ds.map(function(x) { return '<button type="button" class="btn" data-act="' + loai + '" data-v="' + x.dong + '">' + esc(String(x.o[9] || "").trim()) + " <small>" + esc(String(x.o[5] || "")) + "</small></button>"; }).join("") + "</div>";
   document.body.appendChild(p); var b = nut.getBoundingClientRect(); p.style.left = (Math.min(b.left, innerWidth - p.offsetWidth - 8) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
@@ -1691,7 +1691,7 @@ function tienNhom(ds) {
 }
 /** 💵 Nhập tiền cọc cho khách nhiều phòng: số tiền + ngày tiền vào bank -> chia theo tỉ lệ tiền phòng, ghi sổ thuế 1 dòng (gộp mã), cộng vào ô Cọc từng phòng, tích thuế lần 1 */
 function moNhapCoc(nut) {
-  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0], ds = (r && r.gopDs) || (r ? [r] : []); if (!ds.length) return;
+  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0], ds = (NH.nhomMap || {})[Number(nut.dataset.v)] || (r ? [r] : []); if (!ds.length) return; r = ds[0];
   var so = function(v) { return Number(String(v || "").replace(/[^\d-]/g, "")) || 0; }, f2 = function(n) { return Math.round(n).toLocaleString("en-US"); };
   var tong = ds.reduce(function(a, x) { return a + so(x.o[19]); }, 0), daCoc = ds.reduce(function(a, x) { return a + so(x.o[20]); }, 0), goiY = Math.max(0, Math.round((tong / 2 - daCoc) / 1000) * 1000);
   var cu = $("#nhCoc"); if (cu) cu.remove();
@@ -4042,7 +4042,7 @@ document.addEventListener("click", function(e) {
   else if (a === "tcLuuMoi") luuDongChiMoi();
   else if (a === "nhoMenu") moNhoMenu(el);
   else if (a === "nhoCoc") moNhapCoc(el);
-  else if (a === "nhoHL") { var rg = NH.bang.ds.filter(function(x) { return x.dong === Number(v); })[0]; ((rg && rg.gopDs) || []).forEach(function(x, i) { setTimeout(function() { var b0 = document.createElement("button"); b0.dataset.act = "nhHL"; b0.dataset.v = x.dong; document.body.appendChild(b0); b0.click(); b0.remove(); }, i * 250); }); }
+  else if (a === "nhoHL") { ((NH.nhomMap || {})[Number(v)] || []).forEach(function(x, i) { setTimeout(function() { var b0 = document.createElement("button"); b0.dataset.act = "nhHL"; b0.dataset.v = x.dong; document.body.appendChild(b0); b0.click(); b0.remove(); }, i * 250); }); }
   else if (a === "nhAnTat") { if (NH.anNgay === "all" && NH.anTruoc != null) { NH.anNgay = NH.anTruoc; NH.anTruoc = null; } else { NH.anTruoc = NH.anNgay; NH.anNgay = "all"; } try { localStorage.setItem("olia_an_ngay", NH.anNgay); } catch (e) {} veNhap(); }   // 👁 hiện tất cả dòng ẩn / ẩn lại như trước
   else if (a === "tcNote") { TC.anNote = !TC.anNote; try { localStorage.setItem("olia_tc_note", TC.anNote ? "1" : "0"); } catch (e) {} giuOVe(); }
   else if (a === "tcXep") { TC.xep = v === "ngay" ? "ngay" : "nhap"; try { localStorage.setItem("olia_tc_xep", TC.xep); } catch (e) {} giuOVe(); }
