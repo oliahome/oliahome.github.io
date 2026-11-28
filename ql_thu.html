@@ -807,6 +807,8 @@ html.toi .nh-dt tbody tr.gop-dau>td{border-top-color:#c9853a!important}html.toi 
 /* ô chưa nhập: không hiện icon (vẫn giữ chỗ, bấm vào vẫn nhập được, không xê dịch) */
 .nh-dt tbody .oi.rong{visibility:hidden}
 .nh-dt tbody [data-j="14"] .oi svg,.nh-dt tbody [data-j="15"] .oi svg{width:34px!important;height:34px!important}.nh-dt tbody [data-j="14"] .oi,.nh-dt tbody [data-j="15"] .oi{height:auto!important;width:auto!important;align-items:center}.nh-dt tbody [data-j="14"],.nh-dt tbody [data-j="15"]{height:auto!important;align-items:center}
+/* tích L1 L2 trước, tên phòng sau, thẳng hàng */
+.o-thue-nhom .tn-ph{display:grid!important;grid-template-columns:auto auto 1fr;gap:2px 6px;align-items:center}.o-thue-nhom .tn-p{display:contents}.o-thue-nhom .tn-p small{opacity:.8;white-space:nowrap}.o-thue-nhom .tn-p small i{font-style:normal;opacity:.6;font-size:.9em}
 </style>
 </head>
 <body>
@@ -1676,7 +1678,7 @@ function thueNhom(ds) {
     var trang = !thu ? '<b class="tn-thieu">chưa thu</b>' : con <= 1000 ? '<b class="tn-du">đủ ✓</b>' : Math.abs(thu - coc50) <= Math.max(1000, coc50 * 0.03) ? '<b class="tn-du">cọc ✓</b>' : '<b class="tn-thieu">' + (thu < coc50 ? "cọc thiếu" : "cọc dư") + "</b>";
     var tip = dd(k) + "–" + dd(ngayOUT(g[0], th)) + " · tổng " + f2(tong) + " · cọc 50% " + f2(coc50) + (ls.length ? "\nĐã nhập thuế: " + ls.map(function(x) { return (x.ng || "?") + " " + f2(x.t); }).join(" · ") : "") + "\nĐã thu " + f2(thu) + " · còn " + f2(con);
     return '<div class="tn-dot2" title="' + esc(tip) + '"><b>' + dd(k) + "</b> " + g.map(function(r) { return esc(String(r.o[9] || "").trim().slice(0, 3)); }).join("+") + " · " + (thu ? f(thu) + " " : "") + trang + "</div>";
-  }).join("") + '<div class="tn-ph">' + ds.map(function(r) { return '<span class="tn-p"><small>' + esc(String(r.o[5] || "").split(".")[0]) + "</small>" + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck mini' + (co ? " on" : "") + '" title="' + esc(String(r.o[5] || "")) + " · thuế lần " + l + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + "><span>" + l + "</span></label>"; }).join("") + "</span>"; }).join("") + "</div>";
+  }).join("") + '<div class="tn-ph">' + ds.map(function(r) { return '<span class="tn-p">' + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck mini' + (co ? " on" : "") + '" title="' + esc(String(r.o[5] || "")) + " · thuế lần " + l + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + "><span>" + l + "</span></label>"; }).join("") + "<small>" + esc(String(r.o[9] || "").trim() || String(r.o[5] || "").split(".")[0]) + " <i>" + esc(String(r.o[5] || "")) + "</i></small></span>"; }).join("") + "</div>";
 }
 /* màu dòng: bỏ màu nâu "sắp tới" của sheet, chỉ tô xanh lá đơn nhận phòng trong 3 ngày tới (điện thoại) / 7 ngày (máy tính) (xám/huỷ, xanh Airbnb giữ nguyên) */
 var MAU_SAP = { "#494429": 1 };
