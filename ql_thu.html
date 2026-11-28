@@ -1537,7 +1537,7 @@ function xepDs(ds, th) {
     var truoc = "", k = {}; a.forEach(function(r) { var v = khoaBook(r, th); if (v) truoc = v; k[r.dong] = v || truoc; });
     a.sort(function(x, y) { var p = k[x.dong] || "", q = k[y.dong] || ""; return p < q ? -1 : p > q ? 1 : x.dong - y.dong; });
   }
-  return a;
+  return a.reverse();   // mới / xa nhất ở trên cùng, ngày cũ nằm dưới cùng
 }
 /** Ngày book (vd "Nov 27", "27/11", "2026-11-27") -> yyyy-mm-dd; năm suy từ ngày IN (book tháng sau IN = năm trước) */
 function khoaBook(r, th) {
