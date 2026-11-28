@@ -840,6 +840,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-n td.nh-ag .nh-agi{position:absolute;left:5px;top:50%;transform:translateY(-50%);pointer-events:none;line-height:0}.nh-n td.nh-ag .nh-o{padding-left:30px;font-size:12px}.nh-n tr:hover td{background:color-mix(in srgb,var(--card) 88%,#e9a23b)}
 .t-ck.t-hoan .hoan-i{display:inline-flex;line-height:0}.t-ck.t-hoan .hoan-i svg{stroke-width:2.2}
 .t-ck.t-hoan input{appearance:none;-webkit-appearance:none;border:2px solid #b4553f;border-radius:50%!important;background:var(--card);cursor:pointer;display:inline-grid;place-content:center}.t-ck.t-hoan input:checked{background:#b4553f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/78% no-repeat}
+.nh-dt div[data-j="13"],.nh-dt div[data-j="0"],.nh-n .nh-o[data-k="ten"],.nh-n .nh-o[data-k="tenFb"]{text-transform:capitalize}
 </style>
 </head>
 <body>
@@ -2350,6 +2351,7 @@ function luuSuaDong(dong) {
     var v = el.value.trim(), cu = c[2] === "ngay" ? hienNgaySua(r.o[j]) : r.o[j];
     if (v === String(cu).trim()) return;
     if (c[2] === "ngay" && v) { var g = docNgayNhap(v); if (!g) { loi = "Ngày chưa đúng ở ô " + c[1]; return; } v = g; }
+    if (j === 0 || j === 13) v = hoaDau(v);
     sua[j + 2] = v; n++;
   });
   if (loi) return ($("#sdLoi").innerHTML = '<div class="err-box">' + esc(loi) + "</div>");
@@ -2381,6 +2383,7 @@ function suaO(td) {
     if (xong) return; var v = o.value.trim();
     if (v === (COT_NGAY_J[j] ? hienNgaySua(cu) : cu)) return huy();
     if (COT_NGAY_J[j] && v) { var g = docNgayNhap(v); if (!g) { toast("⚠️ Ngày chưa đúng, gõ ngày/tháng (vd 21/11)"); o.focus(); return; } v = g; }
+    if (j === 0 || j === 13) v = hoaDau(v);   // cột Name (B) / Name (O): viết hoa chữ đầu mỗi từ
     xong = true; td.classList.remove("dang"); td.classList.add("luu"); td.textContent = "Đang lưu…";
     var s = {}; s[j + 2] = v;
     api("suaDong", [dong, s], function() { ghiHoanTac(dong, s); toast("✔ Đã sửa dòng " + dong); taiLich(); if (NH.che === "ds") { td.classList.remove("luu"); lamMoiBang(); } else { NH.bang = null; veNhap(); } }, function(e) { td.classList.remove("luu"); td.innerHTML = goc; loiChung(e); });
@@ -2447,10 +2450,12 @@ function nhapDoi(i, k, v, veLai) {
   if (["phong", "vao", "ra", "dem", "nlThem", "te", "giam", "inSom", "outTre"].indexOf(k) >= 0) { clearTimeout(NH.hen[i]); NH.hen[i] = setTimeout(function() { if (r.phong) xemNhap(i); else { r.xem = null; tinhDongNhap(i); } }, 600); }
   if (k === "ten" || k === "vao") { var nut = document.querySelector('[data-act="nhLuu"]'), n = NH.dong.filter(function(x) { return !x.kq; }).length; if (nut) { nut.disabled = !n; nut.textContent = "💾 Lưu " + n + " đơn vào sheet"; } }
 }
+/* viết hoa chữ đầu mỗi từ: "thienann do" -> "Thienann Do" (giữ nguyên chữ hoa sẵn có, vd "C.P") */
+function hoaDau(s) { return String(s || "").trim().replace(/\s+/g, " ").replace(/(^|[\s(\-\/."'])(\p{Ll})/gu, function(m, a, c) { return a + c.toLocaleUpperCase("vi"); }); }
 function donNhap(r) {
   var p = Q.d.phong.filter(function(x) { return x.id === r.phong; })[0] || {}, vao = docNgayNhap(r.vao), ra = docNgayNhap(r.ra, vao);
   var so = function(x) { return Math.round(Number(String(x || "").replace(/[^\d-]/g, "")) || 0); };
-  return { ten: String(r.ten).trim(), tenFb: String(r.tenFb).trim(), agent: String(r.agent).trim() || "Facebook", sdt: r.sdt, ngayDat: docNgayNhap(r.ngayDat) || Q.d.homNay,
+  return { ten: hoaDau(r.ten), tenFb: hoaDau(r.tenFb), agent: String(r.agent).trim() || "Facebook", sdt: r.sdt, ngayDat: docNgayNhap(r.ngayDat) || Q.d.homNay,
     trangThai: r.trangThai, phong: r.phong, vao: vao, ra: ra, nl: (p.khachChuan || 2) + so(r.nlThem), te: so(r.te), giam: so(r.giam), ghiChu: r.ghiChu + (r.giamMo ? (r.ghiChu ? " · " : "") + (so(r.giam) ? "giảm " : "") + r.giamMo : ""),
     inSom: so(r.inSom), outTre: so(r.outTre), coc: so(r.coc), ghiThue: false };
 }
@@ -2496,7 +2501,7 @@ function moDanMau(nut) {
   p.addEventListener("keydown", function(e) { if (e.key === "Escape") p.remove(); });
   p.addEventListener("click", function(e) { var bt = e.target.closest("[data-m]"); if (!bt) return; if (bt.dataset.m !== "1") return p.remove();
     var k = docMau($("#mauTxt").value); if (!k.phong.length) return toast("Chưa nhận ra phòng trong mẫu"); if (!k.vao) return toast("Chưa nhận ra ngày check in");
-    var ten = $("#mauTen").value.trim(), sdt = $("#mauSdt").value.trim(), dem = Number(k.dem) || 0;
+    var ten = hoaDau($("#mauTen").value), sdt = $("#mauSdt").value.trim(), dem = Number(k.dem) || 0;
     var kieuCoc = p.querySelector('[name="mauCoc"]:checked').value, cocTu = Number(String($("#mauCocTien").value || "").replace(/[^\d]/g, "")) || 0;
     if (kieuCoc === "tu" && !(cocTu > 0)) return toast("Nhập số tiền cọc hoặc chọn 50%");
     var giamTu = null; if (p.querySelector('[name="mauGiam"]:checked').value === "tu") { var gv = String($("#mauGiamO").value || "").replace(/\s/g, ""), mp = gv.match(/(\d+(?:[.,]\d+)?)%/), mt2 = gv.replace(/\d+(?:[.,]\d+)?%/, "").replace(/[^\d]/g, "");
