@@ -3150,12 +3150,37 @@ function tagThue(r) {
   if (bk) {
     var lan = /gộp:/i.test(gc) ? "gộp" : mucKhopTien(bk.invoice, t) === 0 ? "L1+L2 đủ" : mucKhopTien(bk.coc, t) <= 2 && ngay < cong(bk.vao, -3) ? "L1 cọc" : mucKhopTien(bk.conLai || bk.invoice - bk.coc, t) <= 2 ? "L2 còn lại" : mucKhopTien(bk.coc, t) <= 2 ? "L1 cọc" : "?";
     var c = soDem(bk.vao, ngay), cach = c === 0 ? "đúng ngày in" : c < 0 ? "trước in " + (-c) + "n" : "sau in " + c + "n";
-    return '<span class="tx-tag' + (lan === "?" ? " la" : "") + '" title="' + esc(bk.ten + " · in " + ngan(bk.vao) + " → out " + ngan(bk.ra) + (lan === "?" ? " · số tiền không khớp cọc / còn lại / tổng" : "")) + '">' + esc(lan) + " · " + cach + "</span>";
+    if (lan !== "?") return '<span class="tx-tag" title="' + esc(bk.ten + " · in " + ngan(bk.vao) + " → out " + ngan(bk.ra)) + '">' + esc(lan) + " · " + cach + "</span>";
+    return '<span class="tx-tag la" title="' + esc(bk.ten + " · cọc " + (bk.coc || 0).toLocaleString("en-US") + " · còn lại " + (bk.conLai || 0).toLocaleString("en-US") + " · tổng " + (bk.invoice || 0).toLocaleString("en-US") + " — không khớp " + t.toLocaleString("en-US")) + '">? lệch tiền · ' + cach + "</span>" + tagThayThe(r, t, ngay, ma);
   }
   if (!ma && String(r.o[4] || "").trim() && !r.ct[4]) return "";   // khoản thu khác ghi tay
-  var dsG = chamKhach(t, ngay, String(r.o[4] || "") + " " + gc).ds; if (!dsG.length) return ma ? '<span class="tx-tag la" title="Mã không có trong sổ booking đang tải">? mã lạ</span>' : "";
+  var dsG = chamKhach(t, ngay, String(r.o[4] || "") + " " + gc).ds; if (!dsG.length) return ma ? '<span class="tx-tag la" title="Mã ' + esc(ma) + ' không có trong sổ booking cả năm' + (TH.lichAll ? "" : " (đang tải sổ cả năm…)") + '">? mã lạ</span>' + tagThayThe(r, t, ngay, ma) : "";
   TH.goiY = TH.goiY || {}; TH.goiY[r.hang] = { ds: dsG, ma: ma, tien: t };
   return '<span class="tx-goi-w">' + nutGoiY(r.hang, 0) + (dsG.length > 1 ? '<button type="button" class="tx-goi-x" data-goimo="' + r.hang + '" title="Xem ' + dsG.length + ' khách có khả năng" aria-label="Xem thêm khách gợi ý">▾<small>' + dsG.length + "</small></button>" : "") + "</span>";
+}
+/** Dòng lệch tiền / mã lạ: dò CẢ SỔ BOOKING CẢ NĂM tìm đơn khớp ĐÚNG số tiền (cọc / còn lại / tổng), kể cả khi ghi nhầm tháng (±1 tháng) */
+function timThayThe(t, ngay, ma) {
+  var ds = (TH.lichAll || (Q.lich && Q.lich.ds) || []), kq = [], maL = String(ma || "").toLowerCase();
+  var lech = function(d, n) { var x = dk(d); x.setMonth(x.getMonth() + n); return kd(x); };
+  ds.forEach(function(b) {
+    if (!b.code || b.code.toLowerCase() === maL) return;
+    var khop = [["cọc", b.coc], ["còn lại", b.conLai || (b.invoice - b.coc)], ["tổng", b.invoice]].filter(function(x) { return x[1] > 0 && Math.abs(x[1] - t) <= 1000; })[0]; if (!khop) return;
+    [[0, ""], [-1, "nếu ngày đúng là tháng trước"], [1, "nếu ngày đúng là tháng sau"]].some(function(m) {
+      var d = m[0] ? lech(ngay, m[0]) : ngay; if (d < cong(b.vao, -60) || d > cong(b.ra, 5)) return false;
+      kq.push({ b: b, loai: "khớp " + khop[0], ghi: m[1], ngay: d, diem: (m[0] ? 0 : 20) + (d <= b.vao ? 10 : 0) - Math.abs(soDem(d, b.vao)) / 30 }); return true; });
+  });
+  return kq.sort(function(a, b) { return b.diem - a.diem; }).slice(0, 2);
+}
+function tagThayThe(r, t, ngay, ma) {
+  if (!TH.lichAll) taiLichCaNam();
+  var ds = timThayThe(t, ngay, ma); if (!ds.length) return "";
+  TH.goiY = TH.goiY || {}; TH.goiY[r.hang] = { ds: ds.map(function(x) { return { b: x.b, diem: 0, loai: x.loai + (x.ghi ? " · " + x.ghi + " (" + ngan(x.ngay) + ")" : "") }; }), ma: ma, tien: t };
+  return '<span class="tx-goi-w">' + ds.map(function(x, i) { return nutGoiY(r.hang, i).replace(/ · 0%<\/button>$/, (x.ghi ? " · ngày " + ngan(x.ngay) + "?" : "") + "</button>"); }).join("") + "</span>";
+}
+/** Sổ booking cả năm (để dò dòng thuế cũ / đặt trước xa) — tải 1 lần, xong vẽ lại bảng thuế */
+function taiLichCaNam() {
+  if (TH.lichAllDang) return; TH.lichAllDang = 1;
+  api("lich", [(TH.thang || Q.d.homNay).slice(0, 4) + "-01-01", "all"], function(d) { TH.lichAll = d.ds || []; if (Q.tab === "thue" && TH.sheet) veThueSheet(TH.thang || Q.d.homNay.slice(0, 7)); }, function() { TH.lichAllDang = 0; });
 }
 function nutGoiY(h, i) { var g = TH.goiY[h].ds[i], bs = g.gop || [g.b];
   return '<button type="button" class="tx-tag goi" data-goiy="' + h + "|" + bs.map(function(y) { return y.code; }).join("+") + '" data-gi="' + h + "|" + i + '">🔎 ' + esc(tenGon(bs[0].ten, 14)) + " · " + bs.map(function(y) { return esc(y.code); }).join("+") + " · " + g.diem + "%</button>"; }
@@ -3167,7 +3192,7 @@ function popGoiY(nut) {
   p.innerHTML = (o.ma ? '<div class="tx-pop-c">Mã đang ghi <b>' + esc(o.ma) + "</b> không thấy khách</div>" : "") + bs.map(function(b) {
     return '<div class="tx-pop-k"><b>' + esc(b.ten) + "</b> · " + esc(b.code) + (b.phong ? " · " + esc(b.phong) : "") + "<br>📅 " + ngan(b.vao) + " → " + ngan(b.ra) + " · " + (b.agent ? esc(b.agent) : "") +
       "<br>Cọc " + (b.coc || 0).toLocaleString("en-US") + " · Còn lại " + (b.conLai || 0).toLocaleString("en-US") + " · Tổng " + (b.invoice || 0).toLocaleString("en-US") + "<br>Thuế: " + (b.thue1 ? "✔ L1 " : "✗ L1 ") + (b.thue2 ? "✔ L2" : "✗ L2") + "</div>"; }).join("") +
-    '<div class="tx-pop-l">' + g.diem + "% · " + esc(g.loai) + " · khoản " + o.tien.toLocaleString("en-US") + "</div><small>Bấm để gán mã cho dòng " + k[0] + "</small>";
+    '<div class="tx-pop-l">' + (g.diem ? g.diem + "% · " : "") + esc(g.loai) + " · khoản " + o.tien.toLocaleString("en-US") + "</div><small>Bấm để gán mã cho dòng " + k[0] + "</small>";
   p.hidden = false; var r = nut.getBoundingClientRect(), w = p.offsetWidth, h2 = p.offsetHeight;
   var x = r.right + 8; if (x + w > innerWidth - 8) x = Math.max(8, r.left - w - 8);
   var y = Math.min(Math.max(8, r.top + r.height / 2 - h2 / 2), innerHeight - h2 - 8);
@@ -3339,7 +3364,7 @@ function timKhachGop(tien, ngay) {
   if (!tot) return null;
   return { b: tot.ds[0], gop: tot.ds, loai: "gộp " + tot.ds.length + " đơn (" + (tot.f === "coc" ? "cọc" : "tổng") + "): " + tot.ds.map(function(x) { return x.code; }).join(" + "), cach: 0, bac: 0 };
 }
-function timMaKhach(ma) { ma = String(ma || "").trim().toLowerCase(); return ma ? ((Q.lich && Q.lich.ds) || []).filter(function(b) { return String(b.code || "").toLowerCase() === ma; })[0] : null; }
+function timMaKhach(ma) { ma = String(ma || "").trim().toLowerCase(); if (!ma) return null; var f = function(b) { return String(b.code || "").toLowerCase() === ma; }; return ((Q.lich && Q.lich.ds) || []).filter(f)[0] || (TH.lichAll || []).filter(f)[0] || null; }   // không có trong lịch đang tải -> tìm trong sổ cả năm
 function thueDong(h) { var d = TH.sh || {}; return (d.ds || []).concat(d.moi ? [d.moi] : []).filter(function(r) { return r.hang === h; })[0]; }
 /** Ngày của dòng sổ thuế (cột Ngày + cột tháng) -> yyyy-mm-dd */
 function ngayDongThue(h) {
