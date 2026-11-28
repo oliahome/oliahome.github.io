@@ -792,6 +792,7 @@ html.toi .nh-dt tbody tr.gop-dau>td{border-top-color:#c9853a!important}html.toi 
 .nh-dt tbody .hdg [data-j="20"]{opacity:.5!important;font-weight:400!important}.nh-dt tbody .hdg [data-j="20"] b{font-weight:400!important}
 .nh-dt tbody .hdg [data-j="21"]{font-weight:800!important;opacity:1!important}.nh-dt tbody .hdg [data-j="21"] b{font-weight:800!important}
 .tg-gon .tg-d:first-child b{font-size:14.5px;font-weight:800}.tg-gon .tg-d:nth-child(2){opacity:.6}.tg-gon .tg-d:nth-child(2) b{font-weight:500}
+.nh-dt tbody td.o-chung{vertical-align:middle!important}
 </style>
 </head>
 <body>
@@ -1593,6 +1594,10 @@ function bangDT(b, ds, mo, dt) {
           }
           if (g[0] === "thue" && r.gopDs && r.gopDs.length > 1) { if (r.gop === -1) return ""; return '<td class="o-thue o-thue-nhom" rowspan="' + r.gopDs.length + '">' + thueNhom(r.gopDs) + "</td>"; }   // khách nhiều phòng: 1 khung VAT chung
           if (g[0] === "thue") { var ng = r.ngThue || [], ab = /air\s*b\s*n\s*b/i.test(String(r.o[1] || "")), chung = ng[0] && (ng[0] === ng[1] || (ab && ng.length === 1 && r.thue1 && r.thue2)), gop = r.gopThue > 1 ? '<i class="t-gop" title="1 lần nhập thuế chung cho ' + r.gopThue + ' phòng của cùng khách">🔗×' + r.gopThue + "</i>" : ""; return '<td class="o-thue' + (gop ? " thue-gop" : "") + '">' + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck' + (co ? " on" : "") + '" title="Thuế lần ' + l + (co ? ": đã nhập" : ": chưa nhập — tích để ghi sổ thuế") + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + '><span>L' + l + "</span>" + (!chung && ng[l - 1] ? '<small class="t-ng">' + esc(ng[l - 1]) + (l === 1 ? gop : "") + "</small>" + ((r.tienThue || [])[l - 1] ? '<small class="t-tien">' + tienM((r.tienThue || [])[l - 1]) + "</small>" : "") : "") + "</label>"; }).join("") + (chung ? '<small class="t-ng t-chung">' + esc(ng[0]) + gop + "</small>" + ((r.tienThue || [])[0] ? '<small class="t-tien t-chung">' + tienM(r.tienThue.slice(0, ng[0] === ng[1] ? 2 : 1).reduce(function(a, b) { return a + b; }, 0)) + "</small>" : "") : "") + "</td>"; }
+          if (r.gopDs && r.gopDs.length > 1 && (g[0] === 1 || g[0] === 10 || g[0] === 12)) {   // khách cùng tên: nguồn+trạng thái / ngày ở / số đêm giống nhau cả nhóm -> 1 ô chung
+            var cotG = g[0] === 10 ? [10, 11] : g, giong = r.gopDs.every(function(x) { return cotG.every(function(j) { return String(x.o[j] || "").trim() === String(r.gopDs[0].o[j] || "").trim(); }); });
+            if (giong) { if (r.gop === -1) return ""; var td2 = td.replace('class="', 'class="o-chung ') + ' rowspan="' + r.gopDs.length + '"'; return td2 + ">" + (g[0] === 10 ? oIO(r) : g.map(function(j) { return oj(r, j); }).join("")) + "</td>"; }
+          }
           if (g[0] === 13 && r.gopDs && r.gopDs.length > 1) { if (r.gop === -1) return ""; return td.replace('class="', 'class="o-ten-nhom ') + ' rowspan="' + r.gopDs.length + '">' + g.map(function(j) { return oj(r, j); }).join("") + tenNhom(r.gopDs, !NH.thang || NH.thang === "all" ? Q.d.homNay.slice(0, 7) : NH.thang) + "</td>"; }   // khách nhiều phòng: 1 khung tên chung
           if (g[0] === 10) return td + ">" + oIO(r) + "</td>";
           return td + ">" + g.map(function(j) { return oj(r, j); }).join("") + "</td>";
