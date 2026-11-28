@@ -2449,7 +2449,7 @@ function donNhap(r) {
   var p = Q.d.phong.filter(function(x) { return x.id === r.phong; })[0] || {}, vao = docNgayNhap(r.vao), ra = docNgayNhap(r.ra, vao);
   var so = function(x) { return Math.round(Number(String(x || "").replace(/[^\d-]/g, "")) || 0); };
   return { ten: String(r.ten).trim(), tenFb: String(r.tenFb).trim(), agent: String(r.agent).trim() || "Facebook", sdt: r.sdt, ngayDat: docNgayNhap(r.ngayDat) || Q.d.homNay,
-    trangThai: r.trangThai, phong: r.phong, vao: vao, ra: ra, nl: (p.khachChuan || 2) + so(r.nlThem), te: so(r.te), giam: so(r.giam), ghiChu: r.ghiChu + (r.giamMo && so(r.giam) ? (r.ghiChu ? " · " : "") + "giảm " + r.giamMo : ""),
+    trangThai: r.trangThai, phong: r.phong, vao: vao, ra: ra, nl: (p.khachChuan || 2) + so(r.nlThem), te: so(r.te), giam: so(r.giam), ghiChu: r.ghiChu + (r.giamMo ? (r.ghiChu ? " · " : "") + (so(r.giam) ? "giảm " : "") + r.giamMo : ""),
     inSom: so(r.inSom), outTre: so(r.outTre), coc: so(r.coc), ghiThue: false };
 }
 function xemNhap(i) {
@@ -2460,7 +2460,7 @@ function xemNhap(i) {
       var lech = r.giamTu ? Math.round(goc * r.giamTu.pt / 100 / 1000) * 1000 + r.giamTu.tien : goc - r.giaMuon, pt = 0, gPt = 0;
       if (lech > 1000) { pt = r.giamTu ? r.giamTu.pt : Math.floor(lech * 100 / goc); gPt = Math.round(goc * pt / 100 / 1000) * 1000; if (gPt > lech && pt > 0) { pt--; gPt = Math.round(goc * pt / 100 / 1000) * 1000; }
         var le = lech - gPt; r.giam = String(lech); r.giamMo = (pt ? "−" + pt + "%" : "") + (le ? (pt ? " + " : "") + le.toLocaleString("vi-VN") + "đ TM" : ""); return veNhap(), xemNhap(i); }
-      if (lech < -1000) r.ghiChu = (r.ghiChu ? r.ghiChu + " · " : "") + "giá mẫu cao hơn niêm yết " + (-lech).toLocaleString("vi-VN"); }
+      if (lech < -1000) r.giamMo = "mẫu cao hơn " + (-lech).toLocaleString("vi-VN"); }
     tinhDongNhap(i); });
 }
 /** Tìm đơn đã có trùng với đơn sắp thêm: cùng phòng + cùng ngày nhận, hoặc cùng tên + cùng ngày nhận (bỏ qua đơn huỷ) */
