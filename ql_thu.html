@@ -1709,7 +1709,7 @@ function tienNhom(ds) {
     '<div class="tg-d"><span>' + icn("con", 12) + ' Còn lại</span><b class="' + (con > 1000 ? "tn-thieu" : "tn-du") + '">' + (con > 1000 ? f(con) : "đủ ✓") + "</b></div></div>";
 }
 /** Ô tích H (hoàn cọc): tự tích khi Mô tả có "hoàn cọc"; bấm ô chưa tích -> mở khung hoàn cọc */
-function oHoan(r, mini) { var co = /hoàn cọc/i.test(String(r.o[16] || "")); return '<label class="t-ck t-hoan' + (mini ? " mini" : "") + (co ? " on" : "") + '" title="' + esc(co ? "Đã hoàn cọc: " + (String(r.o[16]).match(/hoàn cọc[^·]*/i) || [""])[0] : "Hoàn cọc — bấm để nhập") + '"><input type="checkbox" data-hoan="' + r.dong + '"' + (co ? " checked" : "") + "><span>H</span></label>"; }
+function oHoan(r, mini) { var co = /hoàn cọc/i.test(String(r.o[16] || "")); if (!co) return ""; /* chỉ hiện ô H khi đã hoàn; muốn hoàn thì xổ chi tiết bấm Hoàn cọc */ return '<label class="t-ck t-hoan' + (mini ? " mini" : "") + (co ? " on" : "") + '" title="' + esc(co ? "Đã hoàn cọc: " + (String(r.o[16]).match(/hoàn cọc[^·]*/i) || [""])[0] : "Hoàn cọc — bấm để nhập") + '"><input type="checkbox" data-hoan="' + r.dong + '"' + (co ? " checked" : "") + "><span>H</span></label>"; }
 /** ↩️ Hoàn cọc: số tiền (mặc định = cọc đang ghi), ngày chuyển trả, lý do -> ghi sổ thuế 1 dòng số ÂM, trừ ô Cọc, ghi chú vào Mô tả, (tuỳ chọn) bỏ tích thuế lần 1. Duyệt 2 lớp */
 function moHoanCoc(nut) {
   var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0]; if (!r) return;
