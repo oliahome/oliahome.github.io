@@ -1495,6 +1495,31 @@ function khoaBook(r, th) {
   if (vin && t > Number(vin.slice(5, 7))) y--;
   return y + "-" + z(t) + "-" + z(d);
 }
+/** 🔗 Nối đơn liền ngày (vd khách ở 31/12→1/1 rồi 1/1→3/1 do tách file năm, hoặc ở thêm ngày phát sinh nhập riêng):
+ *  cùng khách + cùng phòng + ngày ra đơn trước = ngày vào đơn sau -> hiện 1 dòng: ngày vào đơn đầu → ngày ra đơn cuối, cộng đêm & tiền, ghi cả 2 mã.
+ *  Hai đơn vẫn là 2 dòng riêng trên sheet (nhập riêng, thuế riêng); các ô đã cộng không sửa trực tiếp được ở dòng nối (bấm ▸ để xem / sửa từng đơn) */
+function noiLienNgay(ds, th) {
+  if (NH.khongNoi) return ds;
+  var k = function(r) { return boDauQL(String(r.o[13] || "")).trim().toLowerCase().replace(/\s+/g, " ") + "|" + String(r.o[9] || "").trim().toLowerCase(); };
+  var so = function(v) { return Number(String(v || "").replace(/[^\d-]/g, "")) || 0; }, f = function(n) { return n ? n.toLocaleString("en-US") : ""; };
+  var bo = {}, kq = [];
+  ds.forEach(function(r) {
+    if (bo[r.dong] || r.huy || !String(r.o[13] || "").trim()) { if (!bo[r.dong]) kq.push(r); return; }
+    var m = r, ra = ngayOUT(r, th), chuoi = [r];
+    for (var lap = 0; lap < 4 && ra; lap++) {
+      var x = ds.filter(function(y) { return !bo[y.dong] && y !== m && chuoi.indexOf(y) < 0 && !y.huy && k(y) === k(r) && ngayIN(y, th) === ra; })[0]; if (!x) break;
+      chuoi.push(x); bo[x.dong] = 1; ra = ngayOUT(x, th);
+    }
+    if (chuoi.length === 1) return kq.push(r);
+    var cuoi = chuoi[chuoi.length - 1]; m = Object.assign({}, r, { o: r.o.slice(), ct: r.ct.slice(), noi: chuoi.slice(1) });
+    m.o[11] = cuoi.o[11]; m.o[5] = chuoi.map(function(y) { return y.o[5]; }).join(" + ");
+    [12, 14, 15].forEach(function(j) { if (j === 12) m.o[j] = String(chuoi.reduce(function(a, y) { return a + so(y.o[j]); }, 0)); });
+    [19, 20, 21].forEach(function(j) { m.o[j] = f(chuoi.reduce(function(a, y) { return a + so(y.o[j]); }, 0)); });
+    [5, 11, 12, 19, 20, 21].forEach(function(j) { m.ct[j] = true; });
+    kq.push(m);
+  });
+  return kq;
+}
 function gopCungTen(ds, th) {
   var ngay = NH.gop | 0; if (!ngay) return ds;
   var k = function(r) { return boDauQL(String(r.o[13] || "")).trim().toLowerCase().replace(/\s+/g, " "); }, dung = {}, kq = [];
@@ -1513,7 +1538,7 @@ function gopCungTen(ds, th) {
 /* ô IN/OUT: số tháng đậm trong ô vuông trước ngày; cùng tháng thì 1 ô tháng chung */
 function oIO(r) {
   var a = ngayTach(r.o[10]), c = ngayTach(r.o[11]);
-  var d = function(j, v) { return '<div class="sua io-d" data-dong="' + r.dong + '" data-j="' + j + '" title="' + esc((j === 10 ? "IN: " : "OUT: ") + (r.o[j] || "")) + '">' + v + "</div>"; };
+  var d = function(j, v) { return '<div class="' + (r.noi && j === 11 ? "ct" : "sua") + ' io-d" data-dong="' + r.dong + '" data-j="' + j + '" title="' + esc((j === 10 ? "IN: " : "OUT: ") + (r.o[j] || "") + (r.noi && j === 11 ? " · nối " + (r.noi.length + 1) + " đơn liền ngày" : "")) + '">' + v + "</div>"; };
   if (!a || !c) return d(10, a ? a.d : esc(r.o[10] || "")) + d(11, c ? c.d : esc(r.o[11] || ""));
   if (a.t === c.t) return '<div class="io"><span class="io-t">' + a.t + "</span><div>" + d(10, a.d) + d(11, c.d) + "</div></div>";
   return '<div class="io2"><span class="io-t">' + a.t + "</span>" + d(10, a.d) + '<span class="io-t">' + c.t + "</span>" + d(11, c.d) + "</div>";
@@ -1673,7 +1698,7 @@ function veBangSheet() {
     (soAn ? '<button class="btn" data-act="nhHienAn">' + (NH.hienAn ? "🙈 Giấu " : "👁 Hiện ") + soAn + " dòng ẩn</button>" : "") +
     '<span class="muted sm nh-goiy">' + ds.length + " dòng · bấm vào ô để sửa (Enter lưu, Esc huỷ)</span></div></div>" + htmlNhap() +
     (the ? '<div class="the-ds">' + (ds.length ? ds.map(theBooking).join("") : '<p class="muted" style="text-align:center">Chưa có đơn nào trong tháng này.</p>') + "</div></div>" :
-    !NH.bangCu ? bangDT(b, gopCungTen(xepDs(ds, thx), thx), NH.mo, bkDT()) + "</div>" :
+    !NH.bangCu ? bangDT(b, gopCungTen(noiLienNgay(xepDs(ds, thx), thx), thx), NH.mo, bkDT()) + "</div>" :
     '<div class="nh-cuon vk"><table class="nh-b nh-s" style="width:' + cot.reduce(function(s, j) { return s + w[j]; }, 46 + 88) + 'px"><colgroup><col style="width:46px"><col style="width:88px">' + cot.map(function(j) { return '<col style="width:' + w[j] + 'px">'; }).join("") + "</colgroup>" +
     "<thead><tr>" + (bkDT() && !NH.bangCu ? "" : "<th>Dòng</th>") + "<th></th>" + cot.map(function(j) { return "<th>" + (NH.bangCu ? esc(b.tieuDe[j]) : thBK(b.tieuDe[j])) + "</th>"; }).join("") + "</tr></thead><tbody>" +
     (ds.length ? ds.map(function(r) {
