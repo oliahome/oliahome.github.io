@@ -793,6 +793,8 @@ html.toi .nh-dt tbody tr.gop-dau>td{border-top-color:#c9853a!important}html.toi 
 .nh-dt tbody .hdg [data-j="21"]{font-weight:800!important;opacity:1!important}.nh-dt tbody .hdg [data-j="21"] b{font-weight:800!important}
 .tg-gon .tg-d:first-child b{font-size:14.5px;font-weight:800}.tg-gon .tg-d:nth-child(2){opacity:.6}.tg-gon .tg-d:nth-child(2) b{font-weight:500}
 .nh-dt tbody td.o-chung{vertical-align:middle!important}
+.nh-dt tbody td.nh-tac.o-chung{vertical-align:middle!important;text-align:center}.tac-nhom{justify-content:center}.tac-n{display:block;font-size:10.5px;opacity:.55;margin-top:1px}.nho-ds{display:flex;flex-direction:column;gap:5px;margin-top:6px}.nho-ds .btn{justify-content:flex-start;min-height:34px}
+.tt-nhom{display:block;font-size:10.5px;opacity:.7;margin-top:2px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1582,7 +1584,7 @@ function bangDT(b, ds, mo, dt) {
     NHOM.map(function(g) { if (g[0] === "thue") return '<th><span class="th-i" title="Đã nhập thuế lần 1 / lần 2 — tích để ghi sổ thuế"><span class="th-vat">' + icn("thue2", 30) + "<b>VAT</b></span></span></th>"; if (g[0] === 19) return '<th><div class="hdg"><div class="hd-v">' + thBK(b.tieuDe[19]) + "</div><div><div>" + thBK(b.tieuDe[20]) + "</div><div>" + thBK(b.tieuDe[21]) + "</div></div></div></th>"; return "<th" + (g[0] === 16 ? ' class="o-mota"' : "") + '><div class="th-g' + (g.length > 2 ? " g3" : "") + '">' + g.map(function(j) { return "<div>" + thBK(b.tieuDe[j]) + "</div>"; }).join("") + (g[0] === 9 ? '<button class="th-gia' + (DT_BAT.gia ? " on" : "") + '" data-act="dtBat" data-v="gia" title="' + (DT_BAT.gia ? "Ẩn" : "Hiện") + ' giá niêm yết (Published room)">' + icn("tien", 13) + (DT_BAT.gia ? IC_HIEN : IC_AN) + "</button>" : "") + "</div></th>"; }).join("") + "</tr></thead><tbody>" +
     (ds.length ? ds.map(function(r) {
       var nenDong = [13, 5, 9].map(function(j) { return r.nen[j]; }).filter(function(c) { return c && c !== "#ffffff"; })[0] || "";   // màu tô nguyên dòng (cả cột xổ và cột thuế)
-      return '<tr class="' + (r.huy ? "huy " : "") + (r.an ? "an " : "") + (r.gop ? "gop " : "") + (r.gopGiua ? "gop-giua " : "") + (r.gop > 1 ? "gop-dau " : "") + (r.gop && !r.gopGiua ? "gop-cuoi" : "") + '"' + (nenDong ? ' style="background:' + nenDong + '"' : "") + '><td class="dt-x"><button class="dt-mo" type="button" data-dong="' + r.dong + '" aria-expanded="false" aria-label="Xem chi tiết dòng">' + icn("xo", 11) + "</button></td>" + (DT_BAT.sua ? '<td class="nh-tac"><div class="tac-g"><button data-act="sdMo" data-v="' + r.dong + '" title="Sửa cả dòng (form)">' + icn("mota", 14) + '</button><button data-act="nhHL" data-v="' + r.dong + '" class="nh-hl' + (r.hl ? " on" : "") + '" title="' + (r.hl ? "Bỏ highlight khách (sheet)" : "Highlight khách như trên sheet") + '">' + icn("sao", 14) + '</button>' + (r.an || TRANG_THAI_OK(r.tt) === "Done" ? '<button data-act="nhAn" data-v="' + r.dong + '" title="' + (r.an ? "Bỏ ẩn dòng trong sheet" : "Ẩn dòng trong sheet (khách đã Done)") + '">' + (r.an ? IC_HIEN : IC_AN) + "</button>" : '<span class="tac-trong"></span>') + '<button data-act="nhXoaDong" data-v="' + r.dong + '" title="Xoá đơn" class="xoa">' + IC_XOA + "</button></div></td>" : "") +
+      return '<tr class="' + (r.huy ? "huy " : "") + (r.an ? "an " : "") + (r.gop ? "gop " : "") + (r.gopGiua ? "gop-giua " : "") + (r.gop > 1 ? "gop-dau " : "") + (r.gop && !r.gopGiua ? "gop-cuoi" : "") + '"' + (nenDong ? ' style="background:' + nenDong + '"' : "") + '><td class="dt-x"><button class="dt-mo" type="button" data-dong="' + r.dong + '" aria-expanded="false" aria-label="Xem chi tiết dòng">' + icn("xo", 11) + "</button></td>" + (DT_BAT.sua ? (r.gopDs && r.gopDs.length > 1 ? tacNhom(r) : '<td class="nh-tac"><div class="tac-g"><button data-act="sdMo" data-v="' + r.dong + '" title="Sửa cả dòng (form)">' + icn("mota", 14) + '</button><button data-act="nhHL" data-v="' + r.dong + '" class="nh-hl' + (r.hl ? " on" : "") + '" title="' + (r.hl ? "Bỏ highlight khách (sheet)" : "Highlight khách như trên sheet") + '">' + icn("sao", 14) + '</button>' + (r.an || TRANG_THAI_OK(r.tt) === "Done" ? '<button data-act="nhAn" data-v="' + r.dong + '" title="' + (r.an ? "Bỏ ẩn dòng trong sheet" : "Ẩn dòng trong sheet (khách đã Done)") + '">' + (r.an ? IC_HIEN : IC_AN) + "</button>" : '<span class="tac-trong"></span>') + '<button data-act="nhXoaDong" data-v="' + r.dong + '" title="Xoá đơn" class="xoa">' + IC_XOA + "</button></div></td>") : "") +
         NHOM.map(function(g) {
           var n = r.nen[g[0]], cls = (g.length > 1 ? "o2" : "") + (g[0] === 1 ? " agc" : "") + (g[0] === 9 ? " o-ph" : "") + (g[0] === 16 ? " o-mota" : "");
           var td = '<td class="' + cls + '"' + (n && n !== "#ffffff" ? ' style="background:' + n + '"' : "");
@@ -1594,7 +1596,11 @@ function bangDT(b, ds, mo, dt) {
           }
           if (g[0] === "thue" && r.gopDs && r.gopDs.length > 1) { if (r.gop === -1) return ""; return '<td class="o-thue o-thue-nhom" rowspan="' + r.gopDs.length + '">' + thueNhom(r.gopDs) + "</td>"; }   // khách nhiều phòng: 1 khung VAT chung
           if (g[0] === "thue") { var ng = r.ngThue || [], ab = /air\s*b\s*n\s*b/i.test(String(r.o[1] || "")), chung = ng[0] && (ng[0] === ng[1] || (ab && ng.length === 1 && r.thue1 && r.thue2)), gop = r.gopThue > 1 ? '<i class="t-gop" title="1 lần nhập thuế chung cho ' + r.gopThue + ' phòng của cùng khách">🔗×' + r.gopThue + "</i>" : ""; return '<td class="o-thue' + (gop ? " thue-gop" : "") + '">' + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck' + (co ? " on" : "") + '" title="Thuế lần ' + l + (co ? ": đã nhập" : ": chưa nhập — tích để ghi sổ thuế") + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + '><span>L' + l + "</span>" + (!chung && ng[l - 1] ? '<small class="t-ng">' + esc(ng[l - 1]) + (l === 1 ? gop : "") + "</small>" + ((r.tienThue || [])[l - 1] ? '<small class="t-tien">' + tienM((r.tienThue || [])[l - 1]) + "</small>" : "") : "") + "</label>"; }).join("") + (chung ? '<small class="t-ng t-chung">' + esc(ng[0]) + gop + "</small>" + ((r.tienThue || [])[0] ? '<small class="t-tien t-chung">' + tienM(r.tienThue.slice(0, ng[0] === ng[1] ? 2 : 1).reduce(function(a, b) { return a + b; }, 0)) + "</small>" : "") : "") + "</td>"; }
-          if (r.gopDs && r.gopDs.length > 1 && (g[0] === 1 || g[0] === 10 || g[0] === 12)) {   // khách cùng tên: nguồn+trạng thái / ngày ở / số đêm giống nhau cả nhóm -> 1 ô chung
+          if (r.gopDs && r.gopDs.length > 1 && g[0] === 1 && r.gopDs.every(function(x) { return String(x.o[1] || "").trim() === String(r.gopDs[0].o[1] || "").trim(); }) && !r.gopDs.every(function(x) { return String(x.o[4] || "").trim() === String(r.gopDs[0].o[4] || "").trim(); })) {   // cùng nguồn, khác trạng thái: 1 icon nguồn chung + tóm tắt trạng thái
+            if (r.gop === -1) return ""; var nDone = r.gopDs.filter(function(x) { return TRANG_THAI_OK(x.o[4]) === "Done"; }).length;
+            return td.replace('class="', 'class="o-chung ') + ' rowspan="' + r.gopDs.length + '">' + oj(r, 1) + '<small class="tt-nhom" title="' + esc(r.gopDs.map(function(x) { return String(x.o[9] || "").trim() + ": " + (String(x.o[4] || "").trim() || "Book"); }).join(" · ")) + '">' + (nDone ? "✓ Done " + nDone + "/" + r.gopDs.length : "") + "</small></td>";
+          }
+          if (r.gopDs && r.gopDs.length > 1 && (g[0] === 1 || g[0] === 10 || g[0] === 12 || g[0] === 14)) {   // khách cùng tên: nguồn+trạng thái / ngày ở / số đêm giống nhau cả nhóm -> 1 ô chung
             var cotG = g[0] === 10 ? [10, 11] : g, gd = r.gopDs, vi = gd.indexOf(r), cung = function(x, y) { return x && y && cotG.every(function(j) { return String(x.o[j] || "").trim() === String(y.o[j] || "").trim(); }); };
             if (vi > 0 && cung(gd[vi - 1], r)) return "";   // cùng cụm với dòng trên: ô đã gộp ở dòng trên
             var dai = 1; while (vi >= 0 && cung(gd[vi + dai], r)) dai++;   // cụm liền nhau cùng giá trị (vd 2 phòng cùng 19–21/12)
@@ -1606,6 +1612,25 @@ function bangDT(b, ds, mo, dt) {
         }).join("") + "</tr>";
     }).join("") : '<tr><td colspan="24" class="muted" style="padding:16px;text-align:center">Chưa có đơn nào trong tháng này.</td></tr>') +
     "</tbody></table></div>";
+}
+/** ✏️ Ô thao tác chung cho khách cùng tên: 1 bộ nút; sửa / ẩn / xoá mở danh sách chọn phòng; ★ tô cả nhóm */
+function tacNhom(r) {
+  if (r.gop === -1) return "";
+  var ds = r.gopDs, done = ds.every(function(x) { return x.an || TRANG_THAI_OK(x.tt) === "Done"; }), hl = ds.every(function(x) { return x.hl; });
+  return '<td class="nh-tac o-chung" rowspan="' + ds.length + '"><div class="tac-g tac-nhom"><button data-act="nhoMenu" data-loai="sdMo" data-v="' + r.dong + '" title="Sửa — chọn phòng">' + icn("mota", 14) + '</button><button data-act="nhoHL" data-v="' + r.dong + '" class="nh-hl' + (hl ? " on" : "") + '" title="' + (hl ? "Bỏ highlight cả nhóm" : "Highlight cả nhóm") + '">' + icn("sao", 14) + "</button>" +
+    (done ? '<button data-act="nhoMenu" data-loai="nhAn" data-v="' + r.dong + '" title="Ẩn / hiện — chọn phòng">' + (ds.every(function(x) { return x.an; }) ? IC_HIEN : IC_AN) + "</button>" : '<span class="tac-trong"></span>') +
+    '<button data-act="nhoMenu" data-loai="nhXoaDong" data-v="' + r.dong + '" title="Xoá — chọn phòng" class="xoa">' + IC_XOA + "</button></div><small class=\"tac-n\">×" + ds.length + "</small></td>";
+}
+/** Danh sách chọn phòng cho nút chung (bấm phòng = chạy đúng nút cũ của phòng đó) */
+function moNhoMenu(nut) {
+  var cu = $("#nhoMenu"); if (cu) { cu.remove(); if (cu._nut === nut) return; }
+  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0], ds = (r && r.gopDs) || [], loai = nut.dataset.loai;
+  var p = document.createElement("div"); p.id = "nhoMenu"; p.className = "tx-xn"; p._nut = nut;
+  p.innerHTML = '<div class="tx-xn-n"><b>' + ({ sdMo: "Sửa phòng nào?", nhAn: "Ẩn / hiện phòng nào?", nhXoaDong: "Xoá phòng nào?" }[loai] || "") + '</b></div><div class="nho-ds">' + ds.map(function(x) { return '<button type="button" class="btn" data-act="' + loai + '" data-v="' + x.dong + '">' + esc(String(x.o[9] || "").trim()) + " <small>" + esc(String(x.o[5] || "")) + "</small></button>"; }).join("") + "</div>";
+  document.body.appendChild(p); var b = nut.getBoundingClientRect(); p.style.left = (Math.min(b.left, innerWidth - p.offsetWidth - 8) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
+  var dong = function(e) { if (!p.contains(e.target) && e.target !== nut && !nut.contains(e.target)) { p.remove(); document.removeEventListener("mousedown", dong, true); } };
+  setTimeout(function() { document.addEventListener("mousedown", dong, true); }, 0);
+  p.addEventListener("click", function(e) { if (e.target.closest("[data-act]")) setTimeout(function() { p.remove(); }, 0); });
 }
 /** 👥 Khung tên chung: số phòng, từng phòng ở ngày nào, tổng đêm — nhìn 1 chỗ hiểu cả nhóm */
 function tenNhom(ds, th) {
@@ -3920,6 +3945,8 @@ document.addEventListener("click", function(e) {
   else if (a === "tcGuiLai") { (TC.cho || []).forEach(function(x) { x.loi = ""; }); giuOVe(); chayCho(); }
   else if (a === "tcBoCho") { TC.cho = (TC.cho || []).filter(function(x) { return String(x.id) !== String(v); }); giuOVe(); }
   else if (a === "tcLuuMoi") luuDongChiMoi();
+  else if (a === "nhoMenu") moNhoMenu(el);
+  else if (a === "nhoHL") { var rg = NH.bang.ds.filter(function(x) { return x.dong === Number(v); })[0]; ((rg && rg.gopDs) || []).forEach(function(x, i) { setTimeout(function() { var b0 = document.createElement("button"); b0.dataset.act = "nhHL"; b0.dataset.v = x.dong; document.body.appendChild(b0); b0.click(); b0.remove(); }, i * 250); }); }
   else if (a === "nhAnTat") { if (NH.anNgay === "all" && NH.anTruoc != null) { NH.anNgay = NH.anTruoc; NH.anTruoc = null; } else { NH.anTruoc = NH.anNgay; NH.anNgay = "all"; } try { localStorage.setItem("olia_an_ngay", NH.anNgay); } catch (e) {} veNhap(); }   // 👁 hiện tất cả dòng ẩn / ẩn lại như trước
   else if (a === "tcNote") { TC.anNote = !TC.anNote; try { localStorage.setItem("olia_tc_note", TC.anNote ? "1" : "0"); } catch (e) {} giuOVe(); }
   else if (a === "tcXep") { TC.xep = v === "ngay" ? "ngay" : "nhap"; try { localStorage.setItem("olia_tc_xep", TC.xep); } catch (e) {} giuOVe(); }
