@@ -780,6 +780,12 @@ html.toi .nh-dt tbody td.o-thue-nhom{background:rgba(224,163,90,.08)}html.toi .o
 .nh-hien-an{display:inline-flex;align-items:center;gap:5px}.nh-hien-an b{font-size:12px;background:#6b7280;color:#fff;border-radius:99px;padding:0 6px;line-height:1.5}.nh-hien-an.on{background:#e8f1ff;border-color:#7aa7e0}.nh-hien-an small{font-size:11px;opacity:.75}html.toi .nh-hien-an.on{background:#23314a}
 #app .btn.nh-tatca.on{color:#7a3e0c!important;font-weight:700}html.toi #app .btn.nh-tatca.on{color:#f6d6ae!important;background:#4a3828!important}
 .nh-dt tbody td.o-ten-nhom{vertical-align:middle!important;border-left:3px solid #e0a35a!important;background-image:linear-gradient(rgba(192,122,58,.06),rgba(192,122,58,.06))}.tn-nhom{display:flex;flex-direction:column;gap:1px;margin-top:3px;font-size:11.5px;line-height:1.3;font-weight:400}.tn-nhom .tn-so{display:inline-flex;align-items:center;gap:3px;font-weight:700;opacity:.85}.tn-nhom .tn-dot{opacity:.75}.tn-nhom b{font-weight:600}
+/* khung bao nhóm khách cùng tên */
+.nh-dt tbody tr.gop-dau>td{border-top:2.5px solid #d9903f!important}.nh-dt tbody tr.gop-cuoi>td{border-bottom:2.5px solid #d9903f!important}
+.nh-dt tbody tr.gop>td:first-child{border-left:2.5px solid #d9903f!important}.nh-dt tbody tr.gop>td:last-child{border-right:2.5px solid #d9903f!important}
+.nh-dt tbody tr.gop.gop-giua>td{border-bottom-color:rgba(217,144,63,.25)!important}
+html.toi .nh-dt tbody tr.gop-dau>td{border-top-color:#c9853a!important}html.toi .nh-dt tbody tr.gop-cuoi>td{border-bottom-color:#c9853a!important}
+.o-thue-nhom .tn-dot2+.tn-dot2{border-top:1px dashed rgba(192,122,58,.4);margin-top:4px;padding-top:4px}
 </style>
 </head>
 <body>
@@ -1539,7 +1545,7 @@ function gopCungTen(ds, th) {
     if (ten) ds.forEach(function(x, j) { if (!dung[j] && j > i && !x.huy && k(x) === ten && Math.abs(ms(x) - ms(r)) <= ngay * 864e5) { dung[j] = 1; nhom.push(x); } });
     if (nhom.length > 1) {
       var tong = nhom.reduce(function(s, x) { return s + (Number(String(x.o[19]).replace(/[^\d-]/g, "")) || 0); }, 0);
-      nhom.forEach(function(x, n) { x.gop = n ? -1 : nhom.length; x.gopTong = tong; x.gopGiua = n < nhom.length - 1; x.gopDs = nhom; });
+      nhom.forEach(function(x, n) { x.gop = n ? -1 : nhom.length; x.gopTong = tong; x.gopGiua = n < nhom.length - 1; x.gopDs = nhom; if (n && nhom[0].nen) { x.nen = nhom[0].nen.slice(); x.chu = (nhom[0].chu || []).slice(); } });   // cùng khách: cùng 1 màu
     }
     kq = kq.concat(nhom);
   });
@@ -1569,7 +1575,7 @@ function bangDT(b, ds, mo, dt) {
     NHOM.map(function(g) { if (g[0] === "thue") return '<th><span class="th-i" title="Đã nhập thuế lần 1 / lần 2 — tích để ghi sổ thuế"><span class="th-vat">' + icn("thue2", 30) + "<b>VAT</b></span></span></th>"; if (g[0] === 19) return '<th><div class="hdg"><div class="hd-v">' + thBK(b.tieuDe[19]) + "</div><div><div>" + thBK(b.tieuDe[20]) + "</div><div>" + thBK(b.tieuDe[21]) + "</div></div></div></th>"; return "<th" + (g[0] === 16 ? ' class="o-mota"' : "") + '><div class="th-g' + (g.length > 2 ? " g3" : "") + '">' + g.map(function(j) { return "<div>" + thBK(b.tieuDe[j]) + "</div>"; }).join("") + (g[0] === 9 ? '<button class="th-gia' + (DT_BAT.gia ? " on" : "") + '" data-act="dtBat" data-v="gia" title="' + (DT_BAT.gia ? "Ẩn" : "Hiện") + ' giá niêm yết (Published room)">' + icn("tien", 13) + (DT_BAT.gia ? IC_HIEN : IC_AN) + "</button>" : "") + "</div></th>"; }).join("") + "</tr></thead><tbody>" +
     (ds.length ? ds.map(function(r) {
       var nenDong = [13, 5, 9].map(function(j) { return r.nen[j]; }).filter(function(c) { return c && c !== "#ffffff"; })[0] || "";   // màu tô nguyên dòng (cả cột xổ và cột thuế)
-      return '<tr class="' + (r.huy ? "huy " : "") + (r.an ? "an " : "") + (r.gop ? "gop " : "") + (r.gopGiua ? "gop-giua" : "") + '"' + (nenDong ? ' style="background:' + nenDong + '"' : "") + '><td class="dt-x"><button class="dt-mo" type="button" data-dong="' + r.dong + '" aria-expanded="false" aria-label="Xem chi tiết dòng">' + icn("xo", 11) + "</button></td>" + (DT_BAT.sua ? '<td class="nh-tac"><div class="tac-g"><button data-act="sdMo" data-v="' + r.dong + '" title="Sửa cả dòng (form)">' + icn("mota", 14) + '</button><button data-act="nhHL" data-v="' + r.dong + '" class="nh-hl' + (r.hl ? " on" : "") + '" title="' + (r.hl ? "Bỏ highlight khách (sheet)" : "Highlight khách như trên sheet") + '">' + icn("sao", 14) + '</button>' + (r.an || TRANG_THAI_OK(r.tt) === "Done" ? '<button data-act="nhAn" data-v="' + r.dong + '" title="' + (r.an ? "Bỏ ẩn dòng trong sheet" : "Ẩn dòng trong sheet (khách đã Done)") + '">' + (r.an ? IC_HIEN : IC_AN) + "</button>" : '<span class="tac-trong"></span>') + '<button data-act="nhXoaDong" data-v="' + r.dong + '" title="Xoá đơn" class="xoa">' + IC_XOA + "</button></div></td>" : "") +
+      return '<tr class="' + (r.huy ? "huy " : "") + (r.an ? "an " : "") + (r.gop ? "gop " : "") + (r.gopGiua ? "gop-giua " : "") + (r.gop > 1 ? "gop-dau " : "") + (r.gop && !r.gopGiua ? "gop-cuoi" : "") + '"' + (nenDong ? ' style="background:' + nenDong + '"' : "") + '><td class="dt-x"><button class="dt-mo" type="button" data-dong="' + r.dong + '" aria-expanded="false" aria-label="Xem chi tiết dòng">' + icn("xo", 11) + "</button></td>" + (DT_BAT.sua ? '<td class="nh-tac"><div class="tac-g"><button data-act="sdMo" data-v="' + r.dong + '" title="Sửa cả dòng (form)">' + icn("mota", 14) + '</button><button data-act="nhHL" data-v="' + r.dong + '" class="nh-hl' + (r.hl ? " on" : "") + '" title="' + (r.hl ? "Bỏ highlight khách (sheet)" : "Highlight khách như trên sheet") + '">' + icn("sao", 14) + '</button>' + (r.an || TRANG_THAI_OK(r.tt) === "Done" ? '<button data-act="nhAn" data-v="' + r.dong + '" title="' + (r.an ? "Bỏ ẩn dòng trong sheet" : "Ẩn dòng trong sheet (khách đã Done)") + '">' + (r.an ? IC_HIEN : IC_AN) + "</button>" : '<span class="tac-trong"></span>') + '<button data-act="nhXoaDong" data-v="' + r.dong + '" title="Xoá đơn" class="xoa">' + IC_XOA + "</button></div></td>" : "") +
         NHOM.map(function(g) {
           var n = r.nen[g[0]], cls = (g.length > 1 ? "o2" : "") + (g[0] === 1 ? " agc" : "") + (g[0] === 9 ? " o-ph" : "") + (g[0] === 16 ? " o-mota" : "");
           var td = '<td class="' + cls + '"' + (n && n !== "#ffffff" ? ' style="background:' + n + '"' : "");
@@ -1605,16 +1611,21 @@ function tienNhom(ds) {
 }
 /** 🧾 Khung VAT chung cho khách nhiều phòng: tổng nhóm, cọc 50% dự kiến, các lần nhập thuế (gộp trùng), đã thu / còn lại, tích L1/L2 từng phòng */
 function thueNhom(ds) {
+  /* 🧾 Khung VAT chung, tách theo ĐỢT Ở (cùng ngày nhận phòng): mỗi đợt tổng · cọc 50% · đã thu (các lần nhập thuế khớp đợt đó) · còn; cuối là tích L1/L2 từng phòng */
   var so = function(v) { return Number(String(v || "").replace(/[^\d-]/g, "")) || 0; }, f = function(n) { return tienM(String(Math.round(n))); };
-  var tong = ds.reduce(function(a, r) { return a + so(r.o[19]); }, 0), coc50 = Math.round(tong / 2 / 1000) * 1000, lan = {}, thu = 0;
-  ds.forEach(function(r) { (r.ngThue || []).forEach(function(ng, i) { var t = (r.tienThue || [])[i] || 0; if (!ng && !t) return; var k = ng + "|" + t; if (!lan[k]) { lan[k] = { ng: ng, t: t }; thu += t; } }); });
-  var ds2 = Object.keys(lan).map(function(k) { return lan[k]; }).sort(function(a, b) { var p = String(a.ng).split("/").reverse().join(""), q = String(b.ng).split("/").reverse().join(""); return p < q ? -1 : 1; });
-  var cong = 0, con = tong - thu;
-  return '<div class="tn-dau"><b>' + ds.length + " phòng</b> · tổng " + f(tong) + ' <small>(' + ds.map(function(r) { return f(so(r.o[19])); }).join(" + ") + ")</small></div>" +
-    '<div class="tn-coc">cọc 50% <b>' + f(coc50) + "</b> <small>(" + f(tong) + " ÷ 2)</small></div>" +
-    (ds2.length ? ds2.map(function(x) { cong += x.t; var l = cong <= coc50 * 1.05 ? "L1 cọc" : cong - x.t < coc50 * 0.95 ? "L1+L2" : "L2 còn lại"; return '<div class="tn-lan"><span class="tn-l">' + l + "</span>" + esc(x.ng || "") + " · <b>" + f(x.t) + "</b></div>"; }).join("") : '<div class="tn-lan muted">chưa nhập thuế</div>') +
-    '<div class="tn-con">' + (thu ? "đã thu " + f(thu) + (ds2.length > 1 ? " <small>(" + ds2.map(function(x) { return f(x.t); }).join(" + ") + ")</small>" : "") + " · " : "") + (con > 1000 ? '<b class="tn-thieu">còn ' + f(con) + "</b>" : '<b class="tn-du">đủ</b>') + "</div>" +
-    '<div class="tn-ph">' + ds.map(function(r) { return '<span class="tn-p"><small>' + esc(String(r.o[5] || "").split(".")[0]) + "</small>" + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck mini' + (co ? " on" : "") + '" title="' + esc(String(r.o[5] || "")) + " · thuế lần " + l + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + "><span>" + l + "</span></label>"; }).join("") + "</span>"; }).join("") + "</div>";
+  var th = !NH.thang || NH.thang === "all" ? Q.d.homNay.slice(0, 7) : NH.thang, dd = function(k) { return k ? Number(k.slice(8)) + "/" + Number(k.slice(5, 7)) : "?"; };
+  var dot = {}; ds.forEach(function(r) { var k = ngayIN(r, th) || "?"; (dot[k] = dot[k] || []).push(r); });
+  var html = Object.keys(dot).sort().map(function(k) {
+    var g = dot[k], tong = g.reduce(function(a, r) { return a + so(r.o[19]); }, 0), coc50 = Math.round(tong / 2 / 1000) * 1000, lan = {}, thu = 0;
+    g.forEach(function(r) { (r.ngThue || []).forEach(function(ng, i) { var t = (r.tienThue || [])[i] || 0; if (!ng && !t) return; var kk = ng + "|" + t; if (!lan[kk]) { lan[kk] = { ng: ng, t: t }; thu += t; } }); });
+    var ls = Object.keys(lan).map(function(x) { return lan[x]; }), con = tong - thu, cong = 0;
+    var trang = !thu ? '<b class="tn-thieu">chưa thu</b>' : con <= 1000 ? '<b class="tn-du">đủ ✓</b>' : Math.abs(thu - coc50) <= Math.max(1000, coc50 * 0.03) ? '<b class="tn-du">cọc đủ ✓</b> · còn ' + f(con) : '<b class="tn-thieu">còn ' + f(con) + "</b>";
+    return '<div class="tn-dot2"><div class="tn-dau"><b>' + dd(k) + "–" + dd(ngayOUT(g[0], th)) + "</b> · " + g.map(function(r) { return esc(String(r.o[9] || "").trim()); }).join(" + ") + "</div>" +
+      '<div class="tn-coc">tổng ' + f(tong) + (g.length > 1 ? " <small>(" + g.map(function(r) { return f(so(r.o[19])); }).join(" + ") + ")</small>" : "") + " · cọc 50% <b>" + f(coc50) + "</b></div>" +
+      ls.map(function(x) { cong += x.t; var l = cong <= coc50 * 1.05 ? "L1 cọc" : cong - x.t < coc50 * 0.95 ? "L1+L2" : "L2 còn lại"; return '<div class="tn-lan"><span class="tn-l">' + l + "</span>" + esc(x.ng || "") + " · <b>" + f(x.t) + "</b></div>"; }).join("") +
+      '<div class="tn-con">' + (thu ? "đã thu " + f(thu) + " · " : "") + trang + "</div></div>";
+  }).join("");
+  return html + '<div class="tn-ph">' + ds.map(function(r) { return '<span class="tn-p"><small>' + esc(String(r.o[5] || "").split(".")[0]) + "</small>" + [1, 2].map(function(l) { var co = l === 1 ? r.thue1 : r.thue2; return '<label class="t-ck mini' + (co ? " on" : "") + '" title="' + esc(String(r.o[5] || "")) + " · thuế lần " + l + '"><input type="checkbox" data-thue="' + l + '" data-dong="' + r.dong + '"' + (co ? " checked" : "") + "><span>" + l + "</span></label>"; }).join("") + "</span>"; }).join("") + "</div>";
 }
 /* màu dòng: bỏ màu nâu "sắp tới" của sheet, chỉ tô xanh lá đơn nhận phòng trong 3 ngày tới (điện thoại) / 7 ngày (máy tính) (xám/huỷ, xanh Airbnb giữ nguyên) */
 var MAU_SAP = { "#494429": 1 };
