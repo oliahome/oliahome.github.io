@@ -834,6 +834,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-dt tbody td.o-thue{white-space:nowrap}.nh-dt tbody td.o-thue .t-ck:not(.t-hoan):not(.mini){width:calc(41% - 4px)!important;min-width:84px!important}
 .nh-mau{width:min(440px,92vw)}.nh-mau textarea{width:100%;box-sizing:border-box;margin-top:8px;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);color:inherit}.nh-mau .nm-h{display:flex;gap:8px;margin-top:6px}.nh-mau .nm-h label{flex:1;display:flex;flex-direction:column;font-size:12px;gap:3px}.nh-mau .nm-h input{min-height:34px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:2px 8px;background:var(--card);color:inherit}.nh-mau .nm-xem{margin-top:6px;min-height:18px}
 .nh-mau .nm-coc{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:12.5px;flex-wrap:wrap}.nh-mau .nm-coc label{display:inline-flex;align-items:center;gap:4px}.nh-mau .nm-coc input[type=text],.nh-mau #mauCocTien{width:120px;min-height:32px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:2px 8px;background:var(--card);color:inherit}.nh-mau #mauCocTien:disabled{opacity:.45}
+.nh-n td.nh-gop{vertical-align:middle;background:color-mix(in srgb,var(--card) 92%,#e9a23b)}.nh-n tr.nh-dau td{border-top:2px solid #e9a23b}
 </style>
 </head>
 <body>
@@ -1414,6 +1415,7 @@ function htmlNhap() {
     if (c[3] === "tt") return '<td><select class="nh-o" ' + ten + ">" + ["Waiting", "Keep", "Book", "Done"].map(function(t) { return "<option" + (t === v ? " selected" : "") + ">" + t + "</option>"; }).join("") + "</select></td>";
     if (c[3] === "ds") return '<td><input class="nh-o" list="nhAgent" ' + ten + ' value="' + esc(v) + '"></td>';
     if (c[3] === "ngay") { var g = docNgayNhap(v); return '<td><input class="nh-o' + (g === null ? " sai" : "") + '" ' + ten + ' placeholder="dd/mm" value="' + esc(/^\d{4}-/.test(v) ? v.slice(8, 10) + "/" + v.slice(5, 7) : v) + '"><small class="nh-g">' + (g ? hienNgayNhap(g) : g === null ? "sai ngày" : "") + "</small></td>"; }
+    if (k === "giam" && r.giamMo) return '<td><input class="nh-o num" ' + ten + ' inputmode="numeric" value="' + esc(v) + '"><small class="nh-g">' + esc(r.giamMo) + "</small></td>";
     return '<td><input class="nh-o' + (c[3] === "tien" || c[3] === "so" ? " num" : "") + '" ' + ten + (c[3] === "tien" || c[3] === "so" ? ' inputmode="numeric"' : "") + ' value="' + esc(v) + '"></td>';
   };
   var dang = NH.dong.filter(function(r) { return !r.kq; }).length;
@@ -1422,8 +1424,16 @@ function htmlNhap() {
     '<datalist id="nhAgent">' + ag.map(function(a) { return '<option value="' + esc(a) + '">'; }).join("") + "</datalist>" +
     '<div class="nh-cuon"><table class="nh-b nh-n" style="width:' + COT.reduce(function(s, c) { return s + c[2]; }, 68) + 'px"><colgroup><col style="width:34px">' + COT.map(function(c) { return '<col style="width:' + c[2] + 'px">'; }).join("") + "<col style=\"width:34px\"></colgroup>" +
     '<thead><tr><th></th>' + COT.map(function(c) { return "<th>" + esc(c[1]) + "</th>"; }).join("") + "<th></th></tr></thead><tbody>" +
-    NH.dong.map(function(r, i) { return '<tr class="' + (r.kq ? "xong" : "") + '"><td class="nh-so">' + (i + 1) + "</td>" + COT.map(function(c) { return o(r, i, c); }).join("") + '<td><button class="nh-x" data-act="nhXoa" data-v="' + i + '" title="Xoá dòng">×</button></td></tr>'; }).join("") +
+    NH.dong.map(function(r, i) { return '<tr class="' + (r.kq ? "xong" : "") + (r.nhom ? " nh-nhom" : "") + (r.nhom && (!NH.dong[i - 1] || NH.dong[i - 1].nhom !== r.nhom) ? " nh-dau" : "") + '"><td class="nh-so">' + (i + 1) + "</td>" + COT.map(function(c) {
+      var sp = nhGop(i, c[0]); if (sp === 0) return ""; var td = o(r, i, c); return sp > 1 ? td.replace("<td", '<td rowspan="' + sp + '" class="nh-gop"') : td; }).join("") + '<td><button class="nh-x" data-act="nhXoa" data-v="' + i + '" title="Xoá dòng">×</button></td></tr>'; }).join("") +
     "</tbody></table></div></section>";
+}
+/* dòng dán mẫu cùng nhóm: tên, agent, ngày đặt, IN/OUT/đêm giống nhau -> gộp 1 ô (0 = bị gộp vào ô trên) */
+var NH_GOP = ["ten", "tenFb", "agent", "sdt", "ngayDat", "trangThai", "vao", "ra", "dem", "ghiChu"];   // Mô tả chung cả nhóm; lý do giảm từng phòng tự nối khi lưu
+function nhGop(i, k) {
+  var r = NH.dong[i], cung = function(x) { return x && !x.kq && !r.kq && r.nhom && x.nhom === r.nhom && String(x[k]) === String(r[k]); };
+  if (NH_GOP.indexOf(k) < 0 || !r.nhom) return 1; if (cung(NH.dong[i - 1])) return 0;
+  var n = 1; while (cung(NH.dong[i + n])) n++; return n;
 }
 function ganNhap() {
   var b = $(".nh-n"); if (!b) return;
@@ -2409,6 +2419,7 @@ function tinhDongNhap(i) {
 }
 function nhapDoi(i, k, v, veLai) {
   var r = NH.dong[i]; if (!r || r.kq) return;
+  if (r.nhom && NH_GOP.indexOf(k) >= 0 && String(r[k]) !== String(v)) NH.dong.forEach(function(x, j) { if (j !== i && x.nhom === r.nhom && !x.kq && String(x[k]) === String(r[k])) nhapDoi(j, k, v); });
   r[k] = v; r.loi = "";
   var oNhap = function(kk) { return document.querySelector('.nh-o[data-i="' + i + '"][data-k="' + kk + '"]'); };
   var vaoK = docNgayNhap(r.vao), soDem = Math.round(Number(r.dem) || 0);
@@ -2433,15 +2444,17 @@ function donNhap(r) {
   var p = Q.d.phong.filter(function(x) { return x.id === r.phong; })[0] || {}, vao = docNgayNhap(r.vao), ra = docNgayNhap(r.ra, vao);
   var so = function(x) { return Math.round(Number(String(x || "").replace(/[^\d-]/g, "")) || 0); };
   return { ten: String(r.ten).trim(), tenFb: String(r.tenFb).trim(), agent: String(r.agent).trim() || "Facebook", sdt: r.sdt, ngayDat: docNgayNhap(r.ngayDat) || Q.d.homNay,
-    trangThai: r.trangThai, phong: r.phong, vao: vao, ra: ra, nl: (p.khachChuan || 2) + so(r.nlThem), te: so(r.te), giam: so(r.giam), ghiChu: r.ghiChu,
+    trangThai: r.trangThai, phong: r.phong, vao: vao, ra: ra, nl: (p.khachChuan || 2) + so(r.nlThem), te: so(r.te), giam: so(r.giam), ghiChu: r.ghiChu + (r.giamMo && so(r.giam) ? (r.ghiChu ? " · " : "") + "giảm " + r.giamMo : ""),
     inSom: so(r.inSom), outTre: so(r.outTre), coc: so(r.coc), ghiThue: false };
 }
 function xemNhap(i) {
   var r = NH.dong[i]; if (!r) return; var o = donNhap(r);
   if (!(o.vao && o.ra && o.vao < o.ra)) { r.xem = null; return tinhDongNhap(i); }
   api("xemDon", [o], function(x) { if (NH.dong[i] !== r || r.phong !== o.phong) return; r.xem = x;
-    if (r.giaMuon > 0 && !r.daChinh && x && x.tong > 0) { r.daChinh = 1; var lech = x.tong - r.giaMuon;   // giá trong mẫu khác giá niêm yết -> tự ghi Discount (hoặc ghi chú nếu mẫu cao hơn)
-      if (lech > 1000) { r.giam = String((Number(String(r.giam || "").replace(/[^\d-]/g, "")) || 0) + lech); return veNhap(), xemNhap(i); }
+    if ((r.giaMuon > 0 || r.giamTu) && !r.daChinh && x && x.tong > 0) { r.daChinh = 1; var goc = x.tong + (Number(String(r.giam || "").replace(/[^\d-]/g, "")) || 0);   // giá mẫu khác niêm yết / giảm tự điền -> Discount = % chẵn + phần lẻ tiền mặt
+      var lech = r.giamTu ? Math.round(goc * r.giamTu.pt / 100 / 1000) * 1000 + r.giamTu.tien : goc - r.giaMuon, pt = 0, gPt = 0;
+      if (lech > 1000) { pt = r.giamTu ? r.giamTu.pt : Math.floor(lech * 100 / goc); gPt = Math.round(goc * pt / 100 / 1000) * 1000; if (gPt > lech && pt > 0) { pt--; gPt = Math.round(goc * pt / 100 / 1000) * 1000; }
+        var le = lech - gPt; r.giam = String(lech); r.giamMo = (pt ? "−" + pt + "%" : "") + (le ? (pt ? " + " : "") + le.toLocaleString("vi-VN") + "đ TM" : ""); return veNhap(), xemNhap(i); }
       if (lech < -1000) r.ghiChu = (r.ghiChu ? r.ghiChu + " · " : "") + "giá mẫu cao hơn niêm yết " + (-lech).toLocaleString("vi-VN"); }
     tinhDongNhap(i); });
 }
@@ -2465,23 +2478,29 @@ function moDanMau(nut) {
     '<textarea id="mauTxt" rows="8" placeholder="Thông tin đặt phòng của bạn:\n• check in: 22/1\n• check out: 24/1\n• số đêm: 2\n• phòng: B1 Olive- B2 purple- B4 Beige\n• số người: 7\n• số tiền tổng: (680+660+720+150)*2= 4420"></textarea>' +
     '<div class="nm-h"><label>Tên khách<input id="mauTen" placeholder="vd Hồng Ngân"></label><label>SĐT<input id="mauSdt" inputmode="tel"></label></div>' +
     '<div class="nm-coc"><span>Tiền cọc</span><label><input type="radio" name="mauCoc" value="50" checked> 50%</label><label><input type="radio" name="mauCoc" value="tu"> Tự điền</label><input id="mauCocTien" inputmode="numeric" placeholder="vd 2000000" disabled></div>' +
+    '<div class="nm-coc"><span>Giảm giá</span><label><input type="radio" name="mauGiam" value="tinh" checked> Tự tính theo giá mẫu</label><label><input type="radio" name="mauGiam" value="tu"> Tự điền</label><input id="mauGiamO" placeholder="vd 10% hoặc 10%+20000" disabled></div>' +
     '<div id="mauXem" class="nm-xem muted sm"></div><div class="tx-xn-b"><button type="button" class="btn" data-m="0">Đóng</button><button type="button" class="btn pri" data-m="1">Điền vào dòng mới</button></div>';
   document.body.appendChild(p);
   var b = nut.getBoundingClientRect(); p.style.left = (Math.max(8, Math.min(b.left, innerWidth - p.offsetWidth - 8)) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
   var xem = function() { var k = docMau($("#mauTxt").value); $("#mauXem").innerHTML = !k.phong.length ? "Chưa nhận ra phòng" : "→ " + k.phong.length + " dòng: " + k.phong.map(function(x, i) { return "<b>" + esc(x) + "</b>" + (k.gia[i] ? " " + k.gia[i].toLocaleString("vi-VN") + "/đêm" : ""); }).join(" · ") + (k.vao ? " · " + esc(k.vao) + " → " + esc(k.ra || "?") : "") + (k.nguoi ? " · " + k.nguoi + " người" : "") + (k.phu ? " · phụ thu " + k.phu.toLocaleString("vi-VN") + "/đêm" : ""); };
   $("#mauTxt").addEventListener("input", xem); setTimeout(function() { $("#mauTxt").focus(); }, 30);
   [].forEach.call(p.querySelectorAll('[name="mauCoc"]'), function(o) { o.addEventListener("change", function() { var tu = p.querySelector('[name="mauCoc"]:checked').value === "tu"; $("#mauCocTien").disabled = !tu; if (tu) $("#mauCocTien").focus(); }); });
+  [].forEach.call(p.querySelectorAll('[name="mauGiam"]'), function(o) { o.addEventListener("change", function() { var tu = p.querySelector('[name="mauGiam"]:checked').value === "tu"; $("#mauGiamO").disabled = !tu; if (tu) $("#mauGiamO").focus(); }); });
   p.addEventListener("keydown", function(e) { if (e.key === "Escape") p.remove(); });
   p.addEventListener("click", function(e) { var bt = e.target.closest("[data-m]"); if (!bt) return; if (bt.dataset.m !== "1") return p.remove();
     var k = docMau($("#mauTxt").value); if (!k.phong.length) return toast("Chưa nhận ra phòng trong mẫu"); if (!k.vao) return toast("Chưa nhận ra ngày check in");
     var ten = $("#mauTen").value.trim(), sdt = $("#mauSdt").value.trim(), dem = Number(k.dem) || 0;
     var kieuCoc = p.querySelector('[name="mauCoc"]:checked').value, cocTu = Number(String($("#mauCocTien").value || "").replace(/[^\d]/g, "")) || 0;
     if (kieuCoc === "tu" && !(cocTu > 0)) return toast("Nhập số tiền cọc hoặc chọn 50%");
+    var giamTu = null; if (p.querySelector('[name="mauGiam"]:checked').value === "tu") { var gv = String($("#mauGiamO").value || "").replace(/\s/g, ""), mp = gv.match(/(\d+(?:[.,]\d+)?)%/), mt2 = gv.replace(/\d+(?:[.,]\d+)?%/, "").replace(/[^\d]/g, "");
+      giamTu = { pt: mp ? Math.min(100, Number(mp[1].replace(",", "."))) : 0, tien: Number(mt2) || 0 }; if (!giamTu.pt && !giamTu.tien) return toast("Nhập giảm giá (vd 10% hoặc 10%+20000) hoặc chọn Tự tính"); }
+    var nhomId = "m" + Date.now();
     NH.dong = NH.dong.filter(function(x) { return x.kq || x.ten || x.vao; });   // bỏ dòng trống
     var chuan = function(ph) { var q = (Q.d.phong || []).filter(function(x) { return x.id === ph; })[0]; return (q && q.khachChuan) || 2; };
     var du = Math.max(0, (k.nguoi || 0) - k.phong.reduce(function(a, ph) { return a + chuan(ph); }, 0));
     k.phong.forEach(function(ph, i) { var r = dongNhapMoi(NH.dong[NH.dong.length - 1]); r.ten = ten; r.sdt = sdt; r.phong = ph; r.vao = k.vao; r.ra = k.ra || ""; r.dem = dem ? String(dem) : "";
-      if (i === 0 && du) r.nlThem = String(du);
+      if (i === 0 && du) r.nlThem = String(du); r.nhom = nhomId;
+      if (giamTu) r.giamTu = { pt: giamTu.pt, tien: i === 0 ? giamTu.tien : 0 };
       if (k.gia[i] && dem) r.giaMuon = k.gia[i] * dem + (i === 0 && k.phu ? k.phu * dem : 0);
       r.ghiChu = "dán mẫu" + (k.tong ? " · tổng mẫu " + k.tong.toLocaleString("vi-VN") : ""); NH.dong.push(r); });
     var moi = NH.dong.slice(-k.phong.length), tongMuon = moi.reduce(function(a2, x) { return a2 + (x.giaMuon || 0); }, 0);   // cọc: 50% giá từng phòng (mặc định) hoặc số tự điền chia theo tỉ lệ giá
