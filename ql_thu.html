@@ -838,6 +838,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-n thead th{height:50px;background:#f3ead8;color:#7a4a12;vertical-align:middle}.nh-n thead th .icn{display:block;margin:0 auto 2px}.nh-n thead th small{display:block;font-size:9.5px;font-weight:600;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nh-n td{height:44px;vertical-align:middle}.nh-n .nh-o{height:44px}.nh-n .nh-o[data-k="ten"]{font-size:16px;font-weight:700}.nh-n select.nh-o[data-k="phong"]{font-size:16px;font-weight:800;text-align:center}.nh-n .nh-o[data-k="dem"],.nh-n .nh-o[data-k="vao"],.nh-n .nh-o[data-k="ra"]{font-size:15px;font-weight:700;text-align:center}.nh-n td:has(.nh-g) .nh-o{padding-bottom:12px}
 .nh-n td.nh-ag .nh-agi{position:absolute;left:5px;top:50%;transform:translateY(-50%);pointer-events:none;line-height:0}.nh-n td.nh-ag .nh-o{padding-left:30px;font-size:12px}.nh-n tr:hover td{background:color-mix(in srgb,var(--card) 88%,#e9a23b)}
+.t-ck.t-hoan .hoan-i{display:inline-flex;line-height:0}.t-ck.t-hoan .hoan-i svg{stroke-width:2.2}
 </style>
 </head>
 <body>
@@ -1709,7 +1710,7 @@ function tienNhom(ds) {
     '<div class="tg-d"><span>' + icn("con", 12) + ' Còn lại</span><b class="' + (con > 1000 ? "tn-thieu" : "tn-du") + '">' + (con > 1000 ? f(con) : "đủ ✓") + "</b></div></div>";
 }
 /** Ô tích H (hoàn cọc): tự tích khi Mô tả có "hoàn cọc"; bấm ô chưa tích -> mở khung hoàn cọc */
-function oHoan(r, mini) { var co = /hoàn cọc/i.test(String(r.o[16] || "")); if (!co) return ""; /* chỉ hiện ô H khi đã hoàn; muốn hoàn thì xổ chi tiết bấm Hoàn cọc */ return '<label class="t-ck t-hoan' + (mini ? " mini" : "") + (co ? " on" : "") + '" title="' + esc(co ? "Đã hoàn cọc: " + (String(r.o[16]).match(/hoàn cọc[^·]*/i) || [""])[0] : "Hoàn cọc — bấm để nhập") + '"><input type="checkbox" data-hoan="' + r.dong + '"' + (co ? " checked" : "") + "><span>H</span></label>"; }
+function oHoan(r, mini) { var co = /hoàn cọc/i.test(String(r.o[16] || "")); if (!co) return ""; /* chỉ hiện ô H khi đã hoàn; muốn hoàn thì xổ chi tiết bấm Hoàn cọc */ return '<label class="t-ck t-hoan' + (mini ? " mini" : "") + (co ? " on" : "") + '" title="' + esc(co ? "Đã hoàn cọc: " + (String(r.o[16]).match(/hoàn cọc[^·]*/i) || [""])[0] : "Hoàn cọc — bấm để nhập") + '"><input type="checkbox" data-hoan="' + r.dong + '"' + (co ? " checked" : "") + "><span class=\"hoan-i\">" + icn("hoan", 18) + "</span></label>"; }
 /** ↩️ Hoàn cọc: số tiền (mặc định = cọc đang ghi), ngày chuyển trả, lý do -> ghi sổ thuế 1 dòng số ÂM, trừ ô Cọc, ghi chú vào Mô tả, (tuỳ chọn) bỏ tích thuế lần 1. Duyệt 2 lớp */
 function moHoanCoc(nut) {
   var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0]; if (!r) return;
