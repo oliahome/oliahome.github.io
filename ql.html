@@ -829,6 +829,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .tg-nhap{all:unset;display:flex;justify-content:space-between;gap:6px;align-items:baseline;width:100%;cursor:pointer;border-radius:5px;box-sizing:border-box}.tg-nhap:hover{background:rgba(192,122,58,.12)}.tg-nhap b{color:#2b6cb0}.nh-coc{min-width:280px}.nh-coc .nc-o{display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:12px}.nh-coc .nc-o input{min-height:36px;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit}.nh-coc .nc-ph{margin:8px 0 4px;font-size:12.5px}.nh-coc .nc-ph label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0}.nh-coc .nc-ph input{width:110px;text-align:right;min-height:30px;font:inherit;border:1px solid var(--line);border-radius:6px;padding:2px 6px;background:var(--card);color:inherit}.nh-coc .nc-ph i{font-style:normal;opacity:.55}
 /* khung Dòng mới: không tràn, cuộn ngang trong khung */
 .nh-moi{max-width:100%;overflow:hidden;box-sizing:border-box}.nh-moi .nh-cuon{overflow-x:auto;max-width:100%}.nh-moi .nh-goiy{white-space:normal;min-width:0}.nh-moi .nh-bar{flex-wrap:wrap}
+.nh-coc .nc-ck{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:12.5px}.dt-nut .btn svg{width:15px;height:15px;vertical-align:-2px}
 </style>
 </head>
 <body>
@@ -1518,7 +1519,7 @@ function chiTietDT(r, b, ncot) {
     if (j === 20) return '<div><span>' + icn("coc", 15) + " Cọc / " + icn("con", 15) + " Còn lại</span><b>" + esc(x) + " / " + esc(String(r.o[21] || "").trim()) + "</b></div>";
     if (j === 10) return '<div><span>' + icn("vao", 15) + " IN → " + icn("ra", 15) + " OUT</span><b>" + esc(x) + " → " + esc(String(r.o[11] || "").trim()) + "</b></div>";
     return '<div><span>' + thBK(t, 1).replace('class="th-i"', 'class="th-i dt-l"') + " " + esc(t) + "</span><b>" + esc(x) + "</b></div>";
-  }).join("") + '</div><div class="dt-nut"><button class="btn" data-act="sdMo" data-v="' + r.dong + '">' + icn("mota", 15) + ' Sửa cả dòng</button><button class="btn" data-act="nhAn" data-v="' + r.dong + '">' + (an ? IC_HIEN + " Bỏ ẩn" : IC_AN + " Ẩn dòng") + '</button><button class="btn xoa" data-act="nhXoaDong" data-v="' + r.dong + '">' + IC_XOA + " Xoá</button></div></td></tr>";
+  }).join("") + '</div><div class="dt-nut"><button class="btn" data-act="dtHoaDon" data-v="' + r.dong + '">' + IC_HD.pdf + ' Xuất hoá đơn</button><button class="btn" data-act="dtHoanCoc" data-v="' + r.dong + '">' + icn("hoan", 15) + ' Hoàn cọc</button><button class="btn" data-act="sdMo" data-v="' + r.dong + '">' + icn("mota", 15) + ' Sửa cả dòng</button><button class="btn" data-act="nhAn" data-v="' + r.dong + '">' + (an ? IC_HIEN + " Bỏ ẩn" : IC_AN + " Ẩn dòng") + '</button><button class="btn xoa" data-act="nhXoaDong" data-v="' + r.dong + '">' + IC_XOA + " Xoá</button></div></td></tr>";
 }
 /* gộp khách cùng tên: xếp sát nhau nếu ngày IN cách nhau ≤ NH.gop ngày, ô Invoice gộp 1 (tổng) */
 /** Xếp dòng Sổ booking: "dat" = theo thời gian đặt (thứ tự nhập trên sheet, mặc định) · "in" = theo ngày nhận phòng */
@@ -1688,6 +1689,38 @@ function tienNhom(ds) {
   return '<div class="tg-gon" title="' + esc(tip) + '"><div class="tg-d"><span>Tổng</span><b>' + f(tong) + '</b></div><button type="button" class="tg-d tg-nhap" data-act="nhoCoc" data-v="' + ds[0].dong + '" title="Bấm để nhập tiền cọc khách chuyển (tự chia cho từng phòng, tích thuế lần 1)"><span>' + icn("coc", 12) + ' Đã nhận</span><b>' + (nhan ? f(nhan) : "＋ nhập cọc") + "</b></button>" +
     (nhan && Math.abs(lech) > Math.max(1000, coc50 * 0.03) ? '<div class="tg-lech">' + (lech < 0 ? "cọc thiếu " : "cọc dư ") + f(Math.abs(lech)) + " so 50%</div>" : "") +
     '<div class="tg-d"><span>' + icn("con", 12) + ' Còn lại</span><b class="' + (con > 1000 ? "tn-thieu" : "tn-du") + '">' + (con > 1000 ? f(con) : "đủ ✓") + "</b></div></div>";
+}
+/** ↩️ Hoàn cọc: số tiền (mặc định = cọc đang ghi), ngày chuyển trả, lý do -> ghi sổ thuế 1 dòng số ÂM, trừ ô Cọc, ghi chú vào Mô tả, (tuỳ chọn) bỏ tích thuế lần 1. Duyệt 2 lớp */
+function moHoanCoc(nut) {
+  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0]; if (!r) return;
+  var so = function(v) { return Number(String(v || "").replace(/[^\d-]/g, "")) || 0; }, f2 = function(n) { return Math.round(n).toLocaleString("en-US"); }, coc = so(r.o[20]);
+  var cu = $("#nhCoc"); if (cu) cu.remove();
+  var p = document.createElement("div"); p.id = "nhCoc"; p.className = "tx-xn nh-coc"; p.setAttribute("role", "dialog");
+  p.innerHTML = '<div class="tx-xn-n"><b>↩️ Hoàn cọc · ' + esc(r.o[13] || "") + "</b> <small>(" + esc(r.o[5] || "") + " · cọc đang ghi " + f2(coc) + ")</small></div>" +
+    '<label class="nc-o">Số tiền hoàn<input id="hcTien" inputmode="numeric" value="' + (coc || "") + '"></label>' +
+    '<label class="nc-o">Ngày chuyển trả<input id="hcNgay" type="date" value="' + Q.d.homNay + '"></label>' +
+    '<label class="nc-o">Lý do<input id="hcLy" placeholder="vd khách huỷ, đổi ngày…"></label>' +
+    '<label class="nc-ck"><input type="checkbox" id="hcBo"' + (r.thue1 ? " checked" : "") + '> Bỏ tích thuế lần 1</label>' +
+    '<small class="muted">Sổ thuế ghi 1 dòng số âm · trừ vào ô Cọc · ghi chú vào Mô tả</small>' +
+    '<div class="tx-xn-b"><button type="button" class="btn" data-nc="0">Huỷ</button><button type="button" class="btn pri" data-nc="1">Tiếp tục</button></div>';
+  document.body.appendChild(p);
+  var b = nut.getBoundingClientRect(); p.style.left = (Math.max(8, Math.min(b.left, innerWidth - p.offsetWidth - 8)) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
+  setTimeout(function() { $("#hcTien").focus(); $("#hcTien").select(); }, 30);
+  var dong = function() { p.remove(); };
+  p.addEventListener("keydown", function(e) { if (e.key === "Escape") dong(); });
+  p.addEventListener("click", function(e) { var bt = e.target.closest("[data-nc]"); if (!bt) return; if (bt.dataset.nc !== "1") return dong();
+    var t = so($("#hcTien").value), ng = $("#hcNgay").value, ly = $("#hcLy").value.trim(), bo = $("#hcBo").checked, ma = String(r.o[5] || "").trim();
+    if (!(t > 0)) return toast("Nhập số tiền hoàn"); if (!/^\d{4}-\d{2}-\d{2}$/.test(ng)) return toast("Chọn ngày chuyển trả");
+    xacNhan2(bt, "Hoàn cọc <b>" + f2(t) + "</b> cho " + esc(r.o[13] || "") + " · " + esc(ma) + "<br>Ngày " + ngan(ng) + (ly ? " · " + esc(ly) : "") + "<br><small>Sổ thuế −" + f2(t) + " · Cọc " + f2(coc) + " → " + f2(coc - t) + (bo ? " · bỏ tích thuế lần 1" : "") + "</small>", function(xong) {
+      api("themThu", [{ soTien: -t, ngay: ng, code: ma, ghiChu: "hoàn cọc" + (ly ? " · " + ly : "") }], function() {
+        var sua = {}; sua[22] = String(Math.max(0, coc - t)); var mt = String(r.o[16] || "").trim(); sua[18] = (mt ? mt + " · " : "") + "hoàn cọc " + ngan(ng) + " " + f2(t) + (ly ? " (" + ly + ")" : "");
+        api("suaDong", [r.dong, sua], function() { ghiHoanTac(r.dong, sua);
+          var het = function() { xong(); dong(); toast("✔ Đã hoàn cọc " + f2(t) + " · " + ma); NH.bangLuc = 0; if (typeof lamMoiBang === "function") lamMoiBang(); };
+          if (bo && r.thue1) api("boThue", [r.dong, ma, 1], het, function(e2) { het(); toast("⚠ Bỏ tích thuế: " + e2); }); else het();
+        }, function(e) { xong(); loiChung(e); });
+      }, function(e) { xong(); loiChung(e); });
+    });
+  });
 }
 /** 💵 Nhập tiền cọc cho khách nhiều phòng: số tiền + ngày tiền vào bank -> chia theo tỉ lệ tiền phòng, ghi sổ thuế 1 dòng (gộp mã), cộng vào ô Cọc từng phòng, tích thuế lần 1 */
 function moNhapCoc(nut) {
@@ -2433,7 +2466,7 @@ function luuNhap() {
   };
   buoc(0);
 }
-function timDon(dong) { return (Q.lich.ds || []).filter(function(b) { return b.dong === dong; })[0]; }
+function timDon(dong) { var f = function(b) { return b.dong === dong; }; return (Q.lich.ds || []).filter(f)[0] || (TH.lichAll || []).filter(f)[0] || (function() { var r = NH.bang && NH.bang.ds.filter(f)[0]; return r ? { dong: r.dong, code: String(r.o[5] || "").trim(), email: /@/.test(String(r.o[2] || "")) ? String(r.o[2]).trim() : "", ten: r.o[13] } : undefined; })(); }   // cả đơn ngoài lịch đang tải
 
 /* ô ngắn (≤ ~1,6 cột): dòng trên "tên 20–21", dòng dưới "tháng 11"; ô dài giữ "20/11→22/11" */
 /* tên dài không đủ chỗ: viết tắt dần các chữ đầu, giữ tên cuối càng nhiều càng tốt (Nguyễn Hà Anh Thy -> N. Hà Anh Thy -> N.H. Anh Thy -> N.H.A. Thy) */
@@ -4206,6 +4239,8 @@ document.addEventListener("click", function(e) {
     }, function(er) { el.disabled = false; loiChung(er); });
   }
   else if (a === "hoaDon" && b) moHoaDon(b);
+  else if (a === "dtHoaDon") { Q.chon = Number(v); var bh = timDon(Q.chon); if (bh) moHoaDon(bh); else toast("Không tìm thấy đơn"); }   // 📄 xuất hoá đơn từ bảng chi tiết (ảnh / PDF / email)
+  else if (a === "dtHoanCoc") moHoanCoc(el);
   else if (a === "hdDong") $("#modal").hidden = true;
   else if (a === "hdGui" && b) {
     el.disabled = true; el.innerHTML = '<span class="sm">…</span>';
