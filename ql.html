@@ -825,6 +825,10 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-dt tbody td.agc{text-align:center}.nh-dt tbody td.agc>div{display:flex!important;justify-content:center;width:100%}.nh-dt tbody td.agc>div+div{margin-top:1px}
 .nh-dt tbody td.agc .tt-i{width:16px;height:16px}.nh-dt tbody td.agc .tt-ch{font-size:9.5px}
 .nh-dt tbody td.o-gc-nhom{white-space:normal}.o-gc-nhom .gc-p{display:flex;gap:4px;align-items:baseline}.o-gc-nhom .gc-p small{opacity:.6;flex:none}
+@keyframes nhayTrung{0%,100%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,0)}20%,60%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,.55)}}.nh-dt tbody tr.nhay-trung>td{animation:nhayTrung 1.3s ease 2}
+.tg-nhap{all:unset;display:flex;justify-content:space-between;gap:6px;align-items:baseline;width:100%;cursor:pointer;border-radius:5px;box-sizing:border-box}.tg-nhap:hover{background:rgba(192,122,58,.12)}.tg-nhap b{color:#2b6cb0}.nh-coc{min-width:280px}.nh-coc .nc-o{display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:12px}.nh-coc .nc-o input{min-height:36px;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit}.nh-coc .nc-ph{margin:8px 0 4px;font-size:12.5px}.nh-coc .nc-ph label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0}.nh-coc .nc-ph input{width:110px;text-align:right;min-height:30px;font:inherit;border:1px solid var(--line);border-radius:6px;padding:2px 6px;background:var(--card);color:inherit}.nh-coc .nc-ph i{font-style:normal;opacity:.55}
+/* khung Dòng mới: không tràn, cuộn ngang trong khung */
+.nh-moi{max-width:100%;overflow:hidden;box-sizing:border-box}.nh-moi .nh-cuon{overflow-x:auto;max-width:100%}.nh-moi .nh-goiy{white-space:normal;min-width:0}.nh-moi .nh-bar{flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -1393,7 +1397,7 @@ function cotNhap() { return NH_COT.filter(function(c) { return NH.mo || !c[4]; }
 function veNhap() { NH.che = "ds"; return veBangSheet(); }   // Sổ booking = 1 màn: danh sách + dòng nhập mới
 /* phần "dòng mới" (chỉ hiện khi bấm ＋ Thêm dòng) đặt trên đầu danh sách */
 function htmlNhap() {
-  if (!NH.dong.length) { if (NH.anNhap) return ""; NH.dong.push(dongNhapMoi()); }   // luôn có 1 dòng trống để nhập khách mới ngay trên đầu bảng
+  if (!NH.dong.length) return "";   // dòng nhập mặc định ẩn; bấm ＋ Thêm dòng để hiện, bấm lại để ẩn
   var COT = cotNhap();
   var ag = Q.d.agent && Q.d.agent.length ? Q.d.agent : ["Facebook", "Air BnB", "Website"];
   var o = function(r, i, c) {
@@ -1404,7 +1408,7 @@ function htmlNhap() {
     if (c[3] === "phong") return '<td><select class="nh-o" ' + ten + ">" + oPhongNhap(r) + "</select></td>";
     if (c[3] === "tt") return '<td><select class="nh-o" ' + ten + ">" + ["Waiting", "Keep", "Book", "Done"].map(function(t) { return "<option" + (t === v ? " selected" : "") + ">" + t + "</option>"; }).join("") + "</select></td>";
     if (c[3] === "ds") return '<td><input class="nh-o" list="nhAgent" ' + ten + ' value="' + esc(v) + '"></td>';
-    if (c[3] === "ngay") { var g = docNgayNhap(v); return '<td><input class="nh-o' + (g === null ? " sai" : "") + '" ' + ten + ' placeholder="ngày/tháng" value="' + esc(/^\d{4}-/.test(v) ? v.slice(8, 10) + "/" + v.slice(5, 7) : v) + '"><small class="nh-g">' + (g ? hienNgayNhap(g) : g === null ? "sai ngày" : "") + "</small></td>"; }
+    if (c[3] === "ngay") { var g = docNgayNhap(v); return '<td><input class="nh-o' + (g === null ? " sai" : "") + '" ' + ten + ' placeholder="dd/mm" value="' + esc(/^\d{4}-/.test(v) ? v.slice(8, 10) + "/" + v.slice(5, 7) : v) + '"><small class="nh-g">' + (g ? hienNgayNhap(g) : g === null ? "sai ngày" : "") + "</small></td>"; }
     return '<td><input class="nh-o' + (c[3] === "tien" || c[3] === "so" ? " num" : "") + '" ' + ten + (c[3] === "tien" || c[3] === "so" ? ' inputmode="numeric"' : "") + ' value="' + esc(v) + '"></td>';
   };
   var dang = NH.dong.filter(function(r) { return !r.kq; }).length;
@@ -1584,7 +1588,7 @@ function gopCungTen(ds, th) {
     if (ten) ds.forEach(function(x, j) { if (!dung[j] && j > i && !x.huy && k(x) === ten && Math.abs(ms(x) - ms(r)) <= ngay * 864e5) { dung[j] = 1; nhom.push(x); } });
     if (nhom.length > 1) {
       var tong = nhom.reduce(function(s, x) { return s + (Number(String(x.o[19]).replace(/[^\d-]/g, "")) || 0); }, 0);
-      nhom.forEach(function(x, n) { x.gop = n ? -1 : nhom.length; x.gopTong = tong; x.gopGiua = n < nhom.length - 1; x.gopDs = nhom; if (n && nhom[0].nen) { x.nen = nhom[0].nen.slice(); x.chu = (nhom[0].chu || []).slice(); } });   // cùng khách: cùng 1 màu
+      (NH.nhomMap = NH.nhomMap || {})[nhom[0].dong] = nhom; nhom.forEach(function(x, n) { x.gop = n ? -1 : nhom.length; x.gopTong = tong; x.gopGiua = n < nhom.length - 1; x.gopDs = nhom; if (n && nhom[0].nen) { x.nen = nhom[0].nen.slice(); x.chu = (nhom[0].chu || []).slice(); } });   // cùng khách: cùng 1 màu
     }
     kq = kq.concat(nhom);
   });
@@ -1658,7 +1662,7 @@ function tacNhom(r) {
 /** Danh sách chọn phòng cho nút chung (bấm phòng = chạy đúng nút cũ của phòng đó) */
 function moNhoMenu(nut) {
   var cu = $("#nhoMenu"); if (cu) { cu.remove(); if (cu._nut === nut) return; }
-  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0], ds = (r && r.gopDs) || [], loai = nut.dataset.loai;
+  var ds = (NH.nhomMap || {})[Number(nut.dataset.v)] || [], loai = nut.dataset.loai;
   var p = document.createElement("div"); p.id = "nhoMenu"; p.className = "tx-xn"; p._nut = nut;
   p.innerHTML = '<div class="tx-xn-n"><b>' + ({ sdMo: "Sửa phòng nào?", nhAn: "Ẩn / hiện phòng nào?", nhXoaDong: "Xoá phòng nào?" }[loai] || "") + '</b></div><div class="nho-ds">' + ds.map(function(x) { return '<button type="button" class="btn" data-act="' + loai + '" data-v="' + x.dong + '">' + esc(String(x.o[9] || "").trim()) + " <small>" + esc(String(x.o[5] || "")) + "</small></button>"; }).join("") + "</div>";
   document.body.appendChild(p); var b = nut.getBoundingClientRect(); p.style.left = (Math.min(b.left, innerWidth - p.offsetWidth - 8) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
@@ -1681,9 +1685,41 @@ function tienNhom(ds) {
   var cocSheet = ds.reduce(function(a, r) { return a + so(r.o[20]); }, 0), nhan = thu || cocSheet, coc50 = tong / 2, lech = nhan - coc50, con = tong - nhan;
   var phan = ds.map(function(r) { var v = so(r.o[19]), p = tong ? v / tong : 0; return String(r.o[9] || "").trim() + " " + String(r.o[5] || "") + ": " + f2(v) + (nhan ? " · nhận " + f2(nhan * p) + " · còn " + f2(v - nhan * p) : ""); }).join("\n");
   var tip = "Tổng = " + ds.map(function(r) { return f2(so(r.o[19])); }).join(" + ") + "\nĐã nhận " + f2(nhan) + (thu ? " (theo sổ thuế)" : " (theo cột cọc)") + " · cọc 50% = " + f2(coc50) + "\nPhân bổ theo tỉ lệ tiền phòng:\n" + phan;
-  return '<div class="tg-gon" title="' + esc(tip) + '"><div class="tg-d"><span>Tổng</span><b>' + f(tong) + '</b></div><div class="tg-d"><span>' + icn("coc", 12) + ' Đã nhận</span><b>' + (nhan ? f(nhan) : "—") + "</b></div>" +
+  return '<div class="tg-gon" title="' + esc(tip) + '"><div class="tg-d"><span>Tổng</span><b>' + f(tong) + '</b></div><button type="button" class="tg-d tg-nhap" data-act="nhoCoc" data-v="' + ds[0].dong + '" title="Bấm để nhập tiền cọc khách chuyển (tự chia cho từng phòng, tích thuế lần 1)"><span>' + icn("coc", 12) + ' Đã nhận</span><b>' + (nhan ? f(nhan) : "＋ nhập cọc") + "</b></button>" +
     (nhan && Math.abs(lech) > Math.max(1000, coc50 * 0.03) ? '<div class="tg-lech">' + (lech < 0 ? "cọc thiếu " : "cọc dư ") + f(Math.abs(lech)) + " so 50%</div>" : "") +
     '<div class="tg-d"><span>' + icn("con", 12) + ' Còn lại</span><b class="' + (con > 1000 ? "tn-thieu" : "tn-du") + '">' + (con > 1000 ? f(con) : "đủ ✓") + "</b></div></div>";
+}
+/** 💵 Nhập tiền cọc cho khách nhiều phòng: số tiền + ngày tiền vào bank -> chia theo tỉ lệ tiền phòng, ghi sổ thuế 1 dòng (gộp mã), cộng vào ô Cọc từng phòng, tích thuế lần 1 */
+function moNhapCoc(nut) {
+  var r = NH.bang.ds.filter(function(x) { return x.dong === Number(nut.dataset.v); })[0], ds = (NH.nhomMap || {})[Number(nut.dataset.v)] || (r ? [r] : []); if (!ds.length) return; r = ds[0];
+  var so = function(v) { return Number(String(v || "").replace(/[^\d-]/g, "")) || 0; }, f2 = function(n) { return Math.round(n).toLocaleString("en-US"); };
+  var tong = ds.reduce(function(a, x) { return a + so(x.o[19]); }, 0), daCoc = ds.reduce(function(a, x) { return a + so(x.o[20]); }, 0), goiY = Math.max(0, Math.round((tong / 2 - daCoc) / 1000) * 1000);
+  var cu = $("#nhCoc"); if (cu) cu.remove();
+  var p = document.createElement("div"); p.id = "nhCoc"; p.className = "tx-xn nh-coc"; p.setAttribute("role", "dialog");
+  p.innerHTML = '<div class="tx-xn-n"><b>Nhập tiền cọc · ' + esc(r.o[13] || "") + "</b> <small>(" + ds.length + " phòng · tổng " + f2(tong) + ")</small></div>" +
+    '<label class="nc-o">Số tiền khách chuyển<input id="ncTien" inputmode="numeric" value="' + (goiY || "") + '" placeholder="vd 2150000"></label>' +
+    '<label class="nc-o">Ngày tiền vào bank<input id="ncNgay" type="date" value="' + Q.d.homNay + '"></label>' +
+    '<div class="nc-ph" id="ncPh"></div><small class="muted">Ghi 1 dòng sổ thuế (gộp mã) · cộng vào ô Cọc từng phòng · tự tích thuế lần 1</small>' +
+    '<div class="tx-xn-b"><button type="button" class="btn" data-nc="0">Huỷ</button><button type="button" class="btn pri" data-nc="1">Tiếp tục</button></div>';
+  document.body.appendChild(p);
+  var b = nut.getBoundingClientRect(); p.style.left = (Math.max(8, Math.min(b.left, innerWidth - p.offsetWidth - 8)) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
+  var chia = function() { var t = so($("#ncTien").value), con = t; return ds.map(function(x, i) { var v = i === ds.length - 1 ? con : Math.round(t * so(x.o[19]) / (tong || 1) / 1000) * 1000; con -= v; return { r: x, v: v }; }); };
+  var ve = function() { $("#ncPh").innerHTML = chia().map(function(c, i) { return '<label><span>' + esc(String(c.r.o[9] || "").trim()) + " <i>" + esc(c.r.o[5] || "") + '</i></span><input data-ph="' + i + '" inputmode="numeric" value="' + f2(c.v) + '"></label>'; }).join(""); };
+  ve(); $("#ncTien").addEventListener("input", ve);   // gõ tổng -> tự chia theo tỉ lệ; sửa tay từng phòng được (vd tiền chỉ cho 1 đợt ở)
+  var docChia = function() { var cs = chia(); [].forEach.call(p.querySelectorAll("[data-ph]"), function(o) { cs[Number(o.dataset.ph)].v = so(o.value); }); return cs; }; setTimeout(function() { $("#ncTien").focus(); $("#ncTien").select(); }, 30);
+  var dong = function() { p.remove(); };
+  p.addEventListener("click", function(e) { var bt = e.target.closest("[data-nc]"); if (!bt) return; if (bt.dataset.nc !== "1") return dong();
+    var ng = $("#ncNgay").value, cs = docChia(), t = cs.reduce(function(a2, c) { return a2 + c.v; }, 0); if (!(t > 0)) return toast("Nhập số tiền"); if (!/^\d{4}-\d{2}-\d{2}$/.test(ng)) return toast("Chọn ngày tiền vào");
+    xacNhan2(bt, "Ghi cọc <b>" + f2(t) + "</b> · ngày bank <b>" + ngan(ng) + "</b><br>" + cs.map(function(c) { return esc(String(c.r.o[9] || "").trim()) + " " + f2(c.v); }).join(" · ") + "<br><small>Sổ thuế + ô Cọc + tích thuế lần 1</small>", function(xong) {
+      var maDs = cs.filter(function(c) { return c.v > 0; }).map(function(c) { return String(c.r.o[5] || "").trim(); }).filter(String);   // chỉ phòng có tiền
+      api("themThu", [{ soTien: t, ngay: ng, code: maDs[0], ghiChu: (maDs.length > 1 ? "gộp: " + maDs.join(" + ") + " · " : "") + "cọc nhập từ Sổ booking" }], function() {
+        var lam = function(i) { if (i < cs.length && !(cs[i].v > 0)) return lam(i + 1); if (i >= cs.length) { xong(); dong(); toast("✔ Đã ghi cọc " + f2(t) + " · tích thuế lần 1"); NH.bangLuc = 0; if (typeof lamMoiBang === "function") lamMoiBang(); return; }
+          var c = cs[i], sua = {}; sua[22] = String(so(c.r.o[20]) + c.v); api("suaDong", [c.r.dong, sua], function() { ghiHoanTac(c.r.dong, sua); lam(i + 1); }, function(e) { toast("⚠ Ô cọc " + c.r.o[5] + ": " + e); lam(i + 1); }); };
+        lam(0);
+      }, function(e) { xong(); loiChung(e); });
+    });
+  });
+  p.addEventListener("keydown", function(e) { if (e.key === "Escape") dong(); });
 }
 /** 🧾 Khung VAT chung cho khách nhiều phòng: tổng nhóm, cọc 50% dự kiến, các lần nhập thuế (gộp trùng), đã thu / còn lại, tích L1/L2 từng phòng */
 function thueNhom(ds) {
@@ -2366,6 +2402,18 @@ function xemNhap(i) {
   if (!(o.vao && o.ra && o.vao < o.ra)) { r.xem = null; return tinhDongNhap(i); }
   api("xemDon", [o], function(x) { if (NH.dong[i] !== r || r.phong !== o.phong) return; r.xem = x; tinhDongNhap(i); });
 }
+/** Tìm đơn đã có trùng với đơn sắp thêm: cùng phòng + cùng ngày nhận, hoặc cùng tên + cùng ngày nhận (bỏ qua đơn huỷ) */
+function timTrungNhap(o) {
+  var bo = function(x) { return boDauQL(String(x || "")).toLowerCase().replace(/\s+/g, " ").trim(); }, md = function(v) { var t = ngayTach(v); return t ? t.t * 100 + t.d : 0; };
+  var mdVao = o.vao ? Number(o.vao.slice(5, 7)) * 100 + Number(o.vao.slice(8, 10)) : 0; if (!mdVao) return null;
+  return ((NH.bang && NH.bang.ds) || []).filter(function(r) { return !r.huy && md(r.o[10]) === mdVao && (String(r.o[9] || "").trim() === o.phong || (o.ten && bo(r.o[13] || r.o[0]) === bo(o.ten))); })[0] || null;
+}
+/** Nhảy tới dòng đã có: cuộn tới, nháy sáng, mở khung sửa của dòng đó */
+function nhayToiDong(dong) {
+  var o = document.querySelector('.nh-dt [data-dong="' + dong + '"]'), tr = o && o.closest("tr");
+  if (tr) { tr.scrollIntoView({ block: "center", behavior: "smooth" }); tr.classList.add("nhay-trung"); setTimeout(function() { tr.classList.remove("nhay-trung"); }, 2600); }
+  setTimeout(function() { var b = document.createElement("button"); b.dataset.act = "sdMo"; b.dataset.v = dong; b.hidden = true; document.body.appendChild(b); b.click(); b.remove(); }, tr ? 700 : 0);
+}
 function luuNhap() {
   var ds = NH.dong.map(function(r, i) { return i; }).filter(function(i) { var r = NH.dong[i]; return !r.kq && (r.ten || r.vao); });
   if (!ds.length) return;
@@ -2375,6 +2423,11 @@ function luuNhap() {
     if (!o.ten) { r.loi = "Thiếu Name"; tinhDongNhap(ds[n]); return buoc(n + 1); }
     if (!(o.vao && o.ra && o.vao < o.ra)) { r.loi = "Ngày IN/OUT chưa đúng"; tinhDongNhap(ds[n]); return buoc(n + 1); }
     if (!o.phong) { r.loi = "Chưa chọn ROOM"; tinhDongNhap(ds[n]); return buoc(n + 1); }
+    var tr0 = timTrungNhap(o);   // 🔁 chống nhập trùng: cùng phòng + cùng ngày IN, hoặc cùng tên + cùng ngày IN
+    if (tr0 && !r.vanLuu) {
+      if (confirm("⚠️ Có thể TRÙNG với dòng " + tr0.dong + " đã có:\n" + (tr0.o[13] || tr0.o[0]) + " · " + tr0.o[9] + " · " + tr0.o[10] + " → " + tr0.o[11] + "\n\nOK = mở dòng cũ để sửa tại đó\nHuỷ = vẫn lưu thành dòng mới")) { r.loi = "Trùng dòng " + tr0.dong + " — đã mở dòng cũ để sửa"; tinhDongNhap(ds[n]); nhayToiDong(tr0.dong); return; }
+      r.vanLuu = true;
+    }
     r.kq = "Đang lưu…"; tinhDongNhap(ds[n]);
     api("themDon", [o], function(k) { r.kq = "✔ " + k.code + " · dòng " + k.dong; tinhDongNhap(ds[n]); buoc(n + 1); }, function(e) { r.kq = ""; r.loi = e; tinhDongNhap(ds[n]); buoc(n + 1); });
   };
@@ -3967,6 +4020,7 @@ document.addEventListener("click", function(e) {
   else if (a === "noiFileNam") { var fn = $("#fNam"); $("#namKQ").innerHTML = '<div class="loading">Đang sao lưu và nối…</div>'; api("noiFileNam", [fn.nam.value, fn.url.value], function(k) { toast("✅ Đã nối " + k.ten + " cho năm " + k.nam); api("fileTT", [], veFileDL); taiLich(); }, function(e) { $("#namKQ").innerHTML = '<div class="err-box">' + esc(e) + "</div>"; }); }
   else if (a === "boFileNam") api("boFileNam", [v], function(t) { veFileDL(t); taiLich(); });
   else if (a === "veBanThu") api("veBanThu", [], function() { location.reload(); });
+  else if (a === "nhThem" && NH.dong.length && NH.dong.every(function(x) { return !x.kq && !String(x.ten || "").trim() && !String(x.vao || "").trim(); })) { NH.dong = []; veNhap(); }   // dòng nhập đang trống: bấm lại để ẩn
   else if (a === "nhThem") { NH.dong.push(dongNhapMoi(NH.dong[NH.dong.length - 1])); veNhap(); var q = document.querySelectorAll('.nh-n .nh-o[data-k="ten"]'); if (q.length) { q[q.length - 1].focus(); q[q.length - 1].scrollIntoView({ block: "center" }); } }
   else if (a === "nhHuyMoi") { NH.dong = []; veNhap(); }
   else if (a === "nhChe") { NH.che = v; veNhap(); }
@@ -3988,7 +4042,8 @@ document.addEventListener("click", function(e) {
   else if (a === "tcBoCho") { TC.cho = (TC.cho || []).filter(function(x) { return String(x.id) !== String(v); }); giuOVe(); }
   else if (a === "tcLuuMoi") luuDongChiMoi();
   else if (a === "nhoMenu") moNhoMenu(el);
-  else if (a === "nhoHL") { var rg = NH.bang.ds.filter(function(x) { return x.dong === Number(v); })[0]; ((rg && rg.gopDs) || []).forEach(function(x, i) { setTimeout(function() { var b0 = document.createElement("button"); b0.dataset.act = "nhHL"; b0.dataset.v = x.dong; document.body.appendChild(b0); b0.click(); b0.remove(); }, i * 250); }); }
+  else if (a === "nhoCoc") moNhapCoc(el);
+  else if (a === "nhoHL") { ((NH.nhomMap || {})[Number(v)] || []).forEach(function(x, i) { setTimeout(function() { var b0 = document.createElement("button"); b0.dataset.act = "nhHL"; b0.dataset.v = x.dong; document.body.appendChild(b0); b0.click(); b0.remove(); }, i * 250); }); }
   else if (a === "nhAnTat") { if (NH.anNgay === "all" && NH.anTruoc != null) { NH.anNgay = NH.anTruoc; NH.anTruoc = null; } else { NH.anTruoc = NH.anNgay; NH.anNgay = "all"; } try { localStorage.setItem("olia_an_ngay", NH.anNgay); } catch (e) {} veNhap(); }   // 👁 hiện tất cả dòng ẩn / ẩn lại như trước
   else if (a === "tcNote") { TC.anNote = !TC.anNote; try { localStorage.setItem("olia_tc_note", TC.anNote ? "1" : "0"); } catch (e) {} giuOVe(); }
   else if (a === "tcXep") { TC.xep = v === "ngay" ? "ngay" : "nhap"; try { localStorage.setItem("olia_tc_xep", TC.xep); } catch (e) {} giuOVe(); }
