@@ -742,14 +742,14 @@ body.top1 .top-in .tabs2{flex:none!important;margin:0!important;position:static!
 .tc-b2{width:100%;min-width:640px}.tc-b2 thead th{background:#efe6d6!important;color:var(--fg)!important;border:1px solid var(--line)!important}html.toi .tc-b2 thead th{background:#3a342c!important}.tc-b2 td{border:1px solid var(--line)!important}.tc-b2 td{vertical-align:middle}.tc-b2 th.r{text-align:right}
 .tc-b2 td.tc-ngay2{position:relative;white-space:nowrap;text-align:center;font-weight:700;padding-left:22px!important;padding-right:26px!important;width:96px}
 .tc-b2 .tc-d{cursor:text;padding:2px 1px;border-radius:4px}.tc-b2 .tc-d:hover{background:rgba(0,0,0,.06)}
-.tc-b2 td.tc-nd{min-width:220px}.tc-b2 td.tc-nd>div:first-child{line-height:1.35}.tc-b2 td.tc-nd .sua{cursor:text}
+.tc-b2 td.tc-ndc{min-width:220px;white-space:normal}.tc-b2 td.tc-ndc>div:first-child{line-height:1.35}.tc-b2 td.tc-ndc .sua{cursor:text}
 .tc-chip-n{display:inline-block;margin-top:3px;font-size:11.5px;padding:0 7px;border-radius:6px;background:rgba(120,110,95,.13);line-height:1.7}.tc-chip-n.sua{cursor:pointer}.tc-chip-n.sua:hover{background:rgba(192,122,58,.2)}
 .tc-b2 td.tc-tien{text-align:right;white-space:nowrap;width:130px}.tc-b2 td.tc-tien b{display:block;font-size:1.02em}.tc-b2 td.tc-tien small{display:block;opacity:.6;font-size:11px}.tc-b2 td.tc-tien .tc-sl1{opacity:0}.tc-b2 tr:hover td.tc-tien .tc-sl1{opacity:.45}
 .tc-bill{display:inline-block;font-size:12px;padding:0 6px;border-radius:6px;background:rgba(43,79,138,.1);cursor:text}
 .tc-b2 td.tc-an{padding:0!important;width:1%}.tc-b2 .tc-note{cursor:text;opacity:.8}
 .tc-b2 tr.tc-moi td{background:#fff8e6}.tc-b2 tr.tc-moi .nh-o{min-width:0}.tc-b2 td{max-width:none!important}.tc-b2 tr.tc-moi td{padding:5px 6px!important}.tc-b2 tr.tc-moi .tc-nd-o{display:flex;gap:6px;align-items:center}.tc-b2 tr.tc-moi .tc-nd-o input{flex:1 1 160px}.tc-b2 tr.tc-moi .tc-nd-o select{flex:0 0 auto;max-width:150px}.tc-b2 tr.tc-moi .nh-o{height:32px;box-sizing:border-box}.tc-b2 tr.tc-moi td.tc-ngay2 .nh-o{width:34px;text-align:center}.tc-b2 tr.tc-moi td.tc-ngay2 span{margin:0 2px}.tc-b2 tr.tc-moi td.tc-tien .nh-o[data-k=donGia]{width:110px;text-align:right}.tc-b2 tr.tc-moi td.tc-tien .nh-o[data-k=sl]{width:40px;height:26px;text-align:center}.tc-b2 tr.tc-moi td.tc-tien small{opacity:.8;display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:3px}
 html.toi .tc-b2 tr.tc-moi td{background:#3a3326}html.toi .tc-chip-n{background:rgba(255,255,255,.1)}html.toi .tc-bill{background:rgba(120,160,230,.15)}
-@media(max-width:820px){.tc-b2{min-width:0}.tc-b2 td.tc-nd{min-width:150px}}
+@media(max-width:820px){.tc-b2{min-width:0}.tc-b2 td.tc-ndc{min-width:150px}}
 </style>
 </head>
 <body>
@@ -1814,7 +1814,7 @@ function bangChi(d, th) {
   var inp = function(x, k, w, them) { return '<input data-k="' + k + '" class="nh-o' + (/dd|mm|sl|donGia/.test(k) ? " num" : "") + '" size="' + w + '"' + (them || "") + ' value="' + esc(x[k] == null ? "" : x[k]) + '">'; };
   var dongMoi = function(x) {
     return '<tr class="tc-moi"><td class="tc-ngay2">' + inp(x, "dd", 2, ' inputmode="numeric" placeholder="ngày"') + "<span>/</span>" + inp(Object.assign({}, x, { mm: x.mm || mmMac }), "mm", 2, ' inputmode="numeric"') + "</td>" +
-      '<td class="tc-nd"><div class="tc-nd-o">' + inp(x, "noiDung", 14, ' autocomplete="off" placeholder="gõ hoặc chọn nội dung ▾"') + '<select data-k="nhom" class="nh-o">' + d.nhomDs.map(function(n) { return "<option" + (n.ten === x.nhom ? " selected" : "") + ">" + esc(n.ten) + "</option>"; }).join("") + "</select></div></td>" +
+      '<td class="tc-ndc"><div class="tc-nd-o">' + inp(x, "noiDung", 14, ' autocomplete="off" placeholder="gõ hoặc chọn nội dung ▾"') + '<select data-k="nhom" class="nh-o">' + d.nhomDs.map(function(n) { return "<option" + (n.ten === x.nhom ? " selected" : "") + ">" + esc(n.ten) + "</option>"; }).join("") + "</select></div></td>" +
       '<td class="tc-tien">' + inp(x, "donGia", 8, ' inputmode="decimal" placeholder="số tiền"') + '<small>SL ' + inp(x, "sl", 2, ' inputmode="decimal"') + "</small></td>" +
       "<td>" + inp(x, "bill", 5, ' list="tcBills"') + "</td>" + (TC.anNote ? '<td class="tc-an"></td>' : "<td>" + inp(x, "note", 8) + "</td>") +
       '<td class="nh-so">＋</td><td><button class="nh-x" data-act="tcLuuMoi" title="Lưu (Enter)">💾</button></td></tr>' +
@@ -1824,7 +1824,7 @@ function bangChi(d, th) {
     var h = laCho ? "" : x.hang, sl = Number(x.sl) || 1, tienX = laCho ? sl * (Number(x.donGia) || 0) : x.tien, mm = Number(x.mm) || mmMac, sua = function(k, txt, cls) { return laCho ? '<span class="' + (cls || "") + '">' + txt + "</span>" : '<span class="sua ' + (cls || "") + '" data-h="' + h + '" data-k="' + k + '">' + txt + "</span>"; };
     return "<tr" + (laCho ? ' class="tc-cho' + (x.loi ? " loi" : "") + '"' : vua.indexOf(h) >= 0 ? ' class="tc-vua"' : "") + (laCho ? "" : mauDong(x)) + ">" +
       '<td class="tc-ngay2">' + sua("dd", z2(x.dd || 1), "tc-d") + "/" + sua("mm", z2(mm), "tc-d") + (laCho ? "" : '<button type="button" class="tx-lich" data-tclich="' + h + '" title="Chọn ngày trên lịch" aria-label="Chọn ngày trên lịch">' + LICH_SVG + "</button>") + "</td>" +
-      '<td class="tc-nd"><div>' + sua("noiDung", esc(x.noiDung || "") || '<i class="muted">(trống)</i>') + "</div><div>" + nhomChip(x.nhom, h) + "</div></td>" +
+      '<td class="tc-ndc"><div>' + sua("noiDung", esc(x.noiDung || "") || '<i class="muted">(trống)</i>') + "</div><div>" + nhomChip(x.nhom, h) + "</div></td>" +
       '<td class="tc-tien"><b>' + sua("donGia", f0(tienX), "num") + "</b>" + (sl !== 1 ? "<small>" + sua("sl", String(sl)) + " × " + f0(x.donGia) + "</small>" : '<small class="tc-sl1">' + sua("sl", "SL 1") + "</small>") + "</td>" +
       "<td>" + (x.bill ? sua("bill", esc(x.bill), "tc-bill") : sua("bill", "—", "muted")) + "</td>" +
       (TC.anNote ? '<td class="tc-an"></td>' : "<td>" + sua("note", esc(x.note || "") || "&nbsp;", "tc-note") + "</td>") +
