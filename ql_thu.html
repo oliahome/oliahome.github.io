@@ -777,6 +777,7 @@ html.toi .tc-b2 tr.tc-moi td{background:#3a3326}html.toi .tc-chip-n{background:r
 .nh-dt tbody td.o-thue .t-ck.mini{width:auto!important;min-width:0!important;display:inline-flex!important;gap:1px;margin:0!important}.t-ck.mini span{font-size:10.5px}
 html.toi .nh-dt tbody td.o-thue-nhom{background:rgba(224,163,90,.08)}html.toi .o-thue-nhom .tn-l{background:#24452a;color:#a5e0ac}
 .nh-dt tbody td.o-tien-nhom{vertical-align:middle!important;background:rgba(192,122,58,.06);border-left:3px solid #e0a35a!important;white-space:normal;min-width:150px;font-size:12px;line-height:1.3}.o-tien-nhom .tg-d{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.o-tien-nhom .tg-d span{opacity:.7;display:inline-flex;align-items:center;gap:3px}.o-tien-nhom .tg-g{font-size:10.5px;opacity:.6;text-align:right;margin-bottom:2px}.o-thue-nhom .tn-coc small,.o-thue-nhom .tn-con small{opacity:.6}html.toi .nh-dt tbody td.o-tien-nhom{background:rgba(224,163,90,.08)}
+.nh-hien-an{display:inline-flex;align-items:center;gap:5px}.nh-hien-an b{font-size:12px;background:#6b7280;color:#fff;border-radius:99px;padding:0 6px;line-height:1.5}.nh-hien-an.on{background:#e8f1ff;border-color:#7aa7e0}.nh-hien-an small{font-size:11px;opacity:.75}html.toi .nh-hien-an.on{background:#23314a}
 </style>
 </head>
 <body>
@@ -1726,6 +1727,8 @@ function veBangSheet() {
     '<button class="btn' + (NH.bangCu ? " on" : "") + '" data-act="nhSheet" title="Nhập như trên sheet booking (đủ cột, màu y sheet) / về bảng gọn">▦ Kiểu sheet</button>' + (bkDT() && !the ? '<button class="btn" data-act="nhAnDone" title="Ẩn các dòng Done trong sheet">🙈 Ẩn dòng Done</button>' : "") + '<button class="btn" data-act="nhTai" aria-label="Tải lại">↻</button>' + (bkDT() && !the ? '<button class="btn" data-act="hoanTac">↶ Hoàn tác</button>' + nutCoThat() + '<button class="btn" data-act="nhThe">🗂 Xem dạng thẻ</button>' : "") + nutMoCot() +
     '<label class="btn nh-an nh-sel" title="Gộp khách cùng tên (ngày IN gần nhau): xếp sát nhau, gộp ô Invoice">' + icn("gop", 17) + '<select id="nhGop">' + [["0", "tắt"], ["30", "1 th"], ["60", "2 th"], ["90", "3 th"]].map(function(x) { return '<option value="' + x[0] + '"' + (x[0] === String(NH.gop) ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + "</select></label>" +
     '<label class="btn nh-an nh-sel" title="Hiện các dòng đã ẩn trong sheet gần đây">' + icn("an", 17) + '<select id="nhAnNgay">' + [["1", "1 ngày"], ["3", "3 ngày"], ["6", "6 ngày"], ["all", "tất cả"], ["0", "không hiện"]].map(function(x) { return '<option value="' + x[0] + '"' + (x[0] === nAn ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + "</select></label>" +
+    (function() { var soAn = ((NH.bang && NH.bang.ds) || []).filter(function(r) { return r.an; }).length, dangHien = NH.anNgay === "all" && NH.anTruoc != null;
+      return '<button type="button" class="btn nh-hien-an' + (dangHien ? " on" : "") + '" data-act="nhAnTat" title="' + (dangHien ? "Ẩn lại như trước (" + ({ "1": "1 ngày", "3": "3 ngày", "6": "6 ngày", "0": "không hiện" }[NH.anTruoc] || NH.anTruoc) + ")" : "Hiện tất cả dòng đã ẩn trong sheet") + '">' + (dangHien ? IC_HIEN : IC_HIEN) + (soAn ? "<b>" + soAn + "</b>" : "") + (dangHien ? "<small>đang hiện</small>" : "") + "</button>"; })() +
     (soAn ? '<button class="btn" data-act="nhHienAn">' + (NH.hienAn ? "🙈 Giấu " : "👁 Hiện ") + soAn + " dòng ẩn</button>" : "") +
     '<span class="muted sm nh-goiy">' + ds.length + " dòng · bấm vào ô để sửa (Enter lưu, Esc huỷ)</span></div></div>" + htmlNhap() +
     (the ? '<div class="the-ds">' + (ds.length ? ds.map(theBooking).join("") : '<p class="muted" style="text-align:center">Chưa có đơn nào trong tháng này.</p>') + "</div></div>" :
@@ -3883,6 +3886,7 @@ document.addEventListener("click", function(e) {
   else if (a === "tcGuiLai") { (TC.cho || []).forEach(function(x) { x.loi = ""; }); giuOVe(); chayCho(); }
   else if (a === "tcBoCho") { TC.cho = (TC.cho || []).filter(function(x) { return String(x.id) !== String(v); }); giuOVe(); }
   else if (a === "tcLuuMoi") luuDongChiMoi();
+  else if (a === "nhAnTat") { if (NH.anNgay === "all" && NH.anTruoc != null) { NH.anNgay = NH.anTruoc; NH.anTruoc = null; } else { NH.anTruoc = NH.anNgay; NH.anNgay = "all"; } try { localStorage.setItem("olia_an_ngay", NH.anNgay); } catch (e) {} veNhap(); }   // 👁 hiện tất cả dòng ẩn / ẩn lại như trước
   else if (a === "tcNote") { TC.anNote = !TC.anNote; try { localStorage.setItem("olia_tc_note", TC.anNote ? "1" : "0"); } catch (e) {} giuOVe(); }
   else if (a === "tcXep") { TC.xep = v === "ngay" ? "ngay" : "nhap"; try { localStorage.setItem("olia_tc_xep", TC.xep); } catch (e) {} giuOVe(); }
   else if (a === "tcDen") { TC.thang = v; veThuChi(); }
