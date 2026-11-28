@@ -826,7 +826,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-dt tbody td.agc .tt-i{width:16px;height:16px}.nh-dt tbody td.agc .tt-ch{font-size:9.5px}
 .nh-dt tbody td.o-gc-nhom{white-space:normal}.o-gc-nhom .gc-p{display:flex;gap:4px;align-items:baseline}.o-gc-nhom .gc-p small{opacity:.6;flex:none}
 @keyframes nhayTrung{0%,100%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,0)}20%,60%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,.55)}}.nh-dt tbody tr.nhay-trung>td{animation:nhayTrung 1.3s ease 2}
-.tg-nhap{all:unset;display:flex;justify-content:space-between;gap:6px;align-items:baseline;width:100%;cursor:pointer;border-radius:5px;box-sizing:border-box}.tg-nhap:hover{background:rgba(192,122,58,.12)}.tg-nhap b{color:#2b6cb0}.nh-coc{min-width:280px}.nh-coc .nc-o{display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:12px}.nh-coc .nc-o input{min-height:36px;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit}.nh-coc .nc-ph{margin:8px 0 4px;font-size:12.5px}.nh-coc .nc-ph div{display:flex;justify-content:space-between}.nh-coc .nc-ph i{font-style:normal;opacity:.55}
+.tg-nhap{all:unset;display:flex;justify-content:space-between;gap:6px;align-items:baseline;width:100%;cursor:pointer;border-radius:5px;box-sizing:border-box}.tg-nhap:hover{background:rgba(192,122,58,.12)}.tg-nhap b{color:#2b6cb0}.nh-coc{min-width:280px}.nh-coc .nc-o{display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:12px}.nh-coc .nc-o input{min-height:36px;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit}.nh-coc .nc-ph{margin:8px 0 4px;font-size:12.5px}.nh-coc .nc-ph label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0}.nh-coc .nc-ph input{width:110px;text-align:right;min-height:30px;font:inherit;border:1px solid var(--line);border-radius:6px;padding:2px 6px;background:var(--card);color:inherit}.nh-coc .nc-ph i{font-style:normal;opacity:.55}
 /* khung Dòng mới: không tràn, cuộn ngang trong khung */
 .nh-moi{max-width:100%;overflow:hidden;box-sizing:border-box}.nh-moi .nh-cuon{overflow-x:auto;max-width:100%}.nh-moi .nh-goiy{white-space:normal;min-width:0}.nh-moi .nh-bar{flex-wrap:wrap}
 </style>
@@ -1704,15 +1704,16 @@ function moNhapCoc(nut) {
   document.body.appendChild(p);
   var b = nut.getBoundingClientRect(); p.style.left = (Math.max(8, Math.min(b.left, innerWidth - p.offsetWidth - 8)) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
   var chia = function() { var t = so($("#ncTien").value), con = t; return ds.map(function(x, i) { var v = i === ds.length - 1 ? con : Math.round(t * so(x.o[19]) / (tong || 1) / 1000) * 1000; con -= v; return { r: x, v: v }; }); };
-  var ve = function() { $("#ncPh").innerHTML = chia().map(function(c) { return "<div><span>" + esc(String(c.r.o[9] || "").trim()) + " <i>" + esc(c.r.o[5] || "") + "</i></span><b>" + f2(c.v) + "</b></div>"; }).join(""); };
-  ve(); $("#ncTien").addEventListener("input", ve); setTimeout(function() { $("#ncTien").focus(); $("#ncTien").select(); }, 30);
+  var ve = function() { $("#ncPh").innerHTML = chia().map(function(c, i) { return '<label><span>' + esc(String(c.r.o[9] || "").trim()) + " <i>" + esc(c.r.o[5] || "") + '</i></span><input data-ph="' + i + '" inputmode="numeric" value="' + f2(c.v) + '"></label>'; }).join(""); };
+  ve(); $("#ncTien").addEventListener("input", ve);   // gõ tổng -> tự chia theo tỉ lệ; sửa tay từng phòng được (vd tiền chỉ cho 1 đợt ở)
+  var docChia = function() { var cs = chia(); [].forEach.call(p.querySelectorAll("[data-ph]"), function(o) { cs[Number(o.dataset.ph)].v = so(o.value); }); return cs; }; setTimeout(function() { $("#ncTien").focus(); $("#ncTien").select(); }, 30);
   var dong = function() { p.remove(); };
   p.addEventListener("click", function(e) { var bt = e.target.closest("[data-nc]"); if (!bt) return; if (bt.dataset.nc !== "1") return dong();
-    var t = so($("#ncTien").value), ng = $("#ncNgay").value, cs = chia(); if (!(t > 0)) return toast("Nhập số tiền"); if (!/^\d{4}-\d{2}-\d{2}$/.test(ng)) return toast("Chọn ngày tiền vào");
+    var ng = $("#ncNgay").value, cs = docChia(), t = cs.reduce(function(a2, c) { return a2 + c.v; }, 0); if (!(t > 0)) return toast("Nhập số tiền"); if (!/^\d{4}-\d{2}-\d{2}$/.test(ng)) return toast("Chọn ngày tiền vào");
     xacNhan2(bt, "Ghi cọc <b>" + f2(t) + "</b> · ngày bank <b>" + ngan(ng) + "</b><br>" + cs.map(function(c) { return esc(String(c.r.o[9] || "").trim()) + " " + f2(c.v); }).join(" · ") + "<br><small>Sổ thuế + ô Cọc + tích thuế lần 1</small>", function(xong) {
-      var maDs = ds.map(function(x) { return String(x.o[5] || "").trim(); }).filter(String);
+      var maDs = cs.filter(function(c) { return c.v > 0; }).map(function(c) { return String(c.r.o[5] || "").trim(); }).filter(String);   // chỉ phòng có tiền
       api("themThu", [{ soTien: t, ngay: ng, code: maDs[0], ghiChu: (maDs.length > 1 ? "gộp: " + maDs.join(" + ") + " · " : "") + "cọc nhập từ Sổ booking" }], function() {
-        var lam = function(i) { if (i >= cs.length) { xong(); dong(); toast("✔ Đã ghi cọc " + f2(t) + " · tích thuế lần 1"); NH.bangLuc = 0; if (typeof lamMoiBang === "function") lamMoiBang(); return; }
+        var lam = function(i) { if (i < cs.length && !(cs[i].v > 0)) return lam(i + 1); if (i >= cs.length) { xong(); dong(); toast("✔ Đã ghi cọc " + f2(t) + " · tích thuế lần 1"); NH.bangLuc = 0; if (typeof lamMoiBang === "function") lamMoiBang(); return; }
           var c = cs[i], sua = {}; sua[22] = String(so(c.r.o[20]) + c.v); api("suaDong", [c.r.dong, sua], function() { ghiHoanTac(c.r.dong, sua); lam(i + 1); }, function(e) { toast("⚠ Ô cọc " + c.r.o[5] + ": " + e); lam(i + 1); }); };
         lam(0);
       }, function(e) { xong(); loiChung(e); });
