@@ -3075,7 +3075,7 @@ function thueSheetNho(th, ok, loi, sauGhi) {   // sauGhi: vừa lưu -> giữ ng
     if (luu && (m || sauGhi)) return;   // bản trong localStorage cũ hơn bản đang nhớ / vừa ghi
     var sj = JSON.stringify(d); if (m && m.s === sj) return;
     TH.shMem[th] = m = { d: d, s: sj };
-    if (dangSua() || document.querySelector(".tx-s td.dang")) { TH.shCho = th; return; }   // đang gõ ô: vẽ lại sau
+    if (dangSua() || document.querySelector(".tx-s td.dang, .tx-goi-ds, #txXn")) { TH.shCho = th; return; }   // đang gõ / đang mở bảng so sánh / khung xác nhận: không vẽ đè   // đang gõ ô: vẽ lại sau
     ok(d);
   }, m ? function() {} : loi);
 }
