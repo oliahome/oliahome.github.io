@@ -825,6 +825,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .nh-dt tbody td.agc{text-align:center}.nh-dt tbody td.agc>div{display:flex!important;justify-content:center;width:100%}.nh-dt tbody td.agc>div+div{margin-top:1px}
 .nh-dt tbody td.agc .tt-i{width:16px;height:16px}.nh-dt tbody td.agc .tt-ch{font-size:9.5px}
 .nh-dt tbody td.o-gc-nhom{white-space:normal}.o-gc-nhom .gc-p{display:flex;gap:4px;align-items:baseline}.o-gc-nhom .gc-p small{opacity:.6;flex:none}
+@keyframes nhayTrung{0%,100%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,0)}20%,60%{box-shadow:inset 0 0 0 9999px rgba(255,200,60,.55)}}.nh-dt tbody tr.nhay-trung>td{animation:nhayTrung 1.3s ease 2}
 </style>
 </head>
 <body>
@@ -2366,6 +2367,18 @@ function xemNhap(i) {
   if (!(o.vao && o.ra && o.vao < o.ra)) { r.xem = null; return tinhDongNhap(i); }
   api("xemDon", [o], function(x) { if (NH.dong[i] !== r || r.phong !== o.phong) return; r.xem = x; tinhDongNhap(i); });
 }
+/** Tìm đơn đã có trùng với đơn sắp thêm: cùng phòng + cùng ngày nhận, hoặc cùng tên + cùng ngày nhận (bỏ qua đơn huỷ) */
+function timTrungNhap(o) {
+  var bo = function(x) { return boDauQL(String(x || "")).toLowerCase().replace(/\s+/g, " ").trim(); }, md = function(v) { var t = ngayTach(v); return t ? t.t * 100 + t.d : 0; };
+  var mdVao = o.vao ? Number(o.vao.slice(5, 7)) * 100 + Number(o.vao.slice(8, 10)) : 0; if (!mdVao) return null;
+  return ((NH.bang && NH.bang.ds) || []).filter(function(r) { return !r.huy && md(r.o[10]) === mdVao && (String(r.o[9] || "").trim() === o.phong || (o.ten && bo(r.o[13] || r.o[0]) === bo(o.ten))); })[0] || null;
+}
+/** Nhảy tới dòng đã có: cuộn tới, nháy sáng, mở khung sửa của dòng đó */
+function nhayToiDong(dong) {
+  var o = document.querySelector('.nh-dt [data-dong="' + dong + '"]'), tr = o && o.closest("tr");
+  if (tr) { tr.scrollIntoView({ block: "center", behavior: "smooth" }); tr.classList.add("nhay-trung"); setTimeout(function() { tr.classList.remove("nhay-trung"); }, 2600); }
+  setTimeout(function() { var b = document.createElement("button"); b.dataset.act = "sdMo"; b.dataset.v = dong; b.hidden = true; document.body.appendChild(b); b.click(); b.remove(); }, tr ? 700 : 0);
+}
 function luuNhap() {
   var ds = NH.dong.map(function(r, i) { return i; }).filter(function(i) { var r = NH.dong[i]; return !r.kq && (r.ten || r.vao); });
   if (!ds.length) return;
@@ -2375,6 +2388,11 @@ function luuNhap() {
     if (!o.ten) { r.loi = "Thiếu Name"; tinhDongNhap(ds[n]); return buoc(n + 1); }
     if (!(o.vao && o.ra && o.vao < o.ra)) { r.loi = "Ngày IN/OUT chưa đúng"; tinhDongNhap(ds[n]); return buoc(n + 1); }
     if (!o.phong) { r.loi = "Chưa chọn ROOM"; tinhDongNhap(ds[n]); return buoc(n + 1); }
+    var tr0 = timTrungNhap(o);   // 🔁 chống nhập trùng: cùng phòng + cùng ngày IN, hoặc cùng tên + cùng ngày IN
+    if (tr0 && !r.vanLuu) {
+      if (confirm("⚠️ Có thể TRÙNG với dòng " + tr0.dong + " đã có:\n" + (tr0.o[13] || tr0.o[0]) + " · " + tr0.o[9] + " · " + tr0.o[10] + " → " + tr0.o[11] + "\n\nOK = mở dòng cũ để sửa tại đó\nHuỷ = vẫn lưu thành dòng mới")) { r.loi = "Trùng dòng " + tr0.dong + " — đã mở dòng cũ để sửa"; tinhDongNhap(ds[n]); nhayToiDong(tr0.dong); return; }
+      r.vanLuu = true;
+    }
     r.kq = "Đang lưu…"; tinhDongNhap(ds[n]);
     api("themDon", [o], function(k) { r.kq = "✔ " + k.code + " · dòng " + k.dong; tinhDongNhap(ds[n]); buoc(n + 1); }, function(e) { r.kq = ""; r.loi = e; tinhDongNhap(ds[n]); buoc(n + 1); });
   };
