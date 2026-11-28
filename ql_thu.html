@@ -833,6 +833,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 .t-ck.t-hoan span{color:#b4553f}.t-ck.t-hoan.on input{accent-color:#b4553f}.nh-dt tbody td.o-thue .t-ck.t-hoan:not(.mini){width:auto!important;min-width:0!important}
 .nh-dt tbody td.o-thue{white-space:nowrap}.nh-dt tbody td.o-thue .t-ck:not(.t-hoan):not(.mini){width:calc(41% - 4px)!important;min-width:84px!important}
 .nh-mau{width:min(440px,92vw)}.nh-mau textarea{width:100%;box-sizing:border-box;margin-top:8px;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);color:inherit}.nh-mau .nm-h{display:flex;gap:8px;margin-top:6px}.nh-mau .nm-h label{flex:1;display:flex;flex-direction:column;font-size:12px;gap:3px}.nh-mau .nm-h input{min-height:34px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:2px 8px;background:var(--card);color:inherit}.nh-mau .nm-xem{margin-top:6px;min-height:18px}
+.nh-mau .nm-coc{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:12.5px;flex-wrap:wrap}.nh-mau .nm-coc label{display:inline-flex;align-items:center;gap:4px}.nh-mau .nm-coc input[type=text],.nh-mau #mauCocTien{width:120px;min-height:32px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:2px 8px;background:var(--card);color:inherit}.nh-mau #mauCocTien:disabled{opacity:.45}
 </style>
 </head>
 <body>
@@ -2463,15 +2464,19 @@ function moDanMau(nut) {
   p.innerHTML = '<div class="tx-xn-n"><b>📋 Dán mẫu đặt phòng</b> <small class="muted">check in / out · số đêm · phòng · số người · số tiền</small></div>' +
     '<textarea id="mauTxt" rows="8" placeholder="Thông tin đặt phòng của bạn:\n• check in: 22/1\n• check out: 24/1\n• số đêm: 2\n• phòng: B1 Olive- B2 purple- B4 Beige\n• số người: 7\n• số tiền tổng: (680+660+720+150)*2= 4420"></textarea>' +
     '<div class="nm-h"><label>Tên khách<input id="mauTen" placeholder="vd Hồng Ngân"></label><label>SĐT<input id="mauSdt" inputmode="tel"></label></div>' +
+    '<div class="nm-coc"><span>Tiền cọc</span><label><input type="radio" name="mauCoc" value="50" checked> 50%</label><label><input type="radio" name="mauCoc" value="tu"> Tự điền</label><input id="mauCocTien" inputmode="numeric" placeholder="vd 2000000" disabled></div>' +
     '<div id="mauXem" class="nm-xem muted sm"></div><div class="tx-xn-b"><button type="button" class="btn" data-m="0">Đóng</button><button type="button" class="btn pri" data-m="1">Điền vào dòng mới</button></div>';
   document.body.appendChild(p);
   var b = nut.getBoundingClientRect(); p.style.left = (Math.max(8, Math.min(b.left, innerWidth - p.offsetWidth - 8)) + scrollX) + "px"; p.style.top = (b.bottom + 6 + scrollY) + "px";
   var xem = function() { var k = docMau($("#mauTxt").value); $("#mauXem").innerHTML = !k.phong.length ? "Chưa nhận ra phòng" : "→ " + k.phong.length + " dòng: " + k.phong.map(function(x, i) { return "<b>" + esc(x) + "</b>" + (k.gia[i] ? " " + k.gia[i].toLocaleString("vi-VN") + "/đêm" : ""); }).join(" · ") + (k.vao ? " · " + esc(k.vao) + " → " + esc(k.ra || "?") : "") + (k.nguoi ? " · " + k.nguoi + " người" : "") + (k.phu ? " · phụ thu " + k.phu.toLocaleString("vi-VN") + "/đêm" : ""); };
   $("#mauTxt").addEventListener("input", xem); setTimeout(function() { $("#mauTxt").focus(); }, 30);
+  [].forEach.call(p.querySelectorAll('[name="mauCoc"]'), function(o) { o.addEventListener("change", function() { var tu = p.querySelector('[name="mauCoc"]:checked').value === "tu"; $("#mauCocTien").disabled = !tu; if (tu) $("#mauCocTien").focus(); }); });
   p.addEventListener("keydown", function(e) { if (e.key === "Escape") p.remove(); });
   p.addEventListener("click", function(e) { var bt = e.target.closest("[data-m]"); if (!bt) return; if (bt.dataset.m !== "1") return p.remove();
     var k = docMau($("#mauTxt").value); if (!k.phong.length) return toast("Chưa nhận ra phòng trong mẫu"); if (!k.vao) return toast("Chưa nhận ra ngày check in");
     var ten = $("#mauTen").value.trim(), sdt = $("#mauSdt").value.trim(), dem = Number(k.dem) || 0;
+    var kieuCoc = p.querySelector('[name="mauCoc"]:checked').value, cocTu = Number(String($("#mauCocTien").value || "").replace(/[^\d]/g, "")) || 0;
+    if (kieuCoc === "tu" && !(cocTu > 0)) return toast("Nhập số tiền cọc hoặc chọn 50%");
     NH.dong = NH.dong.filter(function(x) { return x.kq || x.ten || x.vao; });   // bỏ dòng trống
     var chuan = function(ph) { var q = (Q.d.phong || []).filter(function(x) { return x.id === ph; })[0]; return (q && q.khachChuan) || 2; };
     var du = Math.max(0, (k.nguoi || 0) - k.phong.reduce(function(a, ph) { return a + chuan(ph); }, 0));
@@ -2479,6 +2484,8 @@ function moDanMau(nut) {
       if (i === 0 && du) r.nlThem = String(du);
       if (k.gia[i] && dem) r.giaMuon = k.gia[i] * dem + (i === 0 && k.phu ? k.phu * dem : 0);
       r.ghiChu = "dán mẫu" + (k.tong ? " · tổng mẫu " + k.tong.toLocaleString("vi-VN") : ""); NH.dong.push(r); });
+    var moi = NH.dong.slice(-k.phong.length), tongMuon = moi.reduce(function(a2, x) { return a2 + (x.giaMuon || 0); }, 0);   // cọc: 50% giá từng phòng (mặc định) hoặc số tự điền chia theo tỉ lệ giá
+    moi.forEach(function(x, i) { var v = kieuCoc === "tu" ? (i === moi.length - 1 ? cocTu - moi.slice(0, -1).reduce(function(a2, y) { return a2 + Number(y.coc || 0); }, 0) : Math.round(cocTu * (tongMuon ? (x.giaMuon || 0) / tongMuon : 1 / moi.length) / 1000) * 1000) : Math.round((x.giaMuon || 0) / 2 / 1000) * 1000; if (v > 0) x.coc = String(v); });
     p.remove(); veNhap(); NH.dong.forEach(function(x, i) { if (!x.kq) xemNhap(i); }); toast("📋 Đã điền " + k.phong.length + " dòng · kiểm lại rồi bấm Lưu");
   });
 }
