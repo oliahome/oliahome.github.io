@@ -3198,7 +3198,8 @@ function timThayThe(t, ngay, ma) {
   var lech = function(d, n) { var x = dk(d); x.setMonth(x.getMonth() + n); return kd(x); };
   ds.forEach(function(b) {
     if (!b.code || b.code.toLowerCase() === maL) return;
-    var khop = [["cọc", b.coc], ["còn lại", b.conLai || (b.invoice - b.coc)], ["tổng", b.invoice]].filter(function(x) { return x[1] > 0 && Math.abs(x[1] - t) <= 1000; })[0]; if (!khop) return;
+    var daSo = ((TH.sh || {}).maCo || []).indexOf(String(b.code).toLowerCase()) >= 0;   // mã đã có dòng trong sổ thuế
+    var khop = [["cọc", b.coc, b.thue1], ["còn lại", b.conLai || (b.invoice - b.coc), b.thue2], ["tổng", b.invoice, b.thue1 && b.thue2]].filter(function(x) { return x[1] > 0 && Math.abs(x[1] - t) <= 1000 && !(daSo && x[2]); })[0]; if (!khop) return;   // lần đó đã nhập vào sổ thuế rồi -> không gợi ý lại
     [[0, ""], [-1, "nếu ngày đúng là tháng trước"], [1, "nếu ngày đúng là tháng sau"]].some(function(m) {
       var d = m[0] ? lech(ngay, m[0]) : ngay; if (d < cong(b.vao, -60) || d > cong(b.ra, 5)) return false;
       kq.push({ b: b, loai: "khớp " + khop[0], ghi: m[1], ngay: d, diem: (m[0] ? 0 : 20) + (d <= b.vao ? 10 : 0) - Math.abs(soDem(d, b.vao)) / 30 }); return true; });
