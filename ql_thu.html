@@ -693,7 +693,7 @@ html.toi .modal>div,html.toi .drawer>div,html.toi .dr{background:var(--card);col
 .ht-so{display:flex;flex-wrap:wrap;gap:5px;margin:2px 0 6px}.ht-so>div{flex-basis:100%;display:flex;align-items:center;gap:4px}.ht-so button{display:inline-flex;align-items:center;gap:5px;border:1px solid #d6cfc2;background:#faf7f1;border-radius:9px;padding:5px 8px;font:inherit;font-size:.85em;cursor:pointer;color:inherit;min-height:32px}.ht-so button b{background:#e9e1d3;border-radius:5px;padding:0 4px;font-size:.85em}.ht-so button small{opacity:.65}.ht-so button.on{border-color:#c07a3a;background:#f6e6d4;box-shadow:0 0 0 2px rgba(192,122,58,.25)}html.toi .ht-so button{background:#2d2a26;border-color:#4a453e}html.toi .ht-so button b{background:#3d3832}html.toi .ht-so button.on{background:#4a3828;border-color:#d08a4a}
 .tx-s .tx-ghi-th{padding:2px!important;width:1%}.tx-ghi-nut{display:inline-flex;align-items:center;gap:5px;border:0;background:none;color:inherit;font:inherit;font-weight:700;cursor:pointer;min-width:32px;min-height:32px;justify-content:center;border-radius:8px;opacity:.85}.tx-ghi-nut:hover{opacity:1;background:rgba(255,255,255,.12)}.tx-ghi-nut svg{width:18px;height:18px}.tx-s td.tx-ghi-an{padding:0!important;width:1%}
 .tx-cho{border:1px solid #e3c79f;background:#fdf6ea;border-radius:12px;padding:8px 10px;margin:0 0 10px}.tx-cho-d{display:flex;align-items:center;gap:6px;margin-bottom:6px}.tx-cho-i{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 0;border-top:1px dashed #e8d6b8}.tx-cho-t{display:flex;align-items:baseline;gap:6px;min-width:190px}.tx-cho-t>b:first-child{background:#ecdcc2;border-radius:5px;padding:0 5px;font-size:.85em}.tx-cho-t small{opacity:.65}.tx-cho-g{display:flex;flex-wrap:wrap;gap:6px;flex:1;align-items:center}.tx-cho-g button{display:inline-flex;align-items:center;gap:6px;border:1px solid #d6cfc2;background:#fff;border-radius:9px;padding:5px 9px;font:inherit;font-size:.88em;cursor:pointer;color:inherit;min-height:36px}.tx-cho-g button small{opacity:.6}.tx-cho-g button:hover{border-color:#c07a3a}.tx-diem{font-weight:800;font-size:.85em;padding:1px 5px;border-radius:6px;background:#efe6d6}.tx-diem.cao{background:#d8efd9;color:#22612a}.tx-cho-g .tx-cho-bo{margin-left:auto;min-width:36px;justify-content:center;opacity:.6}html.toi .tx-cho{background:#2b2620;border-color:#5a4a36}html.toi .tx-cho-i{border-color:#4a3f31}html.toi .tx-cho-g button{background:#26231f;border-color:#4a453e}html.toi .tx-cho-t>b:first-child,html.toi .tx-diem{background:#3d3530}html.toi .tx-diem.cao{background:#24452a;color:#a5e0ac}
-.tx-nd{margin:0 0 8px}.tx-nd>.btn{font-size:.88em;min-height:36px;display:inline-flex;align-items:center;gap:6px}.tx-nd-f{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:6px;padding:8px 10px;border:1px solid #e3d8c6;border-radius:10px;background:#fbf8f2}.tx-nd-f label{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tx-nd-f input{width:84px;min-height:36px;font:inherit;text-align:center;border:1px solid #d6cfc2;border-radius:8px;padding:2px 6px;background:#fff;color:inherit}.tx-nd-f small{flex-basis:100%}.tx-nd-f #txNdS{width:140px}html.toi .tx-nd-f{background:#26231f;border-color:#4a453e}html.toi .tx-nd-f input{background:#1e1c19;border-color:#4a453e}
+.tx-nd{margin:0 0 8px}.tx-nd>.btn{font-size:.88em;min-height:36px;display:inline-block;text-align:left;line-height:1.35;max-width:100%;white-space:normal}.tx-nd>.btn svg{vertical-align:-3px;margin-right:4px}.tx-nd-f{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:6px;padding:8px 10px;border:1px solid #e3d8c6;border-radius:10px;background:#fbf8f2}.tx-nd-f label{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tx-nd-f input{width:84px;min-height:36px;font:inherit;text-align:center;border:1px solid #d6cfc2;border-radius:8px;padding:2px 6px;background:#fff;color:inherit}.tx-nd-f small{flex-basis:100%}.tx-nd-f #txNdS{width:140px}html.toi .tx-nd-f{background:#26231f;border-color:#4a453e}html.toi .tx-nd-f input{background:#1e1c19;border-color:#4a453e}
 
 /* ===== MENU 2: bố cục gọn, luôn đủ chữ, không tràn =====
    ≥1180px: 1 hàng [☰ logo | tìm | mục chính | mục con | giao diện · chuông]
@@ -725,6 +725,7 @@ body.top1 .top-in .tabs2{flex:none!important;margin:0!important;position:static!
 #app .bar,#app .nh-bar{flex-wrap:wrap!important;row-gap:6px;overflow:visible!important;max-width:100%}
 #app .bar > *,#app .nh-bar > *{flex-shrink:0;max-width:100%}
 #app .bar2{flex-wrap:wrap!important;overflow:visible!important}
+.tx-tag{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;font-size:.78em;line-height:1.6;background:rgba(120,110,95,.14);color:inherit;opacity:.85;white-space:nowrap;vertical-align:1px}.tx-tag.la{background:rgba(200,120,40,.2)}.tx-tag.goi{border:1px dashed #c07a3a;background:#fdf1e2;cursor:pointer;font:inherit;font-size:.78em;opacity:1}.tx-tag.goi:hover{background:#f6e0c6}html.toi .tx-tag{background:rgba(255,255,255,.1)}html.toi .tx-tag.goi{background:#3a2e22;border-color:#d08a4a}
 </style>
 </head>
 <body>
@@ -3080,7 +3081,7 @@ function veThueSheet(th, sauGhi) {
       if (j === 1) { var ng = String(x || "").trim(), th2 = String(r.o[3] || "").trim(); return '<td class="' + (r.ct[1] ? "ct" : "sua") + ' tx-ngay" data-h="' + r.hang + '" data-c="2" data-ngay="1"' + mauTx(r, 1) + '>' + (ng ? esc(("0" + ng).slice(-2) + (th2 ? "/" + ("0" + th2).slice(-2) : "")) : "") + "</td>"; }
       if (j === 13) return '<td class="ct tx-nhap"' + mauTx(r, j) + ">" + (r.tg ? esc(r.tgNgay) + '<small class="tx-tg">' + esc(r.tg) + "</small>" : "") + "</td>";   // cột N -> thời gian nhập (từ cột O)
       if (j === 12) { var bk0 = timMaKhach(r.o[8]); return '<td class="ct"' + mauTx(r, j) + ">" + (bk0 ? esc(("0" + dk(bk0.ra).getDate()).slice(-2) + "/" + ("0" + (dk(bk0.ra).getMonth() + 1)).slice(-2)) : "") + "</td>"; }   // C-out: ngày trả phòng theo mã khách
-      return '<td class="' + (r.ct[j] ? "ct" : "sua") + (j + 1 === d.cotTien ? " num" : "") + '" data-h="' + r.hang + '" data-c="' + (j + 1) + '"' + mauTx(r, j) + ">" + esc(x) + "</td>"; };
+      return '<td class="' + (r.ct[j] ? "ct" : "sua") + (j + 1 === d.cotTien ? " num" : "") + '" data-h="' + r.hang + '" data-c="' + (j + 1) + '"' + mauTx(r, j) + ">" + esc(x) + (j === 4 && !moi ? tagThue(r) : "") + "</td>"; };
       return '<tr' + (moi ? ' class="tx-moi"' : "") + '><td class="nh-so"' + (mauTx(r, 4) && r._mau ? mauTx(r, 4) : "") + ">" + r.hang + "</td>" + r.o.map(function(x, j) { return j === 6 ? "" : o1(x, j); }).join("") + (TH.anGhi ? '<td class="ct tx-ghi-an"' + mauTx(r, 4) + "></td>" : o1(r.o[6], 6)) +   // cột Ghi chú để sau cùng, mặc định ẩn
       '<td class="ct tx-xoa"' + mauTx(r, 4) + ">" + (moi ? "" : '<button type="button" class="xoa" data-xoa="' + r.hang + '" title="Xoá dòng ' + r.hang + ' (xoá nội dung, giữ công thức)" aria-label="Xoá dòng ' + r.hang + '">' + IC_XOA + "</button>") + "</td></tr>"; };
     var mauTx = function(r, j) {   // tô màu như trên sheet; dòng có ô tô màu -> tô NGUYÊN DÒNG bằng màu xuất hiện nhiều nhất
@@ -3107,9 +3108,28 @@ function veThueSheet(th, sauGhi) {
     if (cuon) { var cm = o.querySelector(".nh-cuon"); if (cm) { cm.scrollTop = cuon[0]; cm.scrollLeft = cuon[1]; } window.scrollTo(0, cuonTrang); }   // giữ chỗ đang xem
     o.querySelector(".tx-s").addEventListener("click", function(e) {
       var bx = e.target.closest("button[data-xoa]"); if (bx) return xoaDongThue(Number(bx.dataset.xoa));
+      var bg = e.target.closest("[data-goiy]"); if (bg) { e.stopPropagation(); var pg = bg.dataset.goiy.split("|"), hg = Number(pg[0]), mas = pg[1].split("+"), rg = thueDong(hg), cuMa = rg ? String(rg.o[8] || "").trim() : "";
+        if (cuMa && !confirm("Dòng " + hg + " đang ghi mã " + cuMa + " (không thấy khách). Đổi thành " + mas.join(" + ") + "?")) return;
+        var sg = { 9: mas[0] }; if (mas.length > 1) sg[7] = (rg && String(rg.o[6] || "").trim() ? String(rg.o[6]).trim() + " · " : "") + "gộp: " + mas.join(" + ");
+        bg.disabled = true; api("suaThue", [hg, sg], function() { toast("✔ Dòng " + hg + " → " + mas.join(" + ")); TH.luc = 0; veThueSheet(th, true); }, function(e2) { bg.disabled = false; loiChung(e2); }); return; }
       if (e.target.closest("[data-act=txGhi]")) { TH.anGhi = !TH.anGhi; try { localStorage.setItem("olia_tx_ghi", TH.anGhi ? "1" : "0"); } catch (e2) {} return veThueSheet(th); }
       var td = e.target.closest("td.sua"); if (td && !td.querySelector("input")) suaOThue(td); });
   }, function(e) { var o = $("#thSheetO"); if (o) o.innerHTML = '<div class="err">' + esc(e) + "</div>"; }, sauGhi);
+}
+/** 🏷 Tag ở cột Giao dịch: dòng có mã khớp -> lần thuế (L1 cọc / L2 còn lại / L1+L2 đủ) + cách ngày check-in;
+ *  dòng chưa mã / mã không thấy khách -> gợi ý khách hợp nhất trong khoảng dò (bấm để gán) */
+function tagThue(r) {
+  var t = Number(String(r.o[5] || "").replace(/[^\d-]/g, "")) || 0; if (t <= 0) return "";
+  var ma = String(r.o[8] || "").trim(), bk = ma ? timMaKhach(ma) : null, ngay = ngayDongThue(r.hang), gc = String(r.o[6] || "");
+  if (bk) {
+    var lan = /gộp:/i.test(gc) ? "gộp" : mucKhopTien(bk.invoice, t) === 0 ? "L1+L2 đủ" : mucKhopTien(bk.coc, t) <= 2 && ngay < cong(bk.vao, -3) ? "L1 cọc" : mucKhopTien(bk.conLai || bk.invoice - bk.coc, t) <= 2 ? "L2 còn lại" : mucKhopTien(bk.coc, t) <= 2 ? "L1 cọc" : "?";
+    var c = soDem(bk.vao, ngay), cach = c === 0 ? "đúng ngày in" : c < 0 ? "trước in " + (-c) + "n" : "sau in " + c + "n";
+    return '<span class="tx-tag' + (lan === "?" ? " la" : "") + '" title="' + esc(bk.ten + " · in " + ngan(bk.vao) + " → out " + ngan(bk.ra) + (lan === "?" ? " · số tiền không khớp cọc / còn lại / tổng" : "")) + '">' + esc(lan) + " · " + cach + "</span>";
+  }
+  if (!ma && String(r.o[4] || "").trim() && !r.ct[4]) return "";   // khoản thu khác ghi tay
+  var g = chamKhach(t, ngay, String(r.o[4] || "") + " " + gc).ds[0]; if (!g) return ma ? '<span class="tx-tag la" title="Mã không có trong sổ booking đang tải">? mã lạ</span>' : "";
+  var bs = g.gop || [g.b];
+  return '<button type="button" class="tx-tag goi" data-goiy="' + r.hang + "|" + bs.map(function(y) { return y.code; }).join("+") + '" title="' + esc((ma ? "Mã " + ma + " không thấy khách. " : "") + "Gợi ý: " + g.loai + " · bấm để gán") + '">🔎 ' + esc(tenGon(bs[0].ten, 14)) + " · " + bs.map(function(y) { return esc(y.code); }).join("+") + " · " + g.diem + "%</button>";
 }
 /** 🕒 Hàng chờ "Chưa rõ khách": khoản tiền vào chưa có mã (không phải khoản thu khác ghi tay) -> 2–3 khách gợi ý kèm điểm tin cậy, bấm 1 lần là gán */
 function veChoKhach(d, th) {
