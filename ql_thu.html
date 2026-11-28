@@ -824,6 +824,7 @@ html.toi .nh-dt tbody tr:hover>td,html.toi .nh-dt tbody tr.sang>td{background-im
 /* cột nguồn: icon luôn giữa, trạng thái (Done…) nằm dưới -> thẳng hàng */
 .nh-dt tbody td.agc{text-align:center}.nh-dt tbody td.agc>div{display:flex!important;justify-content:center;width:100%}.nh-dt tbody td.agc>div+div{margin-top:1px}
 .nh-dt tbody td.agc .tt-i{width:16px;height:16px}.nh-dt tbody td.agc .tt-ch{font-size:9.5px}
+.nh-dt tbody td.o-gc-nhom{white-space:normal}.o-gc-nhom .gc-p{display:flex;gap:4px;align-items:baseline}.o-gc-nhom .gc-p small{opacity:.6;flex:none}
 </style>
 </head>
 <body>
@@ -1629,7 +1630,11 @@ function bangDT(b, ds, mo, dt) {
             if (r.gop === -1) return ""; var nDone = r.gopDs.filter(function(x) { return TRANG_THAI_OK(x.o[4]) === "Done"; }).length;
             return td.replace('class="', 'class="o-chung ') + ' rowspan="' + r.gopDs.length + '">' + oj(r, 1) + '<small class="tt-nhom" title="' + esc(r.gopDs.map(function(x) { return String(x.o[9] || "").trim() + ": " + (String(x.o[4] || "").trim() || "Book"); }).join(" · ")) + '">' + (nDone ? "✓ Done " + nDone + "/" + r.gopDs.length : "") + "</small></td>";
           }
-          if (r.gopDs && r.gopDs.length > 1 && (g[0] === 1 || g[0] === 10 || g[0] === 12 || g[0] === 14)) {   // khách cùng tên: nguồn+trạng thái / ngày ở / số đêm giống nhau cả nhóm -> 1 ô chung
+          if (r.gopDs && r.gopDs.length > 1 && g[0] === 16) {   // ghi chú: 1 ô chung cho cả khách (giống nhau thì ghi 1 lần, khác nhau thì ghi theo phòng)
+            if (r.gop === -1) return ""; var gcs = r.gopDs.map(function(x) { return String(x.o[16] || "").trim(); }), coGc = gcs.filter(String), giongGc = coGc.every(function(v) { return v === coGc[0]; });
+            return td.replace('class="', 'class="o-chung o-gc-nhom ') + ' rowspan="' + r.gopDs.length + '">' + (giongGc ? oj(r, 16) : r.gopDs.map(function(x, i) { return gcs[i] ? '<div class="gc-p"><small>' + esc(String(x.o[9] || "").trim()) + ":</small> " + oj(x, 16) + "</div>" : ""; }).join("")) + "</td>";
+          }
+          if (r.gopDs && r.gopDs.length > 1 && (g[0] === 1 || g[0] === 10 || g[0] === 12 || g[0] === 14 || g[0] === 17)) {   // khách cùng tên: nguồn+trạng thái / ngày ở / số đêm giống nhau cả nhóm -> 1 ô chung
             var cotG = g[0] === 10 ? [10, 11] : g, gd = r.gopDs, vi = gd.indexOf(r), cung = function(x, y) { return x && y && cotG.every(function(j) { return String(x.o[j] || "").trim() === String(y.o[j] || "").trim(); }); };
             if (vi > 0 && cung(gd[vi - 1], r)) return "";   // cùng cụm với dòng trên: ô đã gộp ở dòng trên
             var dai = 1; while (vi >= 0 && cung(gd[vi + dai], r)) dai++;   // cụm liền nhau cùng giá trị (vd 2 phòng cùng 19–21/12)
