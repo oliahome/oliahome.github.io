@@ -1683,7 +1683,10 @@ function veBangSheet() {
   $(".nh-s").addEventListener("change", function(e) {
     var ck = e.target.closest("input[data-thue]"); if (!ck) return;
     var lan = Number(ck.dataset.thue), r = NH.bang.ds.filter(function(x) { return x.dong === Number(ck.dataset.dong); })[0];
-    if (!ck.checked) { ck.checked = true; return toast("Đã nhập thuế lần " + lan + " — muốn bỏ thì sửa trong sổ thuế"); }
+    if (!ck.checked) { ck.checked = true; if (!r) return;   // bỏ tích: duyệt 2 lớp
+      return xacNhan2(ck.closest("label") || ck, "Bỏ tích <b>thuế lần " + lan + "</b>" + (lan === 1 ? " (bỏ luôn lần 2)" : "") + "<br>" + esc(r.o[13] || "") + " · " + esc(r.code || "") + "<br><small>Dòng trong sổ thuế giữ nguyên · đang Done sẽ về Book</small>", function(xong) {
+        api("boThue", [r.dong, r.code, lan], function(k) { xong(); r["thue" + lan] = false; if (lan === 1) r.thue2 = false; if (k && k.ve === "Book") { r.tt = "Book"; if (r.o) r.o[4] = "Book"; }
+          toast("✔ Đã bỏ tích thuế lần " + lan + " · " + (r.code || "")); NH.bangLuc = 0; if (NH.bang) veBangSheet(); else veNhap(); if (typeof lamMoiBang === "function") lamMoiBang(); }, function(e) { xong(); loiChung(e); }); }); }
     ck.checked = false; if (r) hoiNgayThue(r, lan, ck.closest("label") || ck);
   });
   $(".nh-s").addEventListener("click", function(e) {
@@ -3361,7 +3364,7 @@ function veChoKhach(d, th) {
 function xoaDongThue(h) {
   var r = thueDong(h); if (!r) return;
   var mo = [r.o[1] && ("ngày " + String(r.o[1]).trim() + (r.o[3] ? "/" + String(r.o[3]).trim() : "")), r.o[5] && String(r.o[5]).trim(), r.o[8] && String(r.o[8]).trim(), r.o[4] && String(r.o[4]).trim()].filter(Boolean).join(" · ");
-  if (!confirm("Xoá dòng " + h + " trong sheet tax dd?\n" + (mo || "(dòng trống)") + "\n\nXoá nội dung các ô nhập tay, giữ công thức. Đơn mang mã này sẽ bỏ tích thuế nếu sổ không còn lần nhập tương ứng.")) return;
+  if (!confirm("Xoá dòng " + h + " trong sheet tax dd?\n" + (mo || "(dòng trống)") + "\n\nXoá HẲN dòng này trên sheet (các dòng dưới dồn lên). Đơn mang mã này sẽ bỏ tích thuế nếu sổ không còn lần nhập tương ứng.")) return;
   var tr = document.querySelector('.tx-s button[data-xoa="' + h + '"]'); if (tr) tr.closest("tr").style.opacity = ".4";
   api("xoaThue", [h], function(k) { toast("🗑 Đã xoá dòng " + h + (k && k.boTich ? " · bỏ tích thuế " + k.boTich + " đơn" : "")); TH.luc = 0; veThueSheet(TH.thang || Q.d.homNay.slice(0, 7), true); },
     function(e) { if (tr) tr.closest("tr").style.opacity = ""; loiChung(e); });
@@ -3459,7 +3462,7 @@ function chamKhach(tien, ngay, chu) {
   var dsB = ((Q.lich && Q.lich.ds) || []).filter(function(b) { return b.code && b.ten && (!(b.thue1 && b.thue2) || canThue1(b)) && trongKhoangThue(b, hn); });
   dsB.forEach(function(b) {
     var tot = null;
-    [["còn lại", b.thue2 ? 0 : b.conLai, 2], ["cọc", canThue1(b) ? b.coc : 0, 1], ["tổng", canThue1(b) ? b.invoice : 0, 1]].forEach(function(x) {
+    [["còn lại", b.thue2 || Q.d.homNay < b.ra ? 0 : b.conLai, 2], ["cọc", canThue1(b) ? b.coc : 0, 1], ["tổng", canThue1(b) ? b.invoice : 0, 1]].forEach(function(x) {
       if (!(x[1] > 0)) return; var m = mucKhopTien(x[1], tien); if (m > 2) return;
       var d = [55, 35, 25][m] + ngayDiem(b, x[2]);
       if (!tot || d > tot.diem) tot = { b: b, diem: d, loai: ["khớp ", "chuyển chẵn ", "chuyển thiếu "][m] + x[0], lan: x[2] };
